@@ -9,3 +9,6 @@ def login(request):
 
 def forget_pwd(request):
     return render(request, 'templates/forget_pwd.html')
+
+def dashboard(request):
+    return render(request,'templates/dashboard.html')

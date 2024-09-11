@@ -20,6 +20,7 @@ from main_admin import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.login, name='login'),
+    path('dashboard/',views.dashboard, name='dashboard'),
     path('forget_pwd/',views.forget_pwd, name='forget_pwd'),
 
 ]
