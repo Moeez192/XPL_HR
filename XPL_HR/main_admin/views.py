@@ -12,3 +12,7 @@ def forget_pwd(request):
 
 def dashboard(request):
     return render(request,'templates/dashboard.html')
+
+
+def test(request):
+    return render(request,'templates/test.html')
