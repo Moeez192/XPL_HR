@@ -1,1 +1,222 @@
-<h1>This is a dashboard </h1>
+{% extends 'templates/navs.html' %}
+{% block title %} Dashboard {% endblock %}
+{% block content %}
+{% load static %}
+
+<style>
+    .header-image {
+    background-image: url("{% static 'static/images/bgart.png' %}");
+    background-size: cover;
+    background-position: center;
+    height: 150px;
+}
+</style>
+
+<div class="header-image">
+</div>
+
+<div class="row">
+    <!-- Profile Section -->
+    <div class="col-md-3">
+        <div class="profile-card">
+            <div class="text-center">
+                <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-img">
+                <div class="profile-info">
+                    <h6>T0002 - Mubasher Irshad</h6>
+                    <p>Business Process Consultant</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-card2">
+            <div class="text-center">
+                <h6>Reporting To</h6>
+                <p><strong>Anjum Ali</strong></p>
+            </div>
+        </div>
+        <div class="profile-card2">
+            <h5>Department Members</h5>
+            <p>Anjum Ali</p>
+        </div>
+    </div>
+
+    <!-- Office Location and Other Info Section -->
+    <div class="col-md-9">
+        <div class="profile-card3">
+            <ul class="nav profile-tabs">
+                <li class="nav-item">
+                    <a class="nav-link2 active" id="profile-tab" data-tab="profile" href="javascript:void(0)">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link2" id="approvals-tab" data-tab="approvals" href="javascript:void(0)">Approvals</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link2" id="leave-tab" data-tab="leave" href="javascript:void(0)">Leave</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link2" id="attendance-tab" data-tab="attendance" href="javascript:void(0)">Attendance</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link2" id="timelogs-tab" data-tab="timelogs" href="javascript:void(0)">Time Logs</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tab Content Sections -->
+        <div class="tab-content">
+            <div class="tab-pane active" id="profile-section">
+                <div class="info-section">
+                    <div class="container ">
+                        <div class="row align-items-start">
+                        <div class="col">
+                            <h6>Office Location</h6>
+                            <p>Dhahran</p>
+                            <h6>Time Zone</h6>
+                            <p>(GMT+03:00)</p>
+                        </div>
+                        <div class="col">
+                            <h6>Department</h6>
+                            <p>Consulting Services</p>
+                            <h6>Email</h6>
+                            <p>mubasher.irshad@progrc.com</p>
+                        </div>
+                        <div class="col">
+                            <h6>Shift</h6>
+                            <p>General</p>
+                        </div>
+                        </div>
+                    </div>
+                        
+                </div>
+
+                <div class="organization-structure-section ">
+                    <h6>Organization Structure</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <span class="icon">&#128100;</span>
+                                <span>Business Unit: Global Operations</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <span class="icon">&#128101;</span>
+                                <span>Division: Consulting Services</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <span class="icon">&#128102;</span>
+                                <span>Department: Consulting Services</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h6>Additional Information</h6>
+                    <p>Some additional information about the employee...</p>
+                    <div class="add-about">
+                        <i class="fas fa-plus-circle"></i>&nbsp; Add About Section
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="approvals-section" style="display: none;">
+                <div class="info-section">
+                    <!-- Approvals content goes here -->
+                    <p>This is the approvals section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Approvals content goes here -->
+                    <p>This is the approvals section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Approvals content goes here -->
+                    <p>This is the approvals section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Approvals content goes here -->
+                    <p>This is the approvals section content.</p>
+                </div>
+            </div>
+            <div class="tab-pane" id="leave-section" style="display: none;">
+                <div class="info-section">
+                    <!-- Leave content goes here -->
+                    <p>This is the leave section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Leave content goes here -->
+                    <p>This is the leave section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Leave content goes here -->
+                    <p>This is the leave section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Leave content goes here -->
+                    <p>This is the leave section content.</p>
+                </div>
+            </div>
+            <div class="tab-pane" id="attendance-section" style="display: none;">
+                <div class="info-section">
+                    <!-- Attendance content goes here -->
+                    <p>This is the attendance section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Attendance content goes here -->
+                    <p>This is the attendance section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Attendance content goes here -->
+                    <p>This is the attendance section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Attendance content goes here -->
+                    <p>This is the attendance section content.</p>
+                </div>
+            </div>
+            <div class="tab-pane" id="timelogs-section" style="display: none;">
+                <div class="info-section">
+                    <!-- Time logs content goes here -->
+                    <p>This is the time logs section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Time logs content goes here -->
+                    <p>This is the time logs section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Time logs content goes here -->
+                    <p>This is the time logs section content.</p>
+                </div>
+                <div class="info-section">
+                    <!-- Time logs content goes here -->
+                    <p>This is the time logs section content.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.querySelectorAll('.nav-link2').forEach(function(tabLink) {
+        tabLink.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-link2').forEach(function(link) {
+                link.classList.remove('active');
+            });
+
+            // Hide all content sections
+            document.querySelectorAll('.tab-pane').forEach(function(pane) {
+                pane.style.display = 'none';
+            });
+
+            // Add active class to clicked tab
+            this.classList.add('active');
+
+            // Show the corresponding content section
+            var tabId = this.getAttribute('data-tab');
+            document.getElementById(tabId + '-section').style.display = 'block';
+        });
+    });
+</script>
+
+{%endblock%}
