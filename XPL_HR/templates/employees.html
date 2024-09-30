@@ -2,7 +2,19 @@
 {%load static%}
 
 {% block content %}
-
+<style>
+    /* Scrollable container styles */
+    .scrollable-container {
+        max-height: 550px; /* Adjust the height as per your preference */
+        overflow-y: auto;
+        padding: 15px;
+        margin-top: -60px;
+        border: 1px solid #ddd; /* Optional border */
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional shadow */
+        background-color: white;
+    }
+</style>
 
 <header class="nav-bar">
     <div class="nav-bar-left">
@@ -13,6 +25,164 @@
         </nav>
     </div>
 </header>
+<div class="header-image"> </div>
+<div class="container-fluid active" id="option2-section" style="display: none;">
+<!-- <div class="container-fluid" > -->
+    <div class="containe-fluid mt-5">
+        <div class="scrollable-container">
+            <h2 class="text-center mb-4">Add Employee</h2>
+            <form>
+                <!-- Personal Information -->
+                <div class="mb-3">
+                    <h4>Personal Information</h4>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" placeholder="Enter First Name">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" placeholder="Enter Last Name">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="dob" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control" id="dob">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender">
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" placeholder="Enter Email">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="phone" placeholder="Enter Phone Number">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" id="address" rows="2" placeholder="Enter Address"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="nationality" class="form-label">Nationality</label>
+                    <input type="text" class="form-control" id="nationality" placeholder="Enter Nationality">
+                </div>
 
+                <!-- Job Details -->
+                <div class="mb-3">
+                    <h4>Job Details</h4>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="employeeId" class="form-label">Employee ID</label>
+                        <input type="text" class="form-control" id="employeeId" placeholder="Enter Employee ID">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="jobTitle" class="form-label">Job Title</label>
+                        <input type="text" class="form-control" id="jobTitle" placeholder="Enter Job Title">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="department" class="form-label">Department</label>
+                        <input type="text" class="form-control" id="department" placeholder="Enter Department">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="supervisor" class="form-label">Supervisor</label>
+                        <input type="text" class="form-control" id="supervisor" placeholder="Enter Supervisor Name">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="employmentType" class="form-label">Employment Type</label>
+                        <select class="form-select" id="employmentType">
+                            <option value="">Select Employment Type</option>
+                            <option value="full-time">Full-Time</option>
+                            <option value="part-time">Part-Time</option>
+                            <option value="contract">Contract</option>
+                            <option value="intern">Intern</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="dateOfJoining" class="form-label">Date of Joining</label>
+                        <input type="date" class="form-control" id="dateOfJoining">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="employeeStatus" class="form-label">Employee Status</label>
+                        <select class="form-select" id="employeeStatus">
+                            <option value="">Select Employee Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="on-leave">On Leave</option>
+                            <option value="terminated">Terminated</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="workLocation" class="form-label">Work Location</label>
+                        <input type="text" class="form-control" id="workLocation" placeholder="Enter Work Location">
+                    </div>
+                </div>
+
+                <!-- Salary and Compensation -->
+                <div class="mb-3">
+                    <h4>Salary and Compensation</h4>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="salary" class="form-label">Salary</label>
+                        <input type="number" step="0.01" class="form-control" id="salary" placeholder="Enter Salary">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">Bonus/Allowances</label>
+                        <input type="number" step="0.01" class="form-control" id="bonus" placeholder="Enter Bonus or Allowances">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="bankAccount" class="form-label">Bank Account Details</label>
+                    <input type="text" class="form-control" id="bankAccount" placeholder="Enter Bank Account Details">
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="mb-3">
+                    <h4>Emergency Contact</h4>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="emergencyName" class="form-label">Emergency Contact Name</label>
+                        <input type="text" class="form-control" id="emergencyName" placeholder="Enter Emergency Contact Name">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="emergencyRelation" class="form-label">Relationship</label>
+                        <input type="text" class="form-control" id="emergencyRelation" placeholder="Enter Relationship">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="emergencyPhone" class="form-label">Emergency Contact Phone</label>
+                    <input type="text" class="form-control" id="emergencyPhone" placeholder="Enter Emergency Contact Phone">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Add Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
 
 {%endblock%}
