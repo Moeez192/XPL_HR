@@ -3,10 +3,9 @@
 {% load static %}
 {%block content%}
 
- <!-- Secondary NavBar -->
- <header class="nav-bar">
+ <!-- Secondary NavBar it will be in every file for secodary file-->
+<header class="nav-bar">
     <div class="nav-bar-left">
-        <!-- <img src="company-logo.png" alt="Logo" class="logo"> -->
         <nav class="nav-bar-nav">
             <a href="#" class="navbar-link active" data-tab="option1">Overview</a>
             <a href="#" class="navbar-link" data-tab="option2">Dashboard</a>
@@ -14,6 +13,8 @@
         </nav>
     </div>
 </header>
+<!-- the secondary nav is till here -->
+
 
 <div class="container-fluid active" id="option1-section">
     <div class="row">
@@ -27,7 +28,7 @@
                 <div class="col-md-3">
                     <div class="profile-card">
                         <div class="text-center">
-                            <img src="100.png" alt="Profile Picture" class="profile-img">
+                            <img src="{% static 'static/images/100.png' %}" alt="Profile Picture" class="profile-img">
                             <div class="profile-info">
                                 <h6>T0002 - Mubasher Irshad</h6>
                                 <p>Business Process Consultant</p>

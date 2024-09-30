@@ -13,6 +13,10 @@ def forget_pwd(request):
 def dashboard(request):
     return render(request,'templates/dashboard.html')
 
+def employees(request):
+    return render(request,'templates/employees.html')
+
+
 
 def test(request):
     return render(request,'templates/test.html')
