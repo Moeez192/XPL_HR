@@ -5,6 +5,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="{% static 'static/css/home_styles.css' %}" rel="stylesheet">
     
 </head>
@@ -191,95 +192,96 @@
 
 
         {%endblock%}
-        <script>
-            document.querySelectorAll('.navbar-link').forEach(function(tabLink) {
-                tabLink.addEventListener('click', function(e) {
-                    e.preventDefault();  // Prevent default anchor behavior
-                    
-                    // Remove active class from all navbar links
-                    document.querySelectorAll('.navbar-link').forEach(function(link) {
-                        link.classList.remove('active');
-                    });
-    
-                    // Hide all content sections
-                    document.querySelectorAll('.container-fluid').forEach(function(pane) {
-                        pane.style.display = 'none';
-                    });
-    
-                    // Add active class to clicked tab
-                    this.classList.add('active');
-    
-                    // Show the corresponding content section
-                    var tabId = this.getAttribute('data-tab');
-                    document.getElementById(tabId + '-section').style.display = 'block';
-                });
-            });
-    
-            document.querySelectorAll('.nav-link2').forEach(function(tabLink) {
-                tabLink.addEventListener('click', function() {
-                    // Remove active class from all tabs
-                    document.querySelectorAll('.nav-link2').forEach(function(link) {
-                        link.classList.remove('active');
-                    });
-    
-                    // Hide all content sections
-                    document.querySelectorAll('.tab-pane').forEach(function(pane) {
-                        pane.style.display = 'none';
-                    });
-    
-                    // Add active class to clicked tab
-                    this.classList.add('active');
-    
-                    // Show the corresponding content section
-                    var tabId = this.getAttribute('data-tab');
-                    document.getElementById(tabId + '-section').style.display = 'block';
-                });
-            });
-    
-            function toggleSidebar() {
-                const sidebar = document.querySelector('.sBar-mobile');
-                const topBar = document.querySelector('.top-bar-mobile');
-                const navBar = document.querySelector('.nav-bar-mobile');
-                
-                if (sidebar.classList.contains('open')) {
-                    sidebar.classList.remove('open');
-                } else {
-                    sidebar.classList.add('open');
-                    topBar.classList.remove('open');
-                    navBar.classList.remove('open');
-                }
-            }
-    
-            function toggleTopBar() {
-                const topBar = document.querySelector('.top-bar-mobile');
-                const sidebar = document.querySelector('.sBar-mobile');
-                const navBar = document.querySelector('.nav-bar-mobile');
-                
-                if (topBar.classList.contains('open')) {
-                    topBar.classList.remove('open');
-                } else {
-                    topBar.classList.add('open');
-                    sidebar.classList.remove('open');
-                    navBar.classList.remove('open');
-                }
-            }
-    
-            function toggleNavBar() {
-                const navBar = document.querySelector('.nav-bar-mobile');
-                const sidebar = document.querySelector('.sBar-mobile');
-                const topBar = document.querySelector('.top-bar-mobile');
-                
-                if (navBar.classList.contains('open')) {
-                    navBar.classList.remove('open');
-                } else {
-                    navBar.classList.add('open');
-                    sidebar.classList.remove('open');
-                    topBar.classList.remove('open');
-                }
-            }
-    
-        </script>
+        
     
     </body>
     
     </html>
+    <script>
+        document.querySelectorAll('.navbar-link').forEach(function(tabLink) {
+            tabLink.addEventListener('click', function(e) {
+                e.preventDefault();  // Prevent default anchor behavior
+                
+                // Remove active class from all navbar links
+                document.querySelectorAll('.navbar-link').forEach(function(link) {
+                    link.classList.remove('active');
+                });
+
+                // Hide all content sections
+                document.querySelectorAll('.container-fluid').forEach(function(pane) {
+                    pane.style.display = 'none';
+                });
+
+                // Add active class to clicked tab
+                this.classList.add('active');
+
+                // Show the corresponding content section
+                var tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId + '-section').style.display = 'block';
+            });
+        });
+
+        document.querySelectorAll('.nav-link2').forEach(function(tabLink) {
+            tabLink.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.nav-link2').forEach(function(link) {
+                    link.classList.remove('active');
+                });
+
+                // Hide all content sections
+                document.querySelectorAll('.tab-pane').forEach(function(pane) {
+                    pane.style.display = 'none';
+                });
+
+                // Add active class to clicked tab
+                this.classList.add('active');
+
+                // Show the corresponding content section
+                var tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId + '-section').style.display = 'block';
+            });
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sBar-mobile');
+            const topBar = document.querySelector('.top-bar-mobile');
+            const navBar = document.querySelector('.nav-bar-mobile');
+            
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            } else {
+                sidebar.classList.add('open');
+                topBar.classList.remove('open');
+                navBar.classList.remove('open');
+            }
+        }
+
+        function toggleTopBar() {
+            const topBar = document.querySelector('.top-bar-mobile');
+            const sidebar = document.querySelector('.sBar-mobile');
+            const navBar = document.querySelector('.nav-bar-mobile');
+            
+            if (topBar.classList.contains('open')) {
+                topBar.classList.remove('open');
+            } else {
+                topBar.classList.add('open');
+                sidebar.classList.remove('open');
+                navBar.classList.remove('open');
+            }
+        }
+
+        function toggleNavBar() {
+            const navBar = document.querySelector('.nav-bar-mobile');
+            const sidebar = document.querySelector('.sBar-mobile');
+            const topBar = document.querySelector('.top-bar-mobile');
+            
+            if (navBar.classList.contains('open')) {
+                navBar.classList.remove('open');
+            } else {
+                navBar.classList.add('open');
+                sidebar.classList.remove('open');
+                topBar.classList.remove('open');
+            }
+        }
+
+    </script>
