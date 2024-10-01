@@ -1,11 +1,11 @@
 .scrollable-container {
-    max-height: 570px; /* Adjust the height as per your preference */
+    max-height: 570px; 
     overflow-y: auto;
     padding: 15px;
     margin-top: -70px;
-    border: 1px solid #ddd; /* Optional border */
+    border: 1px solid #ddd; 
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional shadow */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
     background-color: white;
 }
 
@@ -38,37 +38,37 @@
     align-items: center;
     justify-content: center;
     color: white;
-    background-color: #6c757d; /* Neutral gray */
-    margin-right: 20px; /* Space between icon and text */
+    background-color: #6c757d; 
+    margin-right: 20px; 
 }
 
 .card-total-employees .icon-container {
-    background-color: #17a2b8; /* Subtle blue */
+    background-color: #17a2b8; 
 }
 
 .card-total-departments .icon-container {
-    background-color: #007bff; /* Light blue */
+    background-color: #007bff; 
 }
 
 .card-total-supervisors .icon-container {
-    background-color: #ffc107; /* Soft yellow */
+    background-color: #ffc107; 
 }
 
 .dashboard-text {
-    text-align: center; /* Align text to the right */
+    text-align: center; 
 }
 
 .dashboard-text h5 {
     margin: 0;
 }
 
-/* Scrollable table styling */
+/* Scrollable table  */
 .table-container {
     max-height: 400px;
     overflow-y: auto;
 }
 
-/* Search and filter position adjustment */
+/* Search and filter positions */
 .table-controls {
     display: flex;
     justify-content: flex-end;
