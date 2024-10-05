@@ -20,3 +20,7 @@ def employees(request):
 
 def test(request):
     return render(request,'templates/test.html')
+
+
+def leave(request):
+    return render(request,'templates/leave.html')
