@@ -1,0 +1,102 @@
+
+    <div class="containe-fluid mt-5">
+        <div class="scrollable-container">
+            <h2 class="text-center mb-4">Leave Configuration</h2>
+            <!-- Leave Type Configuration Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body d-flex align-items-center">
+                    <div class="card-icon bg-primary text-white me-3">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h5 class="card-title mb-0">Add Leave Types</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="leaveTypeName" class="form-label">Leave Type Name</label>
+                                <input type="text" class="form-control" id="leaveTypeName" placeholder="E.g. Sick Leave, Casual Leave">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="leaveDays" class="form-label">Leave Days Allowed</label>
+                                <input type="number" class="form-control" id="leaveDays" placeholder="Number of Days">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="carryForward" class="form-label">Carry Forward</label>
+                                <select id="carryForward" class="form-select">
+                                    <option selected>Select Option</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="leavePaid" class="form-label">Is Paid Leave?</label>
+                                <select id="leavePaid" class="form-select">
+                                    <option selected>Select Option</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Leave Type</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Leave Policy Configuration Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body d-flex align-items-center">
+                    <div class="card-icon bg-success text-white me-3">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h5 class="card-title mb-0">Leave Policy Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="selectLeaveType" class="form-label">Select Leave Type to Configure</label>
+                                <select id="selectLeaveType" class="form-select">
+                                    <option selected>Select Leave Type</option>
+                                    <option value="sick">Sick Leave</option>
+                                    <option value="casual">Casual Leave</option>
+                                    <option value="annual">Annual Leave</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="maxLeavesPerMonth" class="form-label">Max Leaves Per Month</label>
+                                <input type="number" class="form-control" id="maxLeavesPerMonth" placeholder="E.g. 2">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="noticePeriod" class="form-label">Notice Period Required (Days)</label>
+                                <input type="number" class="form-control" id="noticePeriod" placeholder="E.g. 3">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="autoApproval" class="form-label">Auto Approval?</label>
+                                <select id="autoApproval" class="form-select">
+                                    <option selected>Select Option</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="allowedOnProbation" class="form-label">Allowed on Probation?</label>
+                                <select id="allowedOnProbation" class="form-select">
+                                    <option selected>Select Option</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Configure Policy</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>

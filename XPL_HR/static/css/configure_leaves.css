@@ -1,0 +1,24 @@
+.scrollable-container {
+    max-height: 570px; /* Set your desired height */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-top: -70px;
+    background-color: #f8f9fa;
+}
+.card-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #f0f4fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.card {
+    border-radius: 10px;
+}
+.form-control, .form-select {
+    border-radius: 8px;
+}
