@@ -23,7 +23,6 @@ urlpatterns = [
     path('dashboard/',views.dashboard, name='dashboard'),
     path('forget_pwd/',views.forget_pwd, name='forget_pwd'),
     path('employees/',views.employees, name='employees'),
-    path('test/',views.test,name='test'),
     path('leave/',views.leave,name='leave'),
 
 ]

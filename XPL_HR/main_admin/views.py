@@ -17,10 +17,5 @@ def employees(request):
     return render(request,'templates/employees.html')
 
 
-
-def test(request):
-    return render(request,'templates/test.html')
-
-
 def leave(request):
     return render(request,'templates/leave.html')
