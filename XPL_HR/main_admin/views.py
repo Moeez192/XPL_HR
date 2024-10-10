@@ -19,3 +19,7 @@ def employees(request):
 
 def leave(request):
     return render(request,'templates/leave.html')
+
+
+def projects(request):
+    return render(request,'templates/projects.html')

@@ -1,0 +1,330 @@
+<style>
+    .container {
+        max-width: 900px;
+        margin-top: 50px;
+    }
+    .form-icon {
+        color: #6c757d;
+        margin-right: 8px;
+    }
+    .selected-employees {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .selected-employee {
+        background-color: #f0f0f0;
+        padding: 5px 10px;
+        border-radius: 4px;
+        position: relative;
+        padding-right: 30px;
+    }
+    .selected-employee .remove {
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+        color: red;
+    }
+    .selected-employee .remove:hover {
+        color: darkred;
+    }
+</style>
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function () {
+        let selectedTeamMembers = [];
+        let selectedProjectManager = null;
+
+        // Search functionality for employees
+        $('#employeeSearch').on('input', function () {
+            let searchValue = $(this).val().toLowerCase();
+            $('#employeeList .form-check').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(searchValue) > -1);
+            });
+        });
+
+        // Search functionality for managers
+        $('#managerSearch').on('input', function () {
+            let searchValue = $(this).val().toLowerCase();
+            $('#managerList .form-check').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(searchValue) > -1);
+            });
+        });
+
+        // Save selected project manager
+        $('#saveManager').on('click', function () {
+            let selectedManager = $('#managerList input[type="checkbox"]:checked').val();
+
+            // Remove any previously selected manager
+            selectedProjectManager = selectedManager;
+
+            $('#projectManagerList').html(`
+                <div class="selected-employee">
+                    ${selectedManager}
+                    <button type="button" class="remove-manager">&times;</button>
+                </div>
+            `);
+
+            // Close the modal
+            $('#projectManagerModal').modal('hide');
+        });
+
+        // Remove selected project manager
+        $('#projectManagerList').on('click', '.remove-manager', function () {
+            selectedProjectManager = null;
+            $(this).parent().remove();
+            $('#managerList input[type="checkbox"]').prop('checked', false);
+        });
+
+        // Save selected team members
+        $('#saveEmployees').on('click', function () {
+            let selectedEmployees = $('#employeeList input[type="checkbox"]:checked').map(function () {
+                return { value: $(this).val(), label: $(this).next('label').text() };
+            }).get();
+
+            selectedTeamMembers = selectedEmployees;
+
+            $('#teamMemberList').html('');
+            selectedTeamMembers.forEach(function (member) {
+                $('#teamMemberList').append(`
+                    <div class="selected-employee">
+                        ${member.label}
+                        <button type="button" class="remove" data-value="${member.value}">&times;</button>
+                    </div>
+                `);
+            });
+
+            // Close the modal
+            $('#teamMemberModal').modal('hide');
+        });
+
+        // Handle removal of selected team members
+        $('#teamMemberList').on('click', '.remove', function () {
+            let valueToRemove = $(this).data('value');
+            selectedTeamMembers = selectedTeamMembers.filter(member => member.value !== valueToRemove);
+            $(this).parent().remove();
+            $('#' + valueToRemove).prop('checked', false);
+        });
+    });
+</script>
+{% endblock %}
+
+<div class="containe-fluid mt-5">
+    <div class="scrollable-container">
+        <!-- <div class="container"> -->
+            <h2 class="mb-4">Assign Team Members to Project</h2>
+            <form>
+                <!-- Project Name -->
+                <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="projectName" class="form-label">Project Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-project-diagram form-icon"></i></span>
+                        <input type="text" class="form-control" id="projectName" placeholder="Enter project name">
+                    </div>
+                </div>
+                <!-- Client Name -->
+                <div class="col-md-6">
+                    <label for="clientName" class="form-label">Client Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
+                        <input type="text" class="form-control" id="clientName" placeholder="Enter client name">
+                    </div>
+                </div>
+                </div>
+    
+                
+    
+                <!-- Project Description -->
+                <div class="mb-3">
+                    <label for="projectDescription" class="form-label">Project Description</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                        <textarea class="form-control" id="projectDescription" rows="3" placeholder="Enter project description"></textarea>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                <!-- Start Date -->
+                <div class="col-md-6">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-day form-icon"></i></span>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="projectDeadline" class="form-label">Deadline</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt form-icon"></i></span>
+                        <input type="date" class="form-control" id="projectDeadline">
+                    </div>
+                </div>
+                </div>
+
+                <div class="row mb-3">
+    
+                <!-- Requirement File Upload -->
+                <div class="col-md-6">
+                    <label for="requirementFile" class="form-label">Requirement File</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-file-upload form-icon"></i></span>
+                        <input type="file" class="form-control" id="requirementFile">
+                    </div>
+                </div>
+    
+                <!-- Project Manager with Modal Trigger -->
+                <div class="col-md-6">
+                    <label for="projectManager" class="form-label">Project Manager</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user form-icon"></i></span>
+                        <input type="text" class="form-control" id="selectedProjectManager" readonly placeholder="Click to select project manager" data-bs-toggle="modal" data-bs-target="#projectManagerModal">
+                    </div>
+                    <div id="projectManagerList" class="selected-employees mt-3">
+                        <!-- Selected project manager will appear here -->
+                    </div>
+                </div>
+                </div>
+
+                <div class="row mb-3">
+                <!-- Team Members with Modal Trigger -->
+                <div class="col-md-6">
+                    <label for="teamMembers" class="form-label">Team Members</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-users form-icon"></i></span>
+                        <input type="text" class="form-control" id="selectedTeamMembers" readonly placeholder="Click to select team members" data-bs-toggle="modal" data-bs-target="#teamMemberModal">
+                    </div>
+                    <div id="teamMemberList" class="selected-employees mt-3">
+                        <!-- Selected team members will appear here -->
+                    </div>
+                </div>
+    
+                <!-- Timesheet Required -->
+                <div class="col-md-6">
+                    <label class="form-label">Is Time Sheet Required?</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="timeSheet" id="timeSheetYes" value="yes">
+                        <label class="form-check-label" for="timeSheetYes">Yes</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="timeSheet" id="timeSheetNo" value="no">
+                        <label class="form-check-label" for="timeSheetNo">No</label>
+                    </div>
+                </div>
+                </div>
+                <div class="row mb-3">
+                <!-- Project Priority -->
+                <div class="col-md-6">
+                    <label for="projectPriority" class="form-label">Priority</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-exclamation-triangle form-icon"></i></span>
+                        <select class="form-select" id="projectPriority">
+                            <option selected>Select Priority</option>
+                            <option value="1">High</option>
+                            <option value="2">Medium</option>
+                            <option value="3">Low</option>
+                        </select>
+                    </div>
+                </div>
+    
+                <!-- Project Status -->
+                <div class="col-md-6">
+                    <label for="projectStatus" class="form-label">Status</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-tasks form-icon"></i></span>
+                        <select class="form-select" id="projectStatus">
+                            <option selected>Select Status</option>
+                            <option value="1">Not Started</option>
+                            <option value="2">In Progress</option>
+                            <option value="3">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                </div>
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    
+        <!-- Modal for Project Manager Selection -->
+        <div class="modal fade" id="projectManagerModal" tabindex="-1" aria-labelledby="projectManagerModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="projectManagerModalLabel">Select Project Manager</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Search Bar -->
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="managerSearch" placeholder="Search managers...">
+                        </div>
+    
+                        <!-- Manager List with Checkboxes -->
+                        <div id="managerList">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Alice Johnson" id="manager1">
+                                <label class="form-check-label" for="manager1">Alice Johnson</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Bob Williams" id="manager2">
+                                <label class="form-check-label" for="manager2">Bob Williams</label>
+                            </div>
+                            <!-- More managers can be added here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveManager">Save Manager</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Modal for Team Members Selection -->
+        <div class="modal fade" id="teamMemberModal" tabindex="-1" aria-labelledby="teamMemberModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="teamMemberModalLabel">Select Team Members</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Search Bar -->
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="employeeSearch" placeholder="Search employees...">
+                        </div>
+    
+                        <!-- Employee List with Checkboxes -->
+                        <div id="employeeList">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="John Doe" id="employee1">
+                                <label class="form-check-label" for="employee1">John Doe</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Jane Smith" id="employee2">
+                                <label class="form-check-label" for="employee2">Jane Smith</label>
+                            </div>
+                            <!-- More employees can be added here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveEmployees">Save Employees</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
