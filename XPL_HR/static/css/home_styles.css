@@ -364,7 +364,7 @@ main {
     /* Base Sidebar Styling */
     .sBar-mobile {
         display: none;
-        background-color: #2E3B4E; /* Dark blue/gray background */
+        background-color: #2E3B4E; 
         height: 100vh;
         padding: 20px 0;
     }
