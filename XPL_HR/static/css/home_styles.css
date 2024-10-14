@@ -124,13 +124,17 @@ main {
 
 .nav-link2 {
     color: rgb(0, 0, 0);
-    padding: 0.75rem 1rem;
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-top: 5px;
     text-decoration: none;
 }
 
 .nav-link2.active {
     font-weight: bold;
-    padding: 0.75rem 1rem;
+    margin-right: 12px;
+    margin-left: 10px;
+    margin-top: 5px;
     border-bottom: 3px solid #007bff; /* Blue bar under the active link */
 }
 
