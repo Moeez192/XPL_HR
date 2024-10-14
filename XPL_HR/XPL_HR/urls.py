@@ -24,6 +24,7 @@ urlpatterns = [
     path('forget_pwd/',views.forget_pwd, name='forget_pwd'),
     path('employees/',views.employees, name='employees'),
     path('leave/',views.leave,name='leave'),
-    path('projects/',views.projects,name='projects')
+    path('projects/',views.projects,name='projects'),
+    path('timesheet/',views.timesheet,name='timesheet')
 
 ]

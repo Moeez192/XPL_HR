@@ -23,3 +23,6 @@ def leave(request):
 
 def projects(request):
     return render(request,'templates/projects.html')
+
+def timesheet(request):
+    return render(request,'templates/timesheet.html')
