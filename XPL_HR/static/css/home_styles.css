@@ -118,7 +118,7 @@ main {
 }
 
 .scroll{
-    max-height: 400px; /* Set the maximum height */
+    max-height: 50vh; /* Set the maximum height */
     overflow-y: auto;  /* Enable vertical scrollbar */
 }
 
