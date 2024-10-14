@@ -10,7 +10,7 @@
 }
 
 
-.dashboard-card {
+/* .dashboard-card {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     margin-top: -70px;
@@ -22,7 +22,55 @@
     justify-content: center;
     position: relative;
     height: 150px;
+} */
+
+.dashboard-card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    transition: transform 0.3s;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* height: 150px; Default height */
+    flex: 1 1 300px; /* Allow flexibility */
+    max-width: 100vh; /* Limit maximum width */
+    margin: 10px; /* Space around cards */
+    /* margin-top: -70px; */
 }
+
+/* Media Queries for Responsiveness */
+@media (max-width: 1200px) {
+    .dashboard-card {
+        flex: 1 1 250px; /* Reduce size for medium screens */
+        /* height: 120px; Adjust height for smaller screens */
+    }
+}
+
+@media (max-width: 992px) {
+    .dashboard-card {
+        flex: 1 1 220px; /* Further reduce size for smaller screens */
+        /* height: 100px; Adjust height for smaller screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-card {
+        flex: 1 1 200px; /* Set a minimum size for small screens */
+        /* height: 80px; Adjust height for smaller screens */
+    }
+}
+
+@media (max-width: 576px) {
+    .dashboard-card {
+        flex: 1 1 180px; /* Even smaller size for mobile */
+        
+         /* height: 70px; Adjust height for mobile */
+    }
+}
+
 
 /* .dashboard-card:hover {
     transform: scale(1.05); /* Pop-up effect  
