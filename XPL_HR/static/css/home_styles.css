@@ -180,7 +180,7 @@ main {
 
 .sBar {
     background-color: #34495E;
-    height: 100vh;
+    /* height: 100vh; */
     /* padding-top: 1rem; */
     left: 0;
     width: 80px;

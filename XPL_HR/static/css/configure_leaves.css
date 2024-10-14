@@ -1,11 +1,13 @@
 .scrollable-container {
-    max-height: 570px; /* Set your desired height */
-    overflow-y: auto; /* Enable vertical scrolling */
+    flex-grow: 1; /* Allows the container to grow and fill the remaining space */
+    height: 80vh; /* Adjust for other elements like headers */
+    overflow-y: auto;
     padding: 15px;
+    margin-top: 0;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-top: -70px;
-    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
 }
 .card-icon {
     width: 60px;
