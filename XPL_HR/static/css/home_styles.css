@@ -332,15 +332,15 @@ main {
 
 .nav-bar-nav a {
     color: #4a4a4a;
-    /* margin-right: 15px; */
-    padding: 10px;
+    margin-right: 15px;
+    /* padding: 10px; */
     text-decoration: none;
     font-weight: 600;
 }
 
-.nav-bar-nav a:hover {
+/* .nav-bar-nav a:hover {
     text-decoration: underline;
-}
+} */
 
 .nav-bar-nav a.active {
     /* color: #007bff; Change text color */
