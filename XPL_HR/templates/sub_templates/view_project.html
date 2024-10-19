@@ -1,0 +1,63 @@
+{% extends 'templates/navs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+
+{% block content %}
+<div class="header-image"> </div>
+
+<div class="container-fluid mt-6">
+    <div class="scrollable-container">
+        <h2 class="text-center mb-4">Project Details: {{ project.project_name }}</h2>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Project Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Client Name:</strong> {{ project.client_name }}</p>
+                <p><strong>Project Description:</strong> {{ project.project_description }}</p>
+                <p><strong>Start Date:</strong> {{ project.start_date }}</p>
+                <p><strong>Deadline:</strong> {{ project.deadline }}</p>
+                <p><strong>Status:</strong> 
+                    {{ project.status }}
+                </p>
+                <p><strong>Priority:</strong> 
+                    {{ project.priority }}
+                </p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Team Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Project Manager:</strong> {{ project.project_manager }}</p>
+                <p><strong>Team Members:</strong> {{ project.team_members.all|join:", " }}</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Additional Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Timesheet Required:</strong> {{ project.is_timesheet_required|yesno:"Yes,No" }}</p>
+                <p><strong>Requirement File:</strong> 
+                    {% if project.requirement_file %}
+                        <a href="{{ project.requirement_file.url }}" class="btn btn-link">Download Requirement File</a>
+                    {% else %}
+                        <span class="text-muted">Not provided</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'projects' %}" class="btn btn-secondary">Back to Projects</a>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

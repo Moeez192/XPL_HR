@@ -1,0 +1,117 @@
+{% extends 'templates/navs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+
+{% block content %}
+<div class="header-image"> </div>
+<div class="container-fluid mt-6">
+    <div class="scrollable-container">
+     <h2 class="text-center mb-4">Edit Project:  {{ project.project_name }} </h2>
+     <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Project Name -->
+        <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="projectName" class="form-label">Project Name</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-project-diagram form-icon"></i></span>
+                {% render_field form.project_name placeholder="Project Name" class+="form-control" %}
+            </div>
+        </div>
+        <!-- Client Name -->
+        <div class="col-md-6">
+            <label for="clientName" class="form-label">Client Name</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
+                {% render_field form.client_name placeholder="Client Name" class+="form-control" %}
+            </div>
+        </div>
+        </div>
+
+        
+
+        <!-- Project Description -->
+        <div class="mb-3">
+            <label for="projectDescription" class="form-label">Project Description</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                {% render_field form.project_description placeholder="Project Description" class+="form-control" %}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+        <!-- Start Date -->
+        <div class="col-md-6">
+            <label for="startDate" class="form-label">Start Date</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-calendar-day form-icon"></i></span>
+                {% render_field form.start_date  class+="form-control" %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <label for="projectDeadline" class="form-label">Deadline</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-calendar-alt form-icon"></i></span>
+                {% render_field form.deadline  class+="form-control" %}
+            </div>
+        </div>
+        </div>
+
+        <div class="row mb-3">
+
+        <!-- Requirement File Upload -->
+        <div class="col-md-6">
+            <label for="requirementFile" class="form-label">Requirement File</label>
+            <!-- <div class="input-group"> -->
+                <!-- <span class="input-group-text"><i class="fas fa-file-upload form-icon"></i></span> -->
+                {% render_field form.requirement_file  class+="form-control" %}
+            <!-- </div> -->
+        </div>
+
+        <!-- Project Manager with Modal Trigger -->
+        <div class="col-md-6">
+            <label for="projectManager" class="form-label">Project Manager</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-user form-icon"></i></span>
+            {% render_field form.project_manager class+="form-control" %}
+            </div>
+        </div>
+        </div>
+
+        <div class="row mb-3">
+        <!-- Team Members with Modal Trigger -->
+            <div class="col-md-6">
+                <label for="teamMembers" class="form-label">Team Members</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-users form-icon"></i></span>
+                    {% render_field form.team_members class+="form-control" %}
+                </div>
+            </div>
+            
+
+            <!-- Timesheet Required -->
+            <div class="col-md-6">
+                <label class="form-label">Is Time Sheet Required?</label>
+                {% render_field form.is_timesheet_required  class+="form-control" %}
+            </div>
+        </div>
+        <div class="row mb-3">
+        <!-- Project Priority -->
+        <div class="col-md-6">
+            <label for="projectPriority" class="form-label">Priority</label>
+            {% render_field form.priority  class+="form-control" %}
+        </div>
+
+        <!-- Project Status -->
+        <div class="col-md-6">
+            <label for="projectStatus" class="form-label">Status</label>
+            {% render_field form.status  class+="form-control" %}
+        </div>
+        </div>
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    </div>
+</div>
+{%endblock%}

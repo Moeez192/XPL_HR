@@ -1,30 +1,35 @@
 {% extends 'templates/navs.html' %}
 {%load static%}
-{% block title %} Timesheet {% endblock %}
+{% block title %} Leave {% endblock %}
 
 {% block content %}
 
 
+<link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
 
 
 <header class="nav-bar">
     <div class="nav-bar-left">
         <nav class="nav-bar-nav">
             <a href="#" class="navbar-link active" data-tab="option1">Overview</a>
+            {% if request.session.role == 'admin' %}
             <a href="#" class="navbar-link" data-tab="option2">Configure Projects</a>
+            {% endif %}
         </nav>
     </div>
 </header>
-
 <div class="header-image"> </div>
 
+
 <div class="container-fluid active" id="option1-section" style="display: block;" >
-    <h1>This is the overview page</h1>
+    {% include "templates/sub_templates/project_dash.html" %}
 
 </div>
+{% if request.session.role == 'admin' %}
 <div class="container-fluid" id="option2-section" style="display: none;">
     {% include "templates/sub_templates/project_configs.html" %}
 </div>
+{% endif %}
 
 
 

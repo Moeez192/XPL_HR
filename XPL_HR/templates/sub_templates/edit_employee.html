@@ -1,0 +1,174 @@
+{% extends 'templates/navs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+
+{% block content %}
+<div class="header-image"> </div>
+<div class="container-fluid mt-6">
+    <div class="scrollable-container">
+     <h2 class="text-center mb-4">Edit Employee: {{ employee.first_name }}</h2>
+        <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Personal Information Section-->
+        <div class="mb-3">
+            <h4>Personal Information</h4>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="firstName" class="form-label">First Name</label>
+                {% render_field form.first_name placeholder="First Name" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="lastName" class="form-label">Last Name</label>
+                {% render_field form.last_name placeholder="Last Name" class+="form-control" %}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="dob" class="form-label">Date of Birth</label>
+                {% render_field form.dob placeholder="Date Of Birth" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="gender" class="form-label">Gender</label>
+                {% render_field form.gender placeholder="Gender" class+="form-control" %}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                {% render_field form.email placeholder="Email" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="employeeRole" class="form-label">Employee Role</label>
+                {% render_field form.employee_role class+="form-control" %}
+
+            </div>
+            <div class="col-md-6">
+                <label for="phone" class="form-label">Phone Number</label>
+                {% render_field form.phone placeholder="Phone Number" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="address" class="form-label">Address</label>
+                {% render_field form.address class+="form-control" %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <label for="password" class="form-label">Password</label>
+            {% render_field form.password placeholder="Default Password is Pakistan if left Empty" class+="form-control" %}
+        </div>
+        <div class="mb-3">
+            <label for="nationality" class="form-label">Nationality</label>
+            {% render_field form.nationality placeholder="Enter Nationality" class+="form-control" %}
+        </div>
+
+        <!-- Job Details Section -->
+        <div class="mb-3">
+            <h4>Job Details</h4>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="employeeId" class="form-label">Employee ID</label>
+                {% render_field form.employee_id placeholder="Enter Employee ID" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="jobTitle" class="form-label">Job Title</label>
+                {% render_field form.job_title placeholder="Job Title" class+="form-control" %}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="department" class="form-label">Department</label>
+                {% render_field form.department placeholder="Enter Department" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="issupervisor" class="form-label">Is Supervisor</label>
+                {% render_field form.is_supervisor  class+="form-control" %}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="employmentType" class="form-label">Employment Type</label>
+                {% render_field form.employment_type class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="dateOfJoining" class="form-label">Date of Joining</label>
+                {% render_field form.date_of_joining  class+="form-control" %}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="employeeStatus" class="form-label">Employee Status</label>
+                {% render_field form.employee_status class+="form-control" %}
+
+            </div>
+            <div class="col-md-6">
+                <label for="workLocation" class="form-label">Work Location</label>
+                {% render_field form.work_location placeholder="Enter Work Location" class+="form-control" %}
+            </div>
+            
+        </div>
+
+        <!-- Salary and Compensation Section-->
+        <div class="mb-3">
+            <h4>Salary and Compensation</h4>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="salary" class="form-label">Salary</label>
+                {% render_field form.salary placeholder="Enter Salary" class+="form-control" %}
+
+            </div>
+            <div class="col-md-6">
+                <label for="bonus" class="form-label">Bonus/Allowances</label>
+                {% render_field form.bonus placeholder="Enter Bonus" class+="form-control" %}
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="bankAccount" class="form-label">Bank Account Details</label>
+            {% render_field form.bank_account placeholder="Bank Account Details" class+="form-control" %}
+        </div>
+
+        <!-- Emergency Contact Section-->
+        <div class="mb-3">
+            <h4>Emergency Contact</h4>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="emergencyName" class="form-label">Emergency Contact Name</label>
+                {% render_field form.emergency_name placeholder="Emergency Contact Name" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="emergencyRelation" class="form-label">Relationship</label>
+                {% render_field form.emergency_relation placeholder="Emergency Relation" class+="form-control" %}
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="emergencyPhone" class="form-label">Emergency Contact Phone</label>
+            {% render_field form.emergency_phone placeholder="Contact Number" class+="form-control" %}
+        </div>
+        <!-- File Upload Fields Section-->
+        <div class="mb-3">
+            <h4>File Uploads</h4>
+        </div>
+        <div class="mb-3">
+            <label for="profilePhoto" class="form-label">Upload Profile Photo</label>
+            {% render_field form.profile_photo  class+="form-control" %}
+        </div>
+        <div class="mb-3">
+            <label for="cvUpload" class="form-label">Upload CV</label>
+            {% render_field form.cv_upload  class+="form-control" %}
+        </div>
+        <div class="mb-3">
+            <label for="signedContract" class="form-label">Upload Signed Contract</label>
+            {% render_field form.signed_contract  class+="form-control" %}
+        </div>
+        <!-- Submit Button -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Save Details</button>
+            <a href="{% url 'employees' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+    </div>
+</div>
+{%endblock%}

@@ -1,3 +1,4 @@
+{% load widget_tweaks %}
 <style>
     .container {
         max-width: 900px;
@@ -76,6 +77,7 @@
 
             // Close the modal
             $('#projectManagerModal').modal('hide');
+            $('.modal-backdrop').remove();
         });
 
         // Remove selected project manager
@@ -105,6 +107,7 @@
 
             // Close the modal
             $('#teamMemberModal').modal('hide');
+            $('.modal-backdrop').remove();
         });
 
         // Handle removal of selected team members
@@ -122,14 +125,15 @@
     <div class="scrollable-container">
         <!-- <div class="container"> -->
             <h2 class="text-center mb-4">Project Cofiguration</h2>
-            <form>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
                 <!-- Project Name -->
                 <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="projectName" class="form-label">Project Name</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-project-diagram form-icon"></i></span>
-                        <input type="text" class="form-control" id="projectName" placeholder="Enter project name">
+                        {% render_field form.project_name placeholder="Project Name" class+="form-control" %}
                     </div>
                 </div>
                 <!-- Client Name -->
@@ -137,7 +141,7 @@
                     <label for="clientName" class="form-label">Client Name</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
-                        <input type="text" class="form-control" id="clientName" placeholder="Enter client name">
+                        {% render_field form.client_name placeholder="Client Name" class+="form-control" %}
                     </div>
                 </div>
                 </div>
@@ -149,7 +153,7 @@
                     <label for="projectDescription" class="form-label">Project Description</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
-                        <textarea class="form-control" id="projectDescription" rows="3" placeholder="Enter project description"></textarea>
+                        {% render_field form.project_description placeholder="Project Description" class+="form-control" %}
                     </div>
                 </div>
 
@@ -159,14 +163,14 @@
                     <label for="startDate" class="form-label">Start Date</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-calendar-day form-icon"></i></span>
-                        <input type="date" class="form-control" id="startDate">
+                        {% render_field form.start_date  class+="form-control" %}
                     </div>
                 </div>
                 <div class="col-md-6">
                     <label for="projectDeadline" class="form-label">Deadline</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-calendar-alt form-icon"></i></span>
-                        <input type="date" class="form-control" id="projectDeadline">
+                        {% render_field form.deadline  class+="form-control" %}
                     </div>
                 </div>
                 </div>
@@ -178,7 +182,7 @@
                     <label for="requirementFile" class="form-label">Requirement File</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-file-upload form-icon"></i></span>
-                        <input type="file" class="form-control" id="requirementFile">
+                        {% render_field form.requirement_file  class+="form-control" %}
                     </div>
                 </div>
     
@@ -187,67 +191,39 @@
                     <label for="projectManager" class="form-label">Project Manager</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-user form-icon"></i></span>
-                        <input type="text" class="form-control" id="selectedProjectManager" readonly placeholder="Click to select project manager" data-bs-toggle="modal" data-bs-target="#projectManagerModal">
-                    </div>
-                    <div id="projectManagerList" class="selected-employees mt-3">
-                        <!-- Selected project manager will appear here -->
+                    {% render_field form.project_manager class+="form-control" %}
                     </div>
                 </div>
                 </div>
 
                 <div class="row mb-3">
                 <!-- Team Members with Modal Trigger -->
-                <div class="col-md-6">
-                    <label for="teamMembers" class="form-label">Team Members</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-users form-icon"></i></span>
-                        <input type="text" class="form-control" id="selectedTeamMembers" readonly placeholder="Click to select team members" data-bs-toggle="modal" data-bs-target="#teamMemberModal">
+                    <div class="col-md-6">
+                        <label for="teamMembers" class="form-label">Team Members</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-users form-icon"></i></span>
+                            {% render_field form.team_members class+="form-control" %}
+                        </div>
                     </div>
-                    <div id="teamMemberList" class="selected-employees mt-3">
-                        <!-- Selected team members will appear here -->
-                    </div>
-                </div>
+                    
     
-                <!-- Timesheet Required -->
-                <div class="col-md-6">
-                    <label class="form-label">Is Time Sheet Required?</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="timeSheet" id="timeSheetYes" value="yes">
-                        <label class="form-check-label" for="timeSheetYes">Yes</label>
+                    <!-- Timesheet Required -->
+                    <div class="col-md-6">
+                        <label class="form-label">Is Time Sheet Required?</label>
+                        {% render_field form.is_timesheet_required  class+="form-control" %}
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="timeSheet" id="timeSheetNo" value="no">
-                        <label class="form-check-label" for="timeSheetNo">No</label>
-                    </div>
-                </div>
                 </div>
                 <div class="row mb-3">
                 <!-- Project Priority -->
                 <div class="col-md-6">
                     <label for="projectPriority" class="form-label">Priority</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-exclamation-triangle form-icon"></i></span>
-                        <select class="form-select" id="projectPriority">
-                            <option selected>Select Priority</option>
-                            <option value="1">High</option>
-                            <option value="2">Medium</option>
-                            <option value="3">Low</option>
-                        </select>
-                    </div>
+                    {% render_field form.priority  class+="form-control" %}
                 </div>
     
                 <!-- Project Status -->
                 <div class="col-md-6">
                     <label for="projectStatus" class="form-label">Status</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-tasks form-icon"></i></span>
-                        <select class="form-select" id="projectStatus">
-                            <option selected>Select Status</option>
-                            <option value="1">Not Started</option>
-                            <option value="2">In Progress</option>
-                            <option value="3">Completed</option>
-                        </select>
-                    </div>
+                    {% render_field form.status  class+="form-control" %}
                 </div>
                 </div>
                 <!-- Submit Button -->
@@ -255,40 +231,7 @@
             </form>
         </div>
     
-        <!-- Modal for Project Manager Selection -->
-        <div class="modal fade" id="projectManagerModal" tabindex="-1" aria-labelledby="projectManagerModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="projectManagerModalLabel">Select Project Manager</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- Search Bar -->
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="managerSearch" placeholder="Search managers...">
-                        </div>
-    
-                        <!-- Manager List with Checkboxes -->
-                        <div id="managerList">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="Anjum Ali" id="manager1">
-                                <label class="form-check-label" for="manager1">Anjum Ali</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="Shayan Ahmed" id="manager2">
-                                <label class="form-check-label" for="manager2">Shayan Ahmed</label>
-                            </div>
-                            <!-- More managers can be added here -->
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="saveManager">Save Manager</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
     
         <!-- Modal for Team Members Selection -->
         <div class="modal fade" id="teamMemberModal" tabindex="-1" aria-labelledby="teamMemberModalLabel" aria-hidden="true">
@@ -299,27 +242,19 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <!-- Search Bar -->
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="employeeSearch" placeholder="Search employees...">
-                        </div>
-    
-                        <!-- Employee List with Checkboxes -->
+                        <input type="text" id="memberSearch" class="form-control mb-3" placeholder="Search team members...">
                         <div id="employeeList">
+                            {% for employee in form.team_members.field.queryset %}
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="Ali Haide" id="employee1">
-                                <label class="form-check-label" for="employee1">Ali Haider</label>
+                                <input class="form-check-input" type="checkbox" value="{{ employee.pk }}" id="employee{{ employee.pk }}" {% if employee.pk in form.team_members.value %}checked{% endif %}>
+                                <label class="form-check-label" for="employee{{ employee.pk }}">{{ employee }}</label>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="Moeez Bin Nadeem" id="employee2">
-                                <label class="form-check-label" for="employee2">Moeez Bin Nadeem</label>
-                            </div>
-                            <!-- More employees can be added here -->
+                            {% endfor %}
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="saveEmployees">Save Employees</button>
+                        <button type="button" class="btn btn-primary" id="saveEmployees">Save Selected</button>
                     </div>
                 </div>
             </div>

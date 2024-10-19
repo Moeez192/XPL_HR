@@ -1,0 +1,101 @@
+{% extends 'templates/navs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+
+{% block content %}
+<div class="header-image"> </div>
+<div class="container-fluid mt-6">
+    <div class="scrollable-container">
+        {% if messages %}
+    <div class="alert alert-info">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+{% if form.errors %}
+    <div class="alert alert-danger">
+        <ul>
+        {% for field in form %}
+            {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+            {% endfor %}
+            {% if field.field.widget.attrs.required %}
+                <li>{{ field.label }} is required.</li>
+            {% endif %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+{% endif %} 
+     <h2 class="text-center mb-4">Welcome {{ employee.first_name }} {{ employee.last_name }}</h2>
+        <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Personal Information Section-->
+        <div class="mb-3">
+            <h4>Personal Information</h4>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                {% render_field form.email placeholder="Email" class+="form-control" %}
+            </div>
+           
+            <div class="col-md-6">
+                <label for="phone" class="form-label">Phone Number</label>
+                {% render_field form.phone placeholder="Phone Number" class+="form-control" %}
+            </div>
+            
+            <div class="col-md-6">
+                <br>
+                <label for="password" class="form-label">Password</label>
+                {% render_field form.new_password placeholder="Enter Password" class+="form-control" %}
+            </div>
+        </div>
+        <!-- Emergency Contact Section-->
+        <div class="mb-3">
+            <h4>Emergency Contact</h4>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="emergencyName" class="form-label">Emergency Contact Name</label>
+                {% render_field form.emergency_name placeholder="Emergency Contact Name" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="emergencyRelation" class="form-label">Relationship</label>
+                {% render_field form.emergency_relation placeholder="Emergency Relation" class+="form-control" %}
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="emergencyPhone" class="form-label">Emergency Contact Phone</label>
+            {% render_field form.emergency_phone placeholder="Contact Number" class+="form-control" %}
+        </div>
+        <!-- File Upload Fields Section-->
+        <div class="mb-3">
+            <h4>File Uploads</h4>
+        </div>
+        <div class="mb-3">
+            <label for="profilePhoto" class="form-label">Upload Profile Photo</label>
+            {% render_field form.profile_photo  class+="form-control" %}
+        </div>
+        <div class="mb-3">
+            <label for="cvUpload" class="form-label">Upload CV</label>
+            {% render_field form.cv_upload  class+="form-control" %}
+        </div>
+        <div class="mb-3">
+            <label for="signedContract" class="form-label">Upload Signed Contract</label>
+            {% render_field form.signed_contract  class+="form-control" %}
+        </div>
+        <!-- Submit Button -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Save Details</button>
+            <a href="{% url 'employees' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+    </div>
+</div>
+{%endblock%}

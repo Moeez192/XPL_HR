@@ -1,4 +1,4 @@
-
+{% load widget_tweaks %}
     <div class="containe-fluid mt-5">
         <div class="scrollable-container">
             <h2 class="text-center mb-4">Leave Configuration</h2>
@@ -11,65 +11,36 @@
                     <h5 class="card-title mb-0">Add Leave Types</h5>
                 </div>
                 <div class="card-body">
-                    <form>
+                    <form method="POST">
+                        {% csrf_token %}
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="leaveTypeName" class="form-label">Leave Type Name</label>
-                                <input type="text" class="form-control" id="leaveTypeName" placeholder="E.g. Sick Leave, Casual Leave">
+                                <label for="leaveTypeName" class="form-label">Leave Name</label>
+                                {% render_field leave_form.leave_name placeholder="Leave Name" class+="form-control" %}
                             </div>
                             <div class="col-md-6">
                                 <label for="leaveDays" class="form-label">Leave Days Allowed</label>
-                                <input type="number" class="form-control" id="leaveDays" placeholder="Number of Days">
+                                {% render_field leave_form.leave_days_allowed placeholder="Leave Days Allowed" class+="form-control" %}
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="carryForward" class="form-label">Carry Forward</label>
-                                <select id="carryForward" class="form-select">
-                                    <option selected>Select Option</option>
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                </select>
+                                <label for="maxLeavesPerMonth" class="form-label">Max Leaves Per Month</label>
+                                {% render_field leave_form.max_leaves_per_month placeholder="e.g 2" class+="form-control" %}
                             </div>
                             <div class="col-md-6">
                                 <label for="leavePaid" class="form-label">Is Paid Leave?</label>
-                                <select id="leavePaid" class="form-select">
-                                    <option selected>Select Option</option>
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                </select>
+                                {% render_field leave_form.is_paid  class+="form-control" %}
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="autoApproval" class="form-label">Auto Approval?</label>
-                                <select id="autoApproval" class="form-select">
-                                    <option selected>Select Option</option>
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="maxLeavesPerMonth" class="form-label">Max Leaves Per Month</label>
-                                <input type="number" class="form-control" id="maxLeavesPerMonth" placeholder="E.g. 2">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="noticePeriod" class="form-label">Notice Period Required (Days)</label>
-                                <input type="number" class="form-control" id="noticePeriod" placeholder="E.g. 3">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="allowedOnProbation" class="form-label">Allowed on Probation?</label>
-                                <select id="allowedOnProbation" class="form-select">
-                                    <option selected>Select Option</option>
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                </select>
+                                {% render_field leave_form.auto_approval class+="form-control" %}
                             </div>
                             
                         </div>
-                        <button type="submit" class="btn btn-primary">Add Leave</button>
+                        <button type="submit" name="leave_form" class="btn btn-primary">Add Leave</button>
                     </form>
                 </div>
             </div>

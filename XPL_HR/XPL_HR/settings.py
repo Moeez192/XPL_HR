@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-#5&dhriw$i2v$%6w1sdqb)#$=!2w7q+x_0_-fw)n^x95i+kf)s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['hr-62zm.onrender.com','127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main_admin',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +49,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+AUTHENTICATION_BACKENDS = [
+    'main_admin.backends.EmailBackend', 
+    'django.contrib.auth.backends.ModelBackend',  # Keep the default for username login
+              # Add your custom email backend
 ]
 
 ROOT_URLCONF = 'XPL_HR.urls'
@@ -69,6 +75,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'XPL_HR.wsgi.application'
+
 
 
 # Database
@@ -112,6 +119,9 @@ USE_I18N = True
 
 USE_TZ = True
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -124,3 +134,9 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# SESSION_COOKIE_AGE = 1209600  # 2 weeks
+
+
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_URL = 'login'

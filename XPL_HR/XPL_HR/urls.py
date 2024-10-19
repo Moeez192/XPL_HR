@@ -16,15 +16,34 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from main_admin import views
+from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',views.login, name='login'),
+    path('',views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('dashboard/',views.dashboard, name='dashboard'),
     path('forget_pwd/',views.forget_pwd, name='forget_pwd'),
     path('employees/',views.employees, name='employees'),
     path('leave/',views.leave,name='leave'),
     path('projects/',views.projects,name='projects'),
-    path('timesheet/',views.timesheet,name='timesheet')
+    path('employees/<int:pk>/delete/', views.employee_delete_view, name='employee_delete'),
+    path('employee/edit/<int:employee_id>/', views.edit_employee, name='edit_employee'),
+    path('edit_employee_self/',views.edit_employee_self, name='edit_employee_self'),
+    path('department/edit/<int:department_id>/', views.edit_department, name='edit_department'),
+    path('departments/delete/<int:department_id>/', views.delete_department, name='delete_department'),
+    path('projects/delete/<int:pk>/',views.project_delete_view, name='delete_project'),
+    path('projects/edit/<int:pk>/',views.project_edit_view, name='edit_project'),
+    path('projects/<int:pk>/',views.project_detail_view, name='project_detail'),
 
-]
+
+
+
+
+
+
+
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

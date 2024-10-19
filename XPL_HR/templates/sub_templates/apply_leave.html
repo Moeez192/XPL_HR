@@ -1,0 +1,46 @@
+{% load widget_tweaks %}
+
+
+<div class="containe mt-5">
+    <div class="scrollable-container">
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    <h4 class=" text-center mb-4">Apply for Leave</h4>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <!-- Employee Selection -->
+        <div class="mb-3">
+            <label for="employeeSelect" class="form-label">Select Leave Type</label>
+            {% render_field leave_application_form.leave_type class+="form-control" onchange="updateMaxDays()" %}
+        </div>            
+    
+        <!-- Leave Dates -->
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="startDate" class="form-label">Start Date</label>
+                {% render_field leave_application_form.start_date class+="form-control" id="startDate" onchange="updateMaxDays()" %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="endDate" class="form-label">End Date</label>
+                {% render_field leave_application_form.end_date class+="form-control" id="endDate" %}
+            </div>
+        </div>
+    
+        <!-- Comments -->
+        <div class="mb-3">
+            <label for="comments" class="form-label">Reason</label>
+            {% render_field leave_application_form.reason class+="form-control" %}
+        </div>
+    
+        <!-- Submit Button -->
+        <button type="submit" name="leave_application_form" class="btn btn-primary">Submit Leave Application</button>
+    </form>
+    </div>
+</div>

@@ -28,10 +28,10 @@
                 <div class="col-md-3">
                     <div class="profile-card">
                         <div class="text-center">
-                            <img src="{% static 'static/images/100.png' %}" alt="Profile Picture" class="profile-img">
+                            <img src="{{ user.profile_photo.url }}" alt="Profile Picture" class="profile-img">
                             <div class="profile-info">
-                                <h6>T0002 - Mubasher Irshad</h6>
-                                <p>Business Process Consultant</p>
+                                <h6>{{ user.first_name }} {{ user.last_name }}</h6>
+                                <p>{{ user.job_title }}</p>
                             </div>
                         </div>
                     </div>
@@ -79,19 +79,19 @@
                                     <div class="row align-items-start">
                                     <div class="col">
                                         <h6>Office Location</h6>
-                                        <p>Dhahran</p>
+                                        <p>{{ user.work_location }}</p>
                                         <h6>Time Zone</h6>
                                         <p>(GMT+03:00)</p>
                                     </div>
                                     <div class="col">
                                         <h6>Department</h6>
-                                        <p>Consulting Services</p>
+                                        <p>{{ user.department }}</p>
                                         <h6>Email</h6>
-                                        <p>mubasher.irshad@progrc.com</p>
+                                        <p>{{ user.email }}</p>
                                     </div>
                                     <div class="col">
                                         <h6>Shift</h6>
-                                        <p>General</p>
+                                        <p>{{ user.employment_type }}</p>
                                     </div>
                                     </div>
                                 </div>
@@ -122,13 +122,13 @@
                                 </div>
                             </div>
 
-                            <div class="info-section">
+                            <!-- <div class="info-section">
                                 <h6>Additional Information</h6>
                                 <p>Some additional information about the employee...</p>
                                 <div class="add-about">
                                     <i class="fas fa-plus-circle"></i>&nbsp; Add About Section
                                 </div>
-                            </div>
+                            </div> -->
 
                             <div class="info-section">
                                 <h6>Work Information</h6>
