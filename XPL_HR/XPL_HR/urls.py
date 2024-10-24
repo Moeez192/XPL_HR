@@ -43,6 +43,7 @@ urlpatterns = [
     path('projects/edit/<int:pk>/',views.project_edit_view, name='edit_project'),
     path('projects/<int:pk>/',views.project_detail_view, name='project_detail'),
     path('timesheet/',views.timesheet, name='timesheet'),
+    path('settings/',views.setting, name='settings'),
     path('timesheet/action/<int:timesheet_id>/', views.timesheet_action, name='timesheet_action'),
     path('timesheet/download/<str:month>/', views.download_timesheet_pdf, name='download_timesheet'),
     path('calculate_salary/<int:employee_id>/', views.calculate_employee_salary, name='calculate_employee_salary'),

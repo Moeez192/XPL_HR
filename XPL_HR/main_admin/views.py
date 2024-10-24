@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect , get_object_or_404
 from django.contrib.auth.hashers import check_password 
-from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary
+from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy
 from django.contrib import messages 
 from django.conf import settings
 from calendar import monthrange
+from django.db.models import Q  # Import Q here
 
 from wkhtmltopdf.views import PDFTemplateView
 from weasyprint import HTML
@@ -213,65 +214,194 @@ def employees(request):
         'dep_form': department_form,
     })
 
+# @login_required
+# @no_cache
+# def leave(request):
+#     employee = Employee.objects.get(email=request.user.email)
+#     logged_in_user = LeaveApplication.objects.filter(employee=employee)
+#     all_leaves = Leaves.objects.all()
+#     leave_applications = LeaveApplication.objects.all()
+
+#     leave_form = LeaveForm()
+#     leave_application_form = LeaveApplicationForm(employee=employee)  
+
+#     if request.method == 'POST':
+#         # Check which form is being submitted
+#         if 'leave_form' in request.POST:
+#             leave_form = LeaveForm(request.POST)
+#             if leave_form.is_valid():
+#                 leave_form.save()
+#                 messages.success(request, 'Leave information has been successfully submitted!')
+#                 return redirect('leave')
+
+#         elif 'leave_application_form' in request.POST:
+#             leave_application_form = LeaveApplicationForm(request.POST, employee=employee)  
+#             if leave_application_form.is_valid():
+#                 leave_application = leave_application_form.save(commit=False)
+#                 leave_application.employee = employee  
+#                 print("Remarks:", leave_application_form.cleaned_data['remarks'])
+#                 leave_application.save()
+#                 messages.success(request, 'Leave application has been successfully submitted!')
+#                 return redirect('leave')
+#             else:
+#                  error_message = ""
+#                  non_field_errors = leave_application_form.errors.get('__all__', [])
+#                  for error in non_field_errors:
+#                         error_message += f"{error}" 
+#                  for field, errors in leave_application_form.errors.items():
+#                         if field != '__all__':
+#                             for error in errors:
+#                                 error_message += f"<strong>{field}</strong>: {error}<br>"
+    
+#                  messages.error(request,error_message)
+                
+#                  leave_application_form = LeaveApplicationForm(employee=employee)
+
+#         elif 'status' in request.POST:
+#             leave_application_id = request.POST.get('leave_application_id')
+#             leave_application = LeaveApplication.objects.get(id=leave_application_id)
+#             leave_application.status = request.POST.get('status')
+#             leave_application.remarks = request.POST.get('remarks')
+#             leave_application.save()
+#             messages.success(request, f'Leave application {leave_application.status}.')
+#             return redirect('leave')
+
+#     return render(request, 'templates/leave.html', {
+#         'leave_form': leave_form,
+#         'all_leaves' : all_leaves,
+#         'logged_in_user': logged_in_user,
+#         'leave_application_form': leave_application_form,
+#         'leave_applications': leave_applications,
+#     })
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.db.models import Q
+from .models import LeaveApplication, Employee, Hierarchy
+from .forms import LeaveForm, LeaveApplicationForm
+
 @login_required
 @no_cache
 def leave(request):
     employee = Employee.objects.get(email=request.user.email)
     logged_in_user = LeaveApplication.objects.filter(employee=employee)
     all_leaves = Leaves.objects.all()
-    leave_applications = LeaveApplication.objects.all()
+    leave_applications = LeaveApplication.objects.none()  # Start with an empty queryset
+
+    # Fetch the approval hierarchy for the employee's position
+    approval_hierarchy = Hierarchy.objects.filter(position=employee.position).first()
+
+    # Check if the logged-in user is an approver
+    is_approver = False
+    if approval_hierarchy:
+        approvers = [
+            approval_hierarchy.first_approver,
+            approval_hierarchy.second_approver,
+            approval_hierarchy.final_approver
+        ]
+        
+        # Check if the logged-in user is in the list of approvers
+        is_approver = employee in approvers
+        
+        if is_approver:
+            # Filter leave applications for the approvers only
+            leave_applications = LeaveApplication.objects.filter(
+                Q(first_approver__in=approvers) | 
+                Q(second_approver__in=approvers) | 
+                Q(final_approver__in=approvers)
+            )
 
     leave_form = LeaveForm()
     leave_application_form = LeaveApplicationForm(employee=employee)  
 
     if request.method == 'POST':
-        # Check which form is being submitted
+        if 'leave_application_form' in request.POST:
+            leave_application_form = LeaveApplicationForm(request.POST, employee=employee)  
+            if leave_application_form.is_valid():
+                leave_application = leave_application_form.save(commit=False)
+                leave_application.employee = employee  
+                
+                # Assign approvers
+                if approval_hierarchy:
+                    leave_application.first_approver = approval_hierarchy.first_approver
+                    leave_application.second_approver = approval_hierarchy.second_approver
+                    leave_application.final_approver = approval_hierarchy.final_approver
+                    leave_application.current_approver = approval_hierarchy.first_approver
+
+                leave_application.save()
+                messages.success(request, 'Leave application has been successfully submitted!')
+                return redirect('leave')
+            else:
+                messages.error(request, 'Error in leave application submission.')
+                leave_application_form = LeaveApplicationForm(employee=employee)
+
         if 'leave_form' in request.POST:
             leave_form = LeaveForm(request.POST)
             if leave_form.is_valid():
                 leave_form.save()
                 messages.success(request, 'Leave information has been successfully submitted!')
                 return redirect('leave')
-
-        elif 'leave_application_form' in request.POST:
-            leave_application_form = LeaveApplicationForm(request.POST, employee=employee)  
-            if leave_application_form.is_valid():
-                leave_application = leave_application_form.save(commit=False)
-                leave_application.employee = employee  
-                print("Remarks:", leave_application_form.cleaned_data['remarks'])
-                leave_application.save()
-                messages.success(request, 'Leave application has been successfully submitted!')
-                return redirect('leave')
-            else:
-                 error_message = ""
-                 non_field_errors = leave_application_form.errors.get('__all__', [])
-                 for error in non_field_errors:
-                        error_message += f"{error}" 
-                 for field, errors in leave_application_form.errors.items():
-                        if field != '__all__':
-                            for error in errors:
-                                error_message += f"<strong>{field}</strong>: {error}<br>"
-    
-                 messages.error(request,error_message)
-                
-                 leave_application_form = LeaveApplicationForm(employee=employee)
-
+            
         elif 'status' in request.POST:
             leave_application_id = request.POST.get('leave_application_id')
             leave_application = LeaveApplication.objects.get(id=leave_application_id)
-            leave_application.status = request.POST.get('status')
-            leave_application.remarks = request.POST.get('remarks')
-            leave_application.save()
-            messages.success(request, f'Leave application {leave_application.status}.')
-            return redirect('leave')
+            current_user = Employee.objects.get(email=request.user.email)
+
+            # Check if the application is already rejected
+            if leave_application.status == 'rejected':
+                messages.error(request, 'This application has already been rejected and cannot be processed further.')
+                return redirect('leave')
+
+            # Rejection logic: if rejected, stop the process
+            if request.POST.get('action') == 'rejected':
+                leave_application.status = 'rejected'  # Set status as rejected
+                leave_application.remarks = f'Rejected by {current_user.first_name}'  # Update remarks
+                leave_application.current_approver = None  # No more approvers, process stops
+                leave_application.save()
+                messages.success(request, 'Leave application has been rejected.')
+                return redirect('leave')
+
+            # Approval logic
+            if leave_application.current_approver == current_user:
+                if leave_application.status == 'pending':
+                    leave_application.status = 'pending second approval'  # First approver action
+                    leave_application.remarks = f'Approved by {current_user.first_name}'
+                    leave_application.current_approver = leave_application.second_approver  # Move to second approver
+                elif leave_application.status == 'pending second approval':
+                    leave_application.status = 'approved by second approver'  # Second approver action
+                    leave_application.remarks = f'Approved by {current_user.first_name}'
+                    leave_application.current_approver = leave_application.final_approver  # Move to final approver
+                elif leave_application.status == 'approved by second approver':
+                    leave_application.status = 'approved'  # Final approver action
+                    leave_application.remarks = f'Final approval by {current_user.first_name}'
+                    leave_application.current_approver = None  # No further approvers
+
+                leave_application.save()
+                messages.success(request, f'Leave application {leave_application.status}.')
+                return redirect('leave')
 
     return render(request, 'templates/leave.html', {
         'leave_form': leave_form,
-        'all_leaves' : all_leaves,
+        'all_leaves': all_leaves,
         'logged_in_user': logged_in_user,
         'leave_application_form': leave_application_form,
-        'leave_applications': leave_applications,
+        'leave_applications': leave_applications if is_approver else None,  # Only show if the user is an approver
     })
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
 
 @login_required
 @no_cache
@@ -532,43 +662,10 @@ def delete_document(request, document_id):
         document.delete()
         messages.success(request, "Document deleted successfully!")
         return redirect('files')
-    
-# @login_required
-# def download_timesheet_pdf(request, month):
-#     # Get the current logged-in employee
-#     employee = Employee.objects.get(email=request.user.email)
-
-#     # Filter timesheets for the selected month and current employee
-#     month_number = datetime.strptime(month, "%B").month
-#     timesheets = Timesheet.objects.filter(employee=employee, date__month=month_number)
-
-#     # Prepare context for the template
-#     context = {
-#         'employee': employee,
-#         'timesheets': timesheets,
-#         'month': month,
-#     }
-
-#     # Load HTML template
-#     template = get_template('templates/pdfTemplates/timesheet.html')
-#     html = template.render(context)
-
-#     # Generate PDF using xhtml2pdf
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="timesheet_{month}.pdf"'
-
-#     # Create a PDF
-#     pisa_status = pisa.CreatePDF(
-#         BytesIO(html.encode('UTF-8')), dest=response, encoding='UTF-8'
-#     )
-
-#     # Check for errors in PDF generation
-#     if pisa_status.err:
-#         return HttpResponse('We had some errors generating your PDF')
-
-#     return response
 
 
+@login_required
+@no_cache
 def download_timesheet_pdf(request, month):
     # Get the current logged-in employee
     employee = Employee.objects.get(email=request.user.email)
@@ -617,7 +714,8 @@ def download_timesheet_pdf(request, month):
 
 
 
-
+@login_required
+@no_cache
 def calculate_salaries_for_month(year, month, employee):
     # Get the accepted timesheets for the month
     timesheets = Timesheet.objects.filter(
@@ -672,7 +770,8 @@ def calculate_salaries_for_month(year, month, employee):
     salary.save()
 
 
-
+@login_required
+@no_cache
 def calculate_employee_salary(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
     print(employee)
@@ -691,3 +790,33 @@ def calculate_employee_salary(request, employee_id):
         'employee': employee,
         'salary_record': salary_record,
     })
+
+
+
+@login_required
+@no_cache
+def setting(request):
+    hierarchies = Hierarchy.objects.all()
+    if request.method == 'POST':
+        form = ApprovalHierarchyForm(request.POST)
+        if form.is_valid():
+            position = form.cleaned_data['position']  # Get the position from the form
+            approval_for = form.cleaned_data['approval_for']  # Get the approval type (leave/timesheet)
+
+            # Check if a hierarchy already exists for this position and approval type
+            if Hierarchy.objects.filter(position=position, approval_for=approval_for).exists():
+                messages.error(request, f"Approval hierarchy for {position} and {approval_for} is already set.")
+                return redirect('settings')  # Redirect back to settings if hierarchy exists
+
+            # Save the new approval hierarchy if it doesn't exist
+            approval_hierarchy = form.save(commit=False)
+            approval_hierarchy.save()
+            messages.success(request, "Approval hierarchy has been successfully saved.")
+            return redirect('settings')  # Redirect to a list of hierarchies after saving
+    else:
+        form = ApprovalHierarchyForm()
+
+    return render(request, 'templates/settings.html', {
+        'form': form,
+        'hierarchies': hierarchies,
+        })

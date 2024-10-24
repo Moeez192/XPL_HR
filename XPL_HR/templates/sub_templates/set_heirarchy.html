@@ -1,0 +1,113 @@
+{% load widget_tweaks %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+    .alert {
+        position: relative;
+    }
+
+    .close {
+        transition: color 0.2s;
+    }
+
+    .close:hover {
+        color: #ff2a00; /* Color on hover */
+    }
+
+    .alert-info {
+        border-color: #b8daff; /* Optional: customize border color */
+    }
+
+    .alert-info p {
+        margin-bottom: 0; /* Remove bottom margin from the paragraph */
+    }
+</style>
+<div class="containe-fluid mt-5">
+   
+    <div class="scrollable-container">
+        {% if messages %}
+    <!-- <div class="container mt-3"> -->
+        {% for message in messages %}
+            <div class="alert alert-dismissible fade show 
+                {% if message.tags == 'success' %}alert-info{% endif %} 
+                {% if message.tags == 'error' %}alert-danger{% endif %} 
+                mt-2" role="alert">
+                <p>{{ message }}</p>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="border: none; background: none; color: #007bff; font-size: 1.5rem; position: absolute; top: 10px; right: 15px; cursor: pointer;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    <!-- </div> -->
+{% endif %}
+        <h2 class="text-center mb-4">Heirarchy</h2>
+        <form method="post">
+            {% csrf_token %}
+                        
+        
+            <!-- Leave Dates -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="employeeSelect" class="form-label">Select Approval For</label>
+                    {% render_field form.approval_for class+="form-control"  %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="startDate" class="form-label">Position</label>
+                    {% render_field form.position class+="form-control"  %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="endDate" class="form-label">First Approver</label>
+                    {% render_field form.first_approver class+="form-control"  %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="endDate" class="form-label">Second Approver</label>
+                    {% render_field form.second_approver class+="form-control"  %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="endDate" class="form-label">Final Approver</label>
+                    {% render_field form.final_approver class+="form-control"  %}
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Save Heirarchy</button>
+            </div>
+        </form>
+
+<br>
+        <h3 class="text-center">Approved Heirarchy</h3>
+    <!-- Scrollable Table -->
+    <div class="table-container">
+        <table class="table table-hover" id="employeeTable">
+            <thead class="table-primary">
+                <tr class="table-header">
+                    <th>Position</th>
+                    <th>Approval For</th>
+                    <th>First Approver</th>
+                    <th>Second Approver</th>
+                    <th>Final Approver</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hierarchy in hierarchies %}
+                <tr>
+                    <td>{{ hierarchy.position }}</td>
+                    <td>{{ hierarchy.approval_for }}</td>
+                    <td>{{ hierarchy.first_approver }}</td>
+                    <td>{{ hierarchy.second_approver|default:"N/A" }}</td>
+                    <td>{{ hierarchy.final_approver|default:"N/A" }}</td>
+                    <td>
+                        actions here
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No approval hierarchies found.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    </div>
+</div>

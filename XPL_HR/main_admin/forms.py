@@ -1,5 +1,5 @@
 from django import forms
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 
@@ -174,3 +174,20 @@ class EmployeeUpdateForm(forms.ModelForm):
             employee.save()
 
         return employee
+    
+
+
+class ApprovalHierarchyForm(forms.ModelForm):
+    class Meta:
+        model = Hierarchy
+        fields = ['approval_for', 'position', 'first_approver', 'second_approver', 'final_approver']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        position = cleaned_data.get('position')
+        second_approver = cleaned_data.get('second_approver')
+
+        # Ensure that developers have 3 approvers and management has 2 approvers
+        if position == 'developer' and not second_approver:
+            raise forms.ValidationError("Developers require a second approver.")
+        return cleaned_data

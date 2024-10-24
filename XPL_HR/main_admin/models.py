@@ -99,6 +99,7 @@ class Employee(models.Model):
 
     POSITION = [
         ('developer', 'Developer'),
+        ('management', 'Management'),
         ]
     
 
@@ -209,12 +210,24 @@ class LeaveApplication(models.Model):
     end_date = models.DateField()
     remarks = models.TextField(blank=True, null=True)
     reason = models.TextField()
+    
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES,default='Pending')  # Default status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')  # Default status
+
+    # Fields for approvers
+    first_approver = models.ForeignKey(Employee, related_name='leave_first_approvals', null=True, blank=True, on_delete=models.SET_NULL)
+    second_approver = models.ForeignKey(Employee, related_name='leave_second_approvals', null=True, blank=True, on_delete=models.SET_NULL)
+    final_approver = models.ForeignKey(Employee, related_name='leave_final_approvals', null=True, blank=True, on_delete=models.SET_NULL)
+    current_approver = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name='current_approvals')
+
+    # Remarks from approvers
+    remarks_first_approver = models.TextField(null=True, blank=True)
+    remarks_second_approver = models.TextField(null=True, blank=True)
+    remarks_final_approver = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.employee.first_name} - {self.leave_type.leave_name} ({self.start_date} to {self.end_date})"
@@ -222,6 +235,25 @@ class LeaveApplication(models.Model):
     @property
     def leave_days(self):
         return (self.end_date - self.start_date).days + 1
+    # employee = models.ForeignKey(Employee, on_delete=models.CASCADE)  # Link to the Employee model
+    # leave_type = models.ForeignKey(Leaves, on_delete=models.CASCADE)
+    # start_date = models.DateField()
+    # end_date = models.DateField()
+    # remarks = models.TextField(blank=True, null=True)
+    # reason = models.TextField()
+    # STATUS_CHOICES = [
+    #     ('pending', 'Pending'),
+    #     ('approved', 'Approved'),
+    #     ('rejected', 'Rejected'),
+    # ]
+    # status = models.CharField(max_length=20, choices=STATUS_CHOICES,default='Pending')  # Default status
+
+    # def __str__(self):
+    #     return f"{self.employee.first_name} - {self.leave_type.leave_name} ({self.start_date} to {self.end_date})"
+    
+    # @property
+    # def leave_days(self):
+    #     return (self.end_date - self.start_date).days + 1
     
 class Timesheet(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
@@ -258,3 +290,18 @@ class Salary(models.Model):
     month = models.DateField()  # Or any suitable field for the month
     total_days_worked = models.IntegerField(null=False)
     total_salary = models.IntegerField()
+
+
+class Hierarchy(models.Model):
+    POSITION_CHOICES = [
+        ('developer', 'Developer'),
+        ('management', 'Management'),
+    ]
+    approval_for = models.CharField(max_length=50, choices=[('leave', 'Leave'), ('timesheet', 'Timesheet')])
+    position = models.CharField(max_length=50, choices=POSITION_CHOICES)
+    first_approver = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='first_approvals')
+    second_approver = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='second_approvals', null=True, blank=True)  # Optional for management
+    final_approver = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='final_approvals')
+
+    def __str__(self):
+        return f'{self.approval_for} Approval Flow for {self.position}'

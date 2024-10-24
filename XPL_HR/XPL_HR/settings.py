@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-#5&dhriw$i2v$%6w1sdqb)#$=!2w7q+x_0_-fw)n^x95i+kf)s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['moeez007.pythonanywhere.com','127.0.0.1']
 
 
 # Application definition
@@ -126,10 +126,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 import os
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Point to the 'static' folder inside your project
-]
+STATIC_URL = '/static/'  # Ensure this matches the URL in your error message
+STATICFILES_DIRS = [BASE_DIR / 'static']  # Path where static files are stored
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 

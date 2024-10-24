@@ -1,0 +1,32 @@
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} Leave {% endblock %}
+
+{% block content %}
+
+
+<link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
+
+
+<header class="nav-bar">
+    <div class="nav-bar-left">
+        <nav class="nav-bar-nav">
+            <a href="#" class="navbar-link active" data-tab="option1">Set Heirarchy</a>
+            <a href="#" class="navbar-link" data-tab="option2">something here</a>
+        </nav>
+    </div>
+</header>
+<div class="header-image"> </div>
+
+
+<div class="container-fluid active" id="option1-section" style="display: block;" >
+    {% include "templates/sub_templates/set_heirarchy.html" %}
+
+</div>
+<div class="container-fluid" id="option2-section" style="display: none;">
+    <h2>this is some other random page</h2>
+</div>
+
+
+
+{%endblock%}
