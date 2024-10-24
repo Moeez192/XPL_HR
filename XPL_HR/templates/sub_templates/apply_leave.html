@@ -3,14 +3,7 @@
 
 <div class="containe mt-5">
     <div class="scrollable-container">
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    
+        
     <h4 class=" text-center mb-4">Apply for Leave</h4>
     
     <form method="POST">
@@ -39,7 +32,6 @@
             {% render_field leave_application_form.reason class+="form-control" %}
         </div>
     
-        <!-- Submit Button -->
         <button type="submit" name="leave_application_form" class="btn btn-primary">Submit Leave Application</button>
     </form>
     </div>

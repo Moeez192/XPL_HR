@@ -1,6 +1,8 @@
 from django import forms
-from .models import Employee , Department , Leaves , Projects , LeaveApplication
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet
 from django.utils.timezone import now
+from django.core.exceptions import ValidationError
+
 
 
 class EmployeeForm(forms.ModelForm):
@@ -8,9 +10,9 @@ class EmployeeForm(forms.ModelForm):
         model = Employee
         fields = ['first_name', 'last_name', 'dob', 'gender', 'email', 'password', 'phone', 'address', 
                   'nationality', 'employee_id', 'job_title', 'department', 'employment_type',
-                  'date_of_joining', 'employee_status', 'work_location', 'salary', 'bonus', 'bank_account',
+                  'date_of_joining', 'employee_status', 'work_location', 'bonus', 'bank_account',
                   'emergency_name', 'emergency_relation', 'emergency_phone', 'profile_photo', 'cv_upload', 
-                  'signed_contract','is_supervisor','employee_role','last_login']  
+                  'signed_contract','is_supervisor','employee_role','last_login','onsite_salary','remote_salary','account_number','iban_number','work_location','employeement_type','position']  
 
         widgets = {
             'password': forms.PasswordInput(),
@@ -59,7 +61,7 @@ class ProjectForm(forms.ModelForm):
 class LeaveApplicationForm(forms.ModelForm):
     class Meta:
         model = LeaveApplication
-        fields = ['leave_type', 'start_date', 'end_date', 'reason']
+        fields = ['leave_type', 'start_date', 'end_date', 'reason','remarks']
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -67,7 +69,7 @@ class LeaveApplicationForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.employee = kwargs.pop('employee', None)
+        self.employee = kwargs.pop('employee', None)  # Pass employee instance via form kwargs
         super(LeaveApplicationForm, self).__init__(*args, **kwargs)
         self.fields['leave_type'].queryset = Leaves.objects.all()  # Populate leave types
 
@@ -79,48 +81,76 @@ class LeaveApplicationForm(forms.ModelForm):
 
         # Ensure all required fields are present
         if not leave_type or not start_date or not end_date:
-            raise forms.ValidationError("Leave type, start date, and end date are required.")
+            raise ValidationError("Leave type, start date, and end date are required.")
 
         # Ensure start date is not in the past
         if start_date < now().date():
-            raise forms.ValidationError("Start date cannot be in the past.")
+            raise ValidationError("Start date cannot be in the past.")
 
         # Calculate leave days
         leave_days = (end_date - start_date).days + 1
 
-        # Validate maximum leave days for the selected leave type
-        if leave_type and leave_days > leave_type.leave_days_allowed:
-            raise forms.ValidationError(
+        # Check 1: Ensure the number of days is positive
+        if leave_days <= 0:
+            raise ValidationError("The number of leave days must be greater than zero.")
+
+        # Check 2: Ensure that the leave days do not exceed the max allowed for the leave type
+        if leave_days > leave_type.leave_days_allowed:
+            raise ValidationError(
                 f"You can only apply for a maximum of {leave_type.leave_days_allowed} days for {leave_type.leave_name}."
             )
-
-        # Get the current month
         current_month = now().month
-        
-        # Get the employee instance from initial data or cleaned data
-        employee = self.initial.get('employee')  # Assuming you're setting 'employee' in initial data
+        current_year = now().year
 
-        if employee:  # Ensure employee is not None
-            # Count approved leaves of the same type in the current month
+        # Count approved leaves of the same type in the current month
+        if self.employee:  
             approved_leaves_in_current_month = LeaveApplication.objects.filter(
-                employee=employee,
+                employee=self.employee,
                 leave_type=leave_type,
                 start_date__month=current_month,
+                start_date__year=current_year,
                 status='approved'  # Only count approved leaves
             ).count()
 
-            # Validate maximum leaves per month for this leave type
             if approved_leaves_in_current_month >= leave_type.max_leaves_per_month:
-                raise forms.ValidationError(
+                raise ValidationError(
                     f"You can only apply for {leave_type.max_leaves_per_month} {leave_type.leave_name} leave(s) in a month."
                 )
 
         return cleaned_data
-    
 
+
+
+class TimesheetForm(forms.ModelForm):
+    class Meta:
+        model = Timesheet
+        fields = ['date', 'task_description', 'location', 'notes','status']
+
+        widgets = {
+            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'task_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'location': forms.Select(attrs={'class': 'form-select'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+
+
+
+class EducationalDocumentForm(forms.ModelForm):
+    class Meta:
+        model = EducationalDocument
+        fields = ['document_name', 'document_file']
+
+    def clean_document_file(self):
+        file = self.cleaned_data.get('document_file')
+
+        # Limit file size to 3MB
+        if file and file.size > 3 * 1024 * 1024:
+            raise forms.ValidationError("File size should be 3MB or less.")
+        return file
 
 class EmployeeUpdateForm(forms.ModelForm):
-    new_password = forms.CharField(widget=forms.PasswordInput(), required=False, label="New Password")  # Optional field
+    new_password = forms.CharField(widget=forms.PasswordInput(), required=False, label="New Password")  
 
     class Meta:
         model = Employee
@@ -128,16 +158,19 @@ class EmployeeUpdateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['new_password'].initial = ''  # Clear the initial value for new_password
+        self.fields['new_password'].initial = ''  
 
     def save(self, commit=True):
-        employee = super().save(commit=False)  # Get the instance
-        new_password = self.cleaned_data.get('new_password')  # Get the new password
+        
+        employee = super().save(commit=False)
+        new_password = self.cleaned_data.get('new_password')
 
-        if new_password:  # If a new password is provided
-            employee.set_password(new_password)  # Hash the new password
+        if new_password:
+            print("this is working")
+            employee.set_password(new_password)
 
         if commit:
-            employee.save()  # Save the employee instance
+            print("commit is working")
+            employee.save()
 
         return employee

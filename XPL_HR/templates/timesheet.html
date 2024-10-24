@@ -1,24 +1,33 @@
 {% extends 'templates/navs.html' %}
 {%load static%}
-{% block title %} Leave {% endblock %}
+{% block title %} timesheet {% endblock %}
 
 {% block content %}
+
+
+<link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
+
 
 <header class="nav-bar">
     <div class="nav-bar-left">
         <nav class="nav-bar-nav">
             <a href="#" class="navbar-link active" data-tab="option1">Overview</a>
-            <a href="#" class="navbar-link" data-tab="option2">Timesheets</a>
+            <a href="#" class="navbar-link" data-tab="option2">Add TimeSheet</a>
         </nav>
     </div>
 </header>
 <div class="header-image"> </div>
+
+
 <div class="container-fluid active" id="option1-section" style="display: block;" >
-    <h1>This is the overview page</h1>
+    {% include "templates/sub_templates/time_dash.html" %}
+    
 
 </div>
 <div class="container-fluid" id="option2-section" style="display: none;">
-    {% include "templates/sub_templates/timesheet3.html" %}
+    {% include "templates/sub_templates/add_timesheet.html" %}
 </div>
+
+
 
 {%endblock%}

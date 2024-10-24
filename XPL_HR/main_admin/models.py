@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
+from django.conf import settings
+from django.utils.timezone import now
 
 
 
@@ -24,12 +26,16 @@ class Employee(models.Model):
     address = models.CharField(max_length=100)
     nationality = models.CharField(max_length=100)
 
+    
     def save(self, *args, **kwargs):
+        
         if not self.password:
-            self.password = "pakistan"
+         self.password = make_password("pakistan")  
+        else:
         
-        self.password = make_password(self.password)
-        
+         if not self.password.startswith('pbkdf2_'):
+            self.password = make_password(self.password)
+
         super().save(*args, **kwargs)
 
     # Job Details
@@ -73,11 +79,39 @@ class Employee(models.Model):
     
     is_supervisor = models.CharField(max_length=20, choices=IS_SUPERVISOR)
    
-    work_location = models.CharField(max_length=255)
-
-    salary = models.DecimalField(max_digits=10, decimal_places=2)
-    bonus = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # salary = models.PositiveIntegerField()
+    bonus = models.PositiveIntegerField()
+    
+    # (new fields)
     bank_account = models.CharField(max_length=100)
+    onsite_salary = models.PositiveIntegerField(null=True)
+    remote_salary = models.PositiveIntegerField(null=True)
+    account_number = models.CharField(max_length=20,null=True)
+    iban_number = models.CharField(max_length=20,null=True)
+
+    WORK_LOCATION = [
+        ('ksa - kingdom of saudia arabia', 'KSA - Kingdom Of Saudia Arabia'),
+        ('dxb - dubai', 'DXB - Dubai'),
+        ('pk - pakistan','Pk - Pakistan'),
+        ]
+    
+
+    POSITION = [
+        ('developer', 'Developer'),
+        ]
+    
+
+    position = models.CharField(max_length=20,choices=POSITION,null=True)
+
+
+    work_location = models.CharField(max_length=35,choices=WORK_LOCATION,null=True)
+
+    employeement_type=models.CharField(max_length=35,null=True)
+
+
+
+
 
     emergency_name = models.CharField(max_length=100)
     emergency_relation = models.CharField(max_length=100)
@@ -94,7 +128,8 @@ class Employee(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.employee_id}"
     
-    def set_password(self, raw_password ):
+    def set_password(self, raw_password):
+        print("set pwd function is also woring")
         self.password = make_password(raw_password)
         
 
@@ -122,8 +157,8 @@ class Leaves(models.Model):
         ('no', 'No'),
     ]
     leave_name = models.CharField(max_length=20)
-    leave_days_allowed = models.IntegerField(max_length=3, blank=True, null=True)  
-    max_leaves_per_month = models.IntegerField(max_length=3)  
+    leave_days_allowed = models.PositiveIntegerField()  
+    max_leaves_per_month = models.PositiveIntegerField()  
     is_paid = models.CharField(max_length=4,choices=IS_PAID)
     auto_approval = models.CharField(max_length=4,choices=AUTO_APPROVAL)
 
@@ -172,6 +207,7 @@ class LeaveApplication(models.Model):
     leave_type = models.ForeignKey(Leaves, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
+    remarks = models.TextField(blank=True, null=True)
     reason = models.TextField()
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -187,5 +223,38 @@ class LeaveApplication(models.Model):
     def leave_days(self):
         return (self.end_date - self.start_date).days + 1
     
-    
+class Timesheet(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    project = models.ForeignKey(Projects, on_delete=models.CASCADE)
+    date = models.DateField()
+    task_description = models.TextField()
+    location = models.CharField(max_length=50, choices=[('onsite', 'Onsite'), ('offsite', 'Offsite'), ('remote', 'Remote')])
+    notes = models.TextField(blank=True)
+    supervisor_approved = models.BooleanField(default=False)
+    is_editable = models.BooleanField(default=True)
+    status = models.CharField(max_length=20, default='pending')
 
+    def __str__(self):
+        return f"{self.employee.first_name} - {self.project.project_name} - {self.date}"
+
+class EducationalDocument(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    document_name = models.CharField(max_length=255)
+    document_file = models.FileField(upload_to='documents/')
+    file_size = models.PositiveIntegerField(null=True)  # Storing file size in bytes
+    upload_date = models.DateTimeField(default=now)  # Automatically track upload date
+
+    def save(self, *args, **kwargs):
+        # Calculate file size in KB or MB (bytes / 1024 = KB)
+        self.file_size = self.document_file.size
+        super().save(*args, **kwargs)
+
+class Salary(models.Model):
+    employee = models.ForeignKey(
+        Employee,
+        on_delete=models.CASCADE,
+        related_name='salaries'  # Use a different related name
+    )
+    month = models.DateField()  # Or any suitable field for the month
+    total_days_worked = models.IntegerField(null=False)
+    total_salary = models.IntegerField()

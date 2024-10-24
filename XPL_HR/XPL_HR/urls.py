@@ -24,11 +24,15 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.login_view, name='login'),
+    path('files/',views.files, name='files'),
+    path('delete/<int:document_id>/',views.delete_document, name='delete_document'),
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/',views.dashboard, name='dashboard'),
     path('forget_pwd/',views.forget_pwd, name='forget_pwd'),
     path('employees/',views.employees, name='employees'),
     path('leave/',views.leave,name='leave'),
+    path('leave/edit/<int:leave_id>/',views.edit_leave, name='edit_leave'),
+    path('leave/delete/<int:leave_id>/',views.delete_leave, name='delete_leave'),
     path('projects/',views.projects,name='projects'),
     path('employees/<int:pk>/delete/', views.employee_delete_view, name='employee_delete'),
     path('employee/edit/<int:employee_id>/', views.edit_employee, name='edit_employee'),
@@ -38,6 +42,15 @@ urlpatterns = [
     path('projects/delete/<int:pk>/',views.project_delete_view, name='delete_project'),
     path('projects/edit/<int:pk>/',views.project_edit_view, name='edit_project'),
     path('projects/<int:pk>/',views.project_detail_view, name='project_detail'),
+    path('timesheet/',views.timesheet, name='timesheet'),
+    path('timesheet/action/<int:timesheet_id>/', views.timesheet_action, name='timesheet_action'),
+    path('timesheet/download/<str:month>/', views.download_timesheet_pdf, name='download_timesheet'),
+    path('calculate_salary/<int:employee_id>/', views.calculate_employee_salary, name='calculate_employee_salary'),
+
+
+
+
+
 
 
 

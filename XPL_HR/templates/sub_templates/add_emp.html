@@ -96,13 +96,20 @@
                     <label for="workLocation" class="form-label">Work Location</label>
                     {% render_field form.work_location placeholder="Enter Work Location" class+="form-control" %}
                 </div>
-                
+                 
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="employeeRole" class="form-label">Employee Role</label>
                     {% render_field form.employee_role class+="form-control" %}
-
+                </div>
+                <div class="col-md-6">
+                    <label for="employeeRole" class="form-label">Employement Type</label>
+                    {% render_field form.employeement_type class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Position</label>
+                    {% render_field form.position placeholder="Position" class+="form-control" %}
                 </div>
             </div>
 
@@ -111,19 +118,44 @@
                 <h4>Salary and Compensation</h4>
             </div>
             <div class="row mb-3">
-                <div class="col-md-6">
+                <!-- <div class="col-md-6">
                     <label for="salary" class="form-label">Salary</label>
                     {% render_field form.salary placeholder="Enter Salary" class+="form-control" %}
-
+                </div> -->
+                <div class="col-md-6">
+                    <label for="bonus" class="form-label">Remote Salary</label>
+                    {% render_field form.remote_salary placeholder="Enter Bonus" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bonus" class="form-label">Onsite Salary Salary</label>
+                    {% render_field form.onsite_salary placeholder="Enter Bonus" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
                     <label for="bonus" class="form-label">Bonus/Allowances</label>
                     {% render_field form.bonus placeholder="Enter Bonus" class+="form-control" %}
                 </div>
+                
             </div>
+            
+
+            <!-- Bank Account Details Section-->
             <div class="mb-3">
-                <label for="bankAccount" class="form-label">Bank Account Details</label>
-                {% render_field form.bank_account placeholder="Bank Account Details" class+="form-control" %}
+                <h4>Bank Account Detail</h4>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="bankAccount" class="form-label">Bank Name</label>
+                {% render_field form.bank_account placeholder="Bank Name" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bankAccount" class="form-label">Account Number</label>
+                {% render_field form.account_number placeholder="Account Number" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bankAccount" class="form-label">Iban Number</label>
+                {% render_field form.iban_number placeholder="Iban Number" class+="form-control" %}
+                </div>
+                
             </div>
 
             <!-- Emergency Contact Section-->

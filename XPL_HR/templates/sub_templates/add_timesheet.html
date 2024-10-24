@@ -1,0 +1,61 @@
+<div class="containe-fluid mt-5">
+    <div class="scrollable-container">
+        <h3 class="text-center">Add TimeSheet</h3>
+
+        <!-- Timesheet Form -->
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Project Information -->
+            <div class="row">
+                <div class="col-6">
+                    <div class="project-info">
+                        <div>
+                            <label><strong>Select Project Name:</strong></label>
+                            <select name="project_id" class="form-control">
+                                {% for project in projects %}
+                                    <option value="{{ project.id }}">{{ project.project_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label><strong>Employee/Consultant Name:</strong></label>
+                            <input type="text" class="form-control" value="{{ request.user.first_name }} {{ request.user.last_name }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timesheet Form Fields -->
+            <table class="table table-bordered mt-4">
+                <thead>
+                    <tr class="table-header">
+                        <th>Date</th>
+                        <th>Task Description</th>
+                        <th>Location</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" name="date" class="form-control" value="{{ today }}" readonly></td>
+                        <td><textarea name="task_description" class="form-control" rows="2" placeholder="Task details" required></textarea></td>
+                        <td>
+                            <select name="location" class="form-select">
+                                <option value="onsite">Onsite</option>
+                                <option value="offsite">Offsite</option>
+                                <option value="remote">Remote</option>
+                            </select>
+                        </td>
+                        <td><textarea name="notes" class="form-control" rows="2"></textarea></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-success">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>

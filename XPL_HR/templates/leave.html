@@ -2,6 +2,7 @@
 {%load static%}
 {% block title %} Leave {% endblock %}
 {% block content %}
+
 <link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
 
 <header class="nav-bar">
@@ -11,6 +12,7 @@
             <a href="#" class="navbar-link" data-tab="option2">Apply Leaves</a>
             {% if request.session.role == 'admin' %}
             <a href="#" class="navbar-link" data-tab="option3">Configure Leaves</a>
+            <a href="#" class="navbar-link" data-tab="option4">Leave Types</a>
             {% endif %}
         </nav>
     </div>
@@ -25,6 +27,9 @@
 {% if request.session.role == 'admin' %}
 <div class="container-fluid" id="option3-section" style="display: none;">
     {% include "templates/sub_templates/configure_leaves.html" %}
+</div>
+<div class="container-fluid" id="option4-section" style="display: none;">
+    {% include "templates/sub_templates/leave_types.html" %}
 </div>
 {% endif %}
 

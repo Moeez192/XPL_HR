@@ -8,7 +8,7 @@
 <div class="container-fluid mt-6">
     <div class="scrollable-container">
      <h2 class="text-center mb-4">Edit Employee: {{ employee.first_name }}</h2>
-        <form method="POST" enctype="multipart/form-data">
+     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <!-- Personal Information Section-->
         <div class="mb-3">
@@ -40,9 +40,8 @@
                 {% render_field form.email placeholder="Email" class+="form-control" %}
             </div>
             <div class="col-md-6">
-                <label for="employeeRole" class="form-label">Employee Role</label>
-                {% render_field form.employee_role class+="form-control" %}
-
+                <label for="password" class="form-label">Password</label>
+                {% render_field form.password placeholder="Default Password is Pakistan if left Empty" class+="form-control" %}
             </div>
             <div class="col-md-6">
                 <label for="phone" class="form-label">Phone Number</label>
@@ -53,10 +52,7 @@
                 {% render_field form.address class+="form-control" %}
             </div>
         </div>
-        <div class="col-md-6">
-            <label for="password" class="form-label">Password</label>
-            {% render_field form.password placeholder="Default Password is Pakistan if left Empty" class+="form-control" %}
-        </div>
+        
         <div class="mb-3">
             <label for="nationality" class="form-label">Nationality</label>
             {% render_field form.nationality placeholder="Enter Nationality" class+="form-control" %}
@@ -106,7 +102,21 @@
                 <label for="workLocation" class="form-label">Work Location</label>
                 {% render_field form.work_location placeholder="Enter Work Location" class+="form-control" %}
             </div>
-            
+             
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="employeeRole" class="form-label">Employee Role</label>
+                {% render_field form.employee_role class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="employeeRole" class="form-label">Employement Type</label>
+                {% render_field form.employeement_type class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="workLocation" class="form-label">Position</label>
+                {% render_field form.position placeholder="Position" class+="form-control" %}
+            </div>
         </div>
 
         <!-- Salary and Compensation Section-->
@@ -114,19 +124,44 @@
             <h4>Salary and Compensation</h4>
         </div>
         <div class="row mb-3">
-            <div class="col-md-6">
+            <!-- <div class="col-md-6">
                 <label for="salary" class="form-label">Salary</label>
                 {% render_field form.salary placeholder="Enter Salary" class+="form-control" %}
-
+            </div> -->
+            <div class="col-md-6">
+                <label for="bonus" class="form-label">Remote Salary</label>
+                {% render_field form.remote_salary placeholder="Enter Bonus" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="bonus" class="form-label">Onsite Salary</label>
+                {% render_field form.onsite_salary placeholder="Enter Onsite Salary" class+="form-control" %}
             </div>
             <div class="col-md-6">
                 <label for="bonus" class="form-label">Bonus/Allowances</label>
                 {% render_field form.bonus placeholder="Enter Bonus" class+="form-control" %}
             </div>
+            
         </div>
+        
+
+        <!-- Bank Account Details Section-->
         <div class="mb-3">
-            <label for="bankAccount" class="form-label">Bank Account Details</label>
-            {% render_field form.bank_account placeholder="Bank Account Details" class+="form-control" %}
+            <h4>Bank Account Detail</h4>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="bankAccount" class="form-label">Bank Name</label>
+            {% render_field form.bank_account placeholder="Bank Name" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="bankAccount" class="form-label">Account Number</label>
+            {% render_field form.account_number placeholder="Account Number" class+="form-control" %}
+            </div>
+            <div class="col-md-6">
+                <label for="bankAccount" class="form-label">Iban Number</label>
+            {% render_field form.iban_number placeholder="Iban Number" class+="form-control" %}
+            </div>
+            
         </div>
 
         <!-- Emergency Contact Section-->
@@ -165,8 +200,7 @@
         </div>
         <!-- Submit Button -->
         <div class="text-center">
-            <button type="submit" class="btn btn-primary">Save Details</button>
-            <a href="{% url 'employees' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" name="employee_submit" class="btn btn-primary">update Employee</button>
         </div>
     </form>
     </div>

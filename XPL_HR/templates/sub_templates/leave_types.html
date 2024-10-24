@@ -1,0 +1,59 @@
+<div class="containe-fluid mt-5">
+    <div class="scrollable-container" style="height: 50vh !important;">
+    {% if messages %}
+    <div class="alert alert-danger">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h3 class="text-center">Leave Types</h3>
+    <br>
+    <!-- Scrollable Table -->
+    <div class="table-container">
+        <table class="table table-hover" id="employeeTable">
+            <thead class="table-primary">
+                <tr>
+                    <th scope="col">Leave Name</th>
+                    <th scope="col">Leave Days Allowed</th>
+                    <th scope="col">Max Leaves per month</th>
+                    <th scope="col">Is Paid</th>
+                    <th scope="col">Auto Approval</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leaves in all_leaves %}
+                <tr>
+                    <td>{{ leaves.leave_name }}</td>
+                    <td> {{ leaves.leave_days_allowed }}</th>
+                    <td>{{ leaves.max_leaves_per_month }}</td>
+                    <td> {{ leaves.is_paid }}</td>
+                    <td> {{ leaves.auto_approval }}</td>
+                    <td> 
+                        <a href="{% url 'edit_leave' leaves.id %}" class="btn btn-primary btn-sm"><i class="fas fa-pencil-alt"></i></a>
+
+                        <form action="{% url 'delete_leave' leaves.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this Leave Type?');">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                    
+                </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No Leaves Types.</td>
+                    </tr>
+                {% endfor %}
+                
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+</div>
+</div>
+</div>
