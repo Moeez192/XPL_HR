@@ -8,8 +8,7 @@
     <div class="nav-bar-left">
         <nav class="nav-bar-nav">
             <a href="#" class="navbar-link active" data-tab="option1">Overview</a>
-            <a href="#" class="navbar-link" data-tab="option2">Dashboard</a>
-            <a href="#" class="navbar-link" data-tab="option3">Calendar</a>
+            <a href="#" class="navbar-link" data-tab="option2" onclick="showCalendar()">Calendar</a>
         </nav>
     </div>
 </header>
@@ -261,7 +260,86 @@
         </div>
     </div>
 </div>
+<div class="container-fluid" id="option2-section" style="display: none;">
+    <div class="containe-fluid mt-5">
+        <div class="scrollable-container">
+        <div id="calendar" style="text-decoration: none !important;"></div>
+    </div>
+    </div>
+</div>
 
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+<script>
+    var calendar;
+
+    function showCalendar() {
+        // Hide other sections
+        document.getElementById('option1-section').style.display = 'none';
+        document.getElementById('option2-section').style.display = 'block';
+
+        // Initialize or render calendar if it's not done yet
+        if (!calendar) {
+            var calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                nowIndicator: true,
+            });
+            calendar.render();
+        }
+    }
+
+    // Optional: Set default tab to show
+    document.getElementById('option1-tab').click(); // Adjust if you want to load the calendar first
+</script>
+{% endblock %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet" />
+<style>
+    #calendar {
+        height: 550px; 
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+    .fc-daygrid-day a {
+    color: inherit; 
+    text-decoration: none; 
+}
+
+    .fc-toolbar {
+        background-color: #0056b3;
+        color: #ffffff;
+        padding: 10px;
+        border-radius: 10px;
+    }
+    .fc-daygrid-day:hover {
+            background-color: #f9f9f9;
+            transform: scale(1.03);
+        }
+    
+    .fc-toolbar h2 {
+        font-size: 1.8em;
+        font-weight: 500;
+        color: #ffffff;
+    }
+
+    .fc-timegrid-now.fc-timegrid-slot {
+        background-color: rgba(255, 255, 0, 0.3); 
+    }
+    .fc-col-header-cell-cushion {
+    color: inherit !important; 
+    text-decoration: none !important; 
+}
+</style>
+{% endblock %}
 {%endblock%}
+
 

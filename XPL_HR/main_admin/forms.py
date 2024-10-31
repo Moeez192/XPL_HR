@@ -12,7 +12,7 @@ class EmployeeForm(forms.ModelForm):
                   'nationality', 'employee_id', 'job_title', 'department', 'employment_type',
                   'date_of_joining', 'employee_status', 'work_location', 'bonus', 'bank_account',
                   'emergency_name', 'emergency_relation', 'emergency_phone', 'profile_photo', 'cv_upload', 
-                  'signed_contract','is_supervisor','employee_role','last_login','onsite_salary','remote_salary','account_number','iban_number','work_location','employeement_type','position']  
+                  'signed_contract','is_supervisor','employee_role','last_login','onsite_salary','remote_salary','account_number','iban_number','work_location','position']  
 
         widgets = {
             'password': forms.PasswordInput(),
@@ -97,7 +97,7 @@ class LeaveApplicationForm(forms.ModelForm):
         # Check 2: Ensure that the leave days do not exceed the max allowed for the leave type
         if leave_days > leave_type.leave_days_allowed:
             raise ValidationError(
-                f"You can only apply for a maximum of {leave_type.leave_days_allowed} days for {leave_type.leave_name}."
+                f"You can only apply for a maximum of {leave_type.leave_days_allowed} days for {leave_type.leave_name} Leave."
             )
         current_month = now().month
         current_year = now().year
@@ -177,17 +177,57 @@ class EmployeeUpdateForm(forms.ModelForm):
     
 
 
+# class ApprovalHierarchyForm(forms.ModelForm):
+#     class Meta:
+#         model = Hierarchy
+#         fields = ['approval_type', 'project_name', 'approver', 'position', 'is_final_approver']
+        
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         approval_type = cleaned_data.get("approval_type")
+#         project_name = cleaned_data.get("project_name")
+#         is_final_approver = cleaned_data.get("is_final_approver")
+
+#         # Ensure that if this approver is final, no new approver can be added
+#         if is_final_approver:
+#             # Check if any existing approver is marked as final
+#             existing_final = Hierarchy.objects.filter(
+#                 approval_type=approval_type,
+#                 project_name=project_name,
+#                 is_final_approver=True
+#             ).exists()
+#             if existing_final:
+#                 raise forms.ValidationError("A final approver is already set for this approval type and project.")
+
+#         return cleaned_data
+
+
 class ApprovalHierarchyForm(forms.ModelForm):
     class Meta:
         model = Hierarchy
-        fields = ['approval_for', 'position', 'first_approver', 'second_approver', 'final_approver']
+        fields = ['approval_type', 'project_name', 'approver', 'position', 'is_final_approver']
 
     def clean(self):
         cleaned_data = super().clean()
-        position = cleaned_data.get('position')
-        second_approver = cleaned_data.get('second_approver')
+        approval_type = cleaned_data.get("approval_type")
+        project_name = cleaned_data.get("project_name")
+        is_final_approver = cleaned_data.get("is_final_approver")
+        position = cleaned_data.get("position")
 
-        # Ensure that developers have 3 approvers and management has 2 approvers
-        if position == 'developer' and not second_approver:
-            raise forms.ValidationError("Developers require a second approver.")
+        # If the approver is marked as final, check for existing final approvers for that position
+        if is_final_approver:
+            existing_final = Hierarchy.objects.filter(
+                approval_type=approval_type,
+                project_name=project_name,
+                position=position,
+                is_final_approver=True
+            )
+
+            # Log existing final approvers for debugging
+            print(f"Existing Final Approvers for {position}: {existing_final.values('approver')}")
+
+            # If a final approver already exists for this position, raise a validation error
+            if existing_final.exists():
+                raise forms.ValidationError(f"A final approver is already set for the {position} position in the {approval_type} approval type and {project_name} project.")
+
         return cleaned_data

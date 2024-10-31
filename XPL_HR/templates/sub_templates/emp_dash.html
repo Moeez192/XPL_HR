@@ -1,21 +1,33 @@
 {% load static %}
 {% block scripts %}
-<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" > -->
-
-
-<!-- Include jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Include Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
 <script src="{% static 'js/emp_edit.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+    .alert {
+        position: relative;
+    }
 
+    .close {
+        transition: color 0.2s;
+    }
 
+    .close:hover {
+        color: #ff2a00; 
+    }
 
+    .alert-info {
+        border-color: #b8daff; 
+    }
+
+    .alert-info p {
+        margin-bottom: 0; 
+    }
+</style>
 {% endblock %}
 <div class="containe-fluid mt-5" style="margin-top:-70px !important">
-    <!-- Dashboard Cards -->
     <div class="row text-center mb-4">
         <div class="col-md-4">
             <div class="dashboard-card card-total-employees">
@@ -52,11 +64,17 @@
         </div>
     </div>
     {% if messages %}
-    <div class="alert alert-info">
         {% for message in messages %}
-            <p>{{ message }}</p>
+            <div class="alert alert-dismissible fade show 
+                {% if message.tags == 'success' %}alert-info{% endif %} 
+                {% if message.tags == 'error' %}alert-danger{% endif %} 
+                mt-2" role="alert">
+                <p>{{ message }}</p>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="border: none; background: none; color: #007bff; font-size: 1.5rem; position: absolute; top: 10px; right: 15px; cursor: pointer;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
         {% endfor %}
-    </div>
 {% endif %}
 {% if form.errors %}
     <div class="alert alert-danger">
@@ -72,23 +90,16 @@
         </ul>
     </div>
 {% endif %}
-    <!-- Search and Table Filter -->
     <div class="table-controls mb-3">
         <div class="search-container">
             <input type="text" id="employeeSearch" class="form-control" placeholder="Search...">
             <i class="fas fa-search search-icon"></i>
         </div>
         
-        <!-- <select class="form-select" id="tableFilter" style="max-width: 200px; margin-left: 10px;">
-            {% for department in dep_list %}
-                 <option value="{{ department.dep_name }}">{{ department.dep_name }}</option>
-            {% endfor %}
-        </select> -->
     </div>
     <br>
 <h3 class="text-center">Employee List</h3>
 <br>
-    <!-- Scrollable employee Table -->
     <div class="table-container">
         <table class="table table-hover" id="employeeTable">
             <thead class="table-primary">
@@ -117,11 +128,6 @@
                         <a href="{% url 'edit_employee' employee.id %}" class="btn btn-primary btn-sm">
                             <i class="fas fa-pencil-alt"></i>
                         </a>
-                        
-                        
-                        
-                        
-                        <!-- Actions column with Delete button -->
                         <form action="{% url 'employee_delete' employee.id %}" method="POST" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this employee?');">
@@ -129,10 +135,10 @@
                             </button>
                         </form>
 
-                        <form action="{% url 'calculate_employee_salary' employee.id %}" method="post" style="display:inline;">
+                        <!-- <form action="{% url 'calculate_employee_salary' employee.id %}" method="post" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-primary btn-sm">Calculate Salary</button>
-                        </form>
+                        </form> -->
                     </td>
                 </tr>
                 {% empty %}

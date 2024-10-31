@@ -108,7 +108,7 @@ class Employee(models.Model):
 
     work_location = models.CharField(max_length=35,choices=WORK_LOCATION,null=True)
 
-    employeement_type=models.CharField(max_length=35,null=True)
+    # employeement_type=models.CharField(max_length=35,null=True)
 
 
 
@@ -174,7 +174,7 @@ class Projects(models.Model):
     start_date = models.DateField()
     deadline = models.DateField()
     requirement_file = models.FileField(upload_to='projects/')
-    project_manager = models.CharField(max_length=20)
+    project_manager = models.CharField(max_length=100)
     team_members = models.ManyToManyField(Employee, related_name='project_team_members')
     IS_TIMESHEET_REQUIRED = [
         ('yes','Yes'),
@@ -201,6 +201,8 @@ class Projects(models.Model):
             remaining = total_days - elapsed_days
             return max(0, remaining)  # Return 0 if all days have elapsed
         return None  # or return a default value if start_date or deadline is None
+    def __str__(self):
+            return self.project_name
 
 
 class LeaveApplication(models.Model):
@@ -219,15 +221,15 @@ class LeaveApplication(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')  # Default status
 
     # Fields for approvers
-    first_approver = models.ForeignKey(Employee, related_name='leave_first_approvals', null=True, blank=True, on_delete=models.SET_NULL)
-    second_approver = models.ForeignKey(Employee, related_name='leave_second_approvals', null=True, blank=True, on_delete=models.SET_NULL)
-    final_approver = models.ForeignKey(Employee, related_name='leave_final_approvals', null=True, blank=True, on_delete=models.SET_NULL)
+    # first_approver = models.ForeignKey(Employee, related_name='leave_first_approvals', null=True, blank=True, on_delete=models.SET_NULL)
+    # second_approver = models.ForeignKey(Employee, related_name='leave_second_approvals', null=True, blank=True, on_delete=models.SET_NULL)
+    # final_approver = models.ForeignKey(Employee, related_name='leave_final_approvals', null=True, blank=True, on_delete=models.SET_NULL)
     current_approver = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name='current_approvals')
 
     # Remarks from approvers
-    remarks_first_approver = models.TextField(null=True, blank=True)
-    remarks_second_approver = models.TextField(null=True, blank=True)
-    remarks_final_approver = models.TextField(null=True, blank=True)
+    # remarks_first_approver = models.TextField(null=True, blank=True)
+    # remarks_second_approver = models.TextField(null=True, blank=True)
+    # remarks_final_approver = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.employee.first_name} - {self.leave_type.leave_name} ({self.start_date} to {self.end_date})"
@@ -235,39 +237,50 @@ class LeaveApplication(models.Model):
     @property
     def leave_days(self):
         return (self.end_date - self.start_date).days + 1
-    # employee = models.ForeignKey(Employee, on_delete=models.CASCADE)  # Link to the Employee model
-    # leave_type = models.ForeignKey(Leaves, on_delete=models.CASCADE)
-    # start_date = models.DateField()
-    # end_date = models.DateField()
-    # remarks = models.TextField(blank=True, null=True)
-    # reason = models.TextField()
-    # STATUS_CHOICES = [
-    #     ('pending', 'Pending'),
-    #     ('approved', 'Approved'),
-    #     ('rejected', 'Rejected'),
-    # ]
-    # status = models.CharField(max_length=20, choices=STATUS_CHOICES,default='Pending')  # Default status
+    
+    
+# class Timesheet(models.Model):
+#     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+#     project = models.ForeignKey(Projects, on_delete=models.CASCADE)
+#     date = models.DateField()
+#     task_description = models.TextField()
+#     location = models.CharField(max_length=50, choices=[('onsite', 'Onsite'), ('offsite', 'Offsite'), ('remote', 'Remote')])
+#     notes = models.TextField(blank=True)
+#     supervisor_approved = models.BooleanField(default=False)
+#     is_editable = models.BooleanField(default=True)
+#     status = models.CharField(max_length=20, default='pending')
 
-    # def __str__(self):
-    #     return f"{self.employee.first_name} - {self.leave_type.leave_name} ({self.start_date} to {self.end_date})"
-    
-    # @property
-    # def leave_days(self):
-    #     return (self.end_date - self.start_date).days + 1
-    
+#     def __str__(self):
+#         return f"{self.employee.first_name} - {self.project.project_name} - {self.date}"
+
+
 class Timesheet(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     project = models.ForeignKey(Projects, on_delete=models.CASCADE)
     date = models.DateField()
     task_description = models.TextField()
-    location = models.CharField(max_length=50, choices=[('onsite', 'Onsite'), ('offsite', 'Offsite'), ('remote', 'Remote')])
+    location = models.CharField(
+        max_length=50,
+        choices=[('onsite', 'Onsite'),
+                ('remote', 'Remote'),
+                ]
+    )
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('saved', 'Saved'),  
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected')
+    ]
     notes = models.TextField(blank=True)
     supervisor_approved = models.BooleanField(default=False)
-    is_editable = models.BooleanField(default=True)
-    status = models.CharField(max_length=20, default='pending')
+    is_editable = models.BooleanField(default=True)  # This will be set to False for weekends in the view
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    timesheet_group_id = models.CharField(max_length=100, blank=True, null=True)  # Optional ID to group entries
 
     def __str__(self):
         return f"{self.employee.first_name} - {self.project.project_name} - {self.date}"
+
 
 class EducationalDocument(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
@@ -293,15 +306,39 @@ class Salary(models.Model):
 
 
 class Hierarchy(models.Model):
+    APPROVAL_TYPES = [
+        ('leave', 'Leave'),
+        ('timesheet', 'Timesheet'),
+    ]
+    
     POSITION_CHOICES = [
         ('developer', 'Developer'),
         ('management', 'Management'),
     ]
-    approval_for = models.CharField(max_length=50, choices=[('leave', 'Leave'), ('timesheet', 'Timesheet')])
+
+    approval_type = models.CharField(max_length=50, choices=APPROVAL_TYPES)
+    project_name = models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL)  
+    approver = models.ForeignKey(Employee,on_delete=models.CASCADE)
     position = models.CharField(max_length=50, choices=POSITION_CHOICES)
-    first_approver = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='first_approvals')
-    second_approver = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='second_approvals', null=True, blank=True)  # Optional for management
-    final_approver = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='final_approvals')
+    order_number = models.PositiveIntegerField() 
+    is_final_approver = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('approval_type','position', 'project_name', 'order_number') 
 
     def __str__(self):
-        return f'{self.approval_for} Approval Flow for {self.position}'
+        return f'{self.approval_type} Approval by {self.approver} in project {self.project_name or "General"}'
+
+    def save(self, *args, **kwargs):
+        if not self.order_number:  
+            last_order = Hierarchy.objects.filter(
+                approval_type=self.approval_type, project_name=self.project_name
+            ).order_by('order_number').last()
+
+            # If there are no previous approvers, start from 1
+            if last_order:
+                self.order_number = last_order.order_number + 1
+            else:
+                self.order_number = 1  # Start numbering from 1 if none exist
+
+        super().save(*args, **kwargs)

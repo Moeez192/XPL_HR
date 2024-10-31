@@ -103,41 +103,24 @@
                         <td>{{ leaves.status }}</td>
                         <td>
                             {% if leaves.status == 'pending' %}
-                                {% if request.user == leaves.first_approver %}
-                                    <button type="button" class="btn btn-warning btn-sm" 
-                                            onclick="openModal('{{ leaves.id }}', 'approved')">
-                                        <i class="fa fa-check"></i> Approve (First)
-                                    </button>
+                                {% if leaves.current_approver.id == request.user.id %}
+                                <button type="button" class="btn btn-warning btn-sm" 
+                                onclick="openModal('{{ leaves.id }}', 'approved')">
+                                     <i class="fa fa-check"></i> Approve
+                                </button>
                                     <button type="button" class="btn btn-danger btn-sm" 
                                             onclick="openModal('{{ leaves.id }}', 'rejected')">
                                         <i class="fas fa-trash"></i> Reject
                                     </button>
+                                {% else %}
+                                    <span class="text-muted">Waiting for another approver...</span>
                                 {% endif %}
-                            {% elif leaves.status == 'pending second approval' %}
-                                {% if request.user == leaves.second_approver %}
-                                    <button type="button" class="btn btn-warning btn-sm" 
-                                            onclick="openModal('{{ leaves.id }}', 'approved')">
-                                        <i class="fa fa-check"></i> Approve (Second)
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" 
-                                            onclick="openModal('{{ leaves.id }}', 'rejected')">
-                                        <i class="fas fa-trash"></i> Reject
-                                    </button>
-                                {% endif %}
-                            {% elif leaves.status == 'approved by second approver' %}
-                                {% if request.user == leaves.final_approver %}
-                                    <button type="button" class="btn btn-success btn-sm" 
-                                            onclick="openModal('{{ leaves.id }}', 'approved')">
-                                        <i class="fa fa-check"></i> Final Approve
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" 
-                                            onclick="openModal('{{ leaves.id }}', 'rejected')">
-                                        <i class="fas fa-trash"></i> Reject
-                                    </button>
-                                {% endif %}
+                            {% elif leaves.status == 'approved' %}
+                                <span class="text-success">Approved</span>
+                            {% elif leaves.status == 'rejected' %}
+                                <span class="text-danger">Rejected</span>
                             {% endif %}
                         </td>
-
                     </tr>
                     {% empty %}
                         <tr>

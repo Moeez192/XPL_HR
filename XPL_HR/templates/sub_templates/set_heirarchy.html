@@ -39,7 +39,8 @@
             </div>
         {% endfor %}
     <!-- </div> -->
-{% endif %}
+    {% endif %}
+
         <h2 class="text-center mb-4">Heirarchy</h2>
         <form method="post">
             {% csrf_token %}
@@ -49,23 +50,23 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="employeeSelect" class="form-label">Select Approval For</label>
-                    {% render_field form.approval_for class+="form-control"  %}
+                    {% render_field form.approval_type class+="form-control"  %}
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="startDate" class="form-label">Position</label>
                     {% render_field form.position class+="form-control"  %}
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="endDate" class="form-label">First Approver</label>
-                    {% render_field form.first_approver class+="form-control"  %}
+                    <label for="endDate" class="form-label">Project Name</label>
+                    {% render_field form.project_name class+="form-control"  %}
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="endDate" class="form-label">Second Approver</label>
-                    {% render_field form.second_approver class+="form-control"  %}
+                    <label for="endDate" class="form-label">Approver</label>
+                    {% render_field form.approver class+="form-control"  %}
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="endDate" class="form-label">Final Approver</label>
-                    {% render_field form.final_approver class+="form-control"  %}
+                    <label for="endDate" >Is Final Approver</label>
+                    {% render_field form.is_final_approver class+="form-check-input"  %}
                 </div>
             </div>
             <div class="text-center">
@@ -80,31 +81,31 @@
         <table class="table table-hover" id="employeeTable">
             <thead class="table-primary">
                 <tr class="table-header">
-                    <th>Position</th>
-                    <th>Approval For</th>
-                    <th>First Approver</th>
-                    <th>Second Approver</th>
-                    <th>Final Approver</th>
-                    <th>Actions</th>
+                    <tr>
+                        <th>Approval Type</th>
+                        <th>Project Name</th>
+                        <th>Approver</th>
+                        <th>Position</th>
+                        <th>Order Number</th>
+                        <th>Final Approver</th>
+                    </tr>
                 </tr>
             </thead>
             <tbody>
                 {% for hierarchy in hierarchies %}
-                <tr>
-                    <td>{{ hierarchy.position }}</td>
-                    <td>{{ hierarchy.approval_for }}</td>
-                    <td>{{ hierarchy.first_approver }}</td>
-                    <td>{{ hierarchy.second_approver|default:"N/A" }}</td>
-                    <td>{{ hierarchy.final_approver|default:"N/A" }}</td>
-                    <td>
-                        actions here
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="6">No approval hierarchies found.</td>
-                </tr>
-            {% endfor %}
+                    <tr>
+                        <td>{{ hierarchy.approval_type }}</td>
+                        <td>{{ hierarchy.project_name }}</td>
+                        <td>{{ hierarchy.approver }}</td>
+                        <td>{{ hierarchy.position }}</td>
+                        <td>{{ hierarchy.order_number }}</td>
+                        <td>{{ hierarchy.is_final_approver|yesno:"Yes,No" }}</td>  <!-- Display Yes or No for final approver -->
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">No approval hierarchies found.</td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
