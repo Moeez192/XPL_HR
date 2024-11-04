@@ -1,0 +1,120 @@
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} timesheet {% endblock %}
+
+{% block content %}
+
+<div class="header-image"> </div>
+
+<div class="containe-fluid mt-5">
+<div class="scrollable-container">
+    <div class="row">
+        <div class="col-6">
+            <div>
+                <label><strong>Project Name:</strong></label>
+                <input type="text" class="form-control" value="{{ project_name }}" readonly>
+            </div>
+<div>
+    <label><strong>Employee/Consultant Name:</strong></label>
+    <input type="text" class="form-control" value="{{ employee_name }}" readonly>
+</div>
+        </div>
+    </div>
+<table class="table table-container mt-4">
+    <thead class="table-primary">
+        <tr class="table-header">
+            <th>Project Name</th>
+            <th>Date</th>
+            <th>Task Description</th>
+            <th>Location</th>
+            <th>Notes</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for timesheet in timesheets %}
+        <tr>
+            <td>{{ timesheet.project.project_name  }}</td>
+            <td>{{ timesheet.date }}</td>
+            <td>{{ timesheet.task_description }}</td>
+            <td>{{ timesheet.location }}</td>
+            <td>{{ timesheet.notes }}</td>
+            <td>{{ timesheet.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<form id="timesheet-form" method="post" action="{% url 'accept_timesheet' timesheet_group_id %}">
+    {% csrf_token %}
+    <button type="submit" name="action" value="accept" class="btn btn-success btn-sm">Accept</button>
+    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#rejectModal">Reject</button>
+</form>
+</div>
+</div>
+
+
+
+<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectModalLabel">Reason for Rejection</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <textarea id="rejectReason" class="form-control" rows="4" placeholder="Enter the reason for rejection here..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="confirmReject">Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.getElementById('confirmReject').onclick = function() {
+        var reason = document.getElementById('rejectReason').value;
+
+        // Check if the rejection reason is provided
+        if (reason.trim() === '') {
+            alert('Please provide a reason for rejection.');
+            return; // Exit if no reason is given
+        }
+
+        // Create a hidden input for the reason
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'action';  // Ensure this name matches the view's expectation
+        input.value = 'reject';  // Set the action to 'reject'
+
+        // Create another hidden input for the reason
+        var reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'reject_reason';  // Ensure this name matches the view's expectation
+        reasonInput.value = reason;
+
+        // Append both inputs to the form
+        var form = document.getElementById('timesheet-form');
+        form.appendChild(input);
+        form.appendChild(reasonInput);
+
+        // Submit the form
+        form.submit();
+    };
+</script>
+
+    
+    
+    
+{% endblock %}
+
+    
+{%endblock%}

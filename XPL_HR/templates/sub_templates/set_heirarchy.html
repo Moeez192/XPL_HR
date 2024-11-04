@@ -64,9 +64,15 @@
                     <label for="endDate" class="form-label">Approver</label>
                     {% render_field form.approver class+="form-control"  %}
                 </div>
-                <div class="col-md-6 mb-3">
+                <!-- <div class="col-md-6 mb-3">
                     <label for="endDate" >Is Final Approver</label>
                     {% render_field form.is_final_approver class+="form-check-input"  %}
+                </div> -->
+                <div class="col-md-6 mb-3 d-flex ">
+                    <label class="me-2" >Is Final Approver</label>
+                    <div class="form-check form-switch" >
+                        {% render_field form.is_final_approver class+="form-check-input" id="id_is_final_approver" %}
+                    </div>
                 </div>
             </div>
             <div class="text-center">

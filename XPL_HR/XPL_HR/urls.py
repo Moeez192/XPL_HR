@@ -47,9 +47,11 @@ urlpatterns = [
     path('timesheet/action/<int:timesheet_id>/', views.timesheet_action, name='timesheet_action'),
     path('timesheet/download/<str:month>/', views.download_timesheet_pdf, name='download_timesheet'),
     path('calculate_salary/<int:employee_id>/', views.calculate_employee_salary, name='calculate_employee_salary'),
-
-
-
+    path('delete_timesheet/<str:timesheet_group_id>/', views.delete_timesheet, name='delete_timesheet'),
+    path('timesheet/edit/<str:timesheet_group_id>/', views.edit_timesheet, name='edit_timesheet'),
+    path('submit_timesheet/<str:timesheet_group_id>/', views.submit_timesheet, name='submit_timesheet'),
+    path('view_timesheet_group/<str:timesheet_group_id>/', views.view_timesheet, name='view_timesheet'), 
+    path('accept_timesheet/<str:timesheet_group_id>/', views.accept_timesheet, name='accept_timesheet'),
 
 
 

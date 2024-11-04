@@ -177,31 +177,6 @@ class EmployeeUpdateForm(forms.ModelForm):
     
 
 
-# class ApprovalHierarchyForm(forms.ModelForm):
-#     class Meta:
-#         model = Hierarchy
-#         fields = ['approval_type', 'project_name', 'approver', 'position', 'is_final_approver']
-        
-#     def clean(self):
-#         cleaned_data = super().clean()
-#         approval_type = cleaned_data.get("approval_type")
-#         project_name = cleaned_data.get("project_name")
-#         is_final_approver = cleaned_data.get("is_final_approver")
-
-#         # Ensure that if this approver is final, no new approver can be added
-#         if is_final_approver:
-#             # Check if any existing approver is marked as final
-#             existing_final = Hierarchy.objects.filter(
-#                 approval_type=approval_type,
-#                 project_name=project_name,
-#                 is_final_approver=True
-#             ).exists()
-#             if existing_final:
-#                 raise forms.ValidationError("A final approver is already set for this approval type and project.")
-
-#         return cleaned_data
-
-
 class ApprovalHierarchyForm(forms.ModelForm):
     class Meta:
         model = Hierarchy

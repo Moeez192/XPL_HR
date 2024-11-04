@@ -2,7 +2,10 @@ from django.shortcuts import render, redirect , get_object_or_404
 from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm
 from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy
 from django.contrib import messages 
-from django.utils.dateparse import parse_date
+import uuid  
+from django.db import transaction
+import logging
+from django.db.models import Min, Max
 from datetime import timedelta
 from django.conf import settings
 from calendar import monthrange
@@ -21,7 +24,7 @@ from django.contrib.auth import authenticate, login
 from django.utils.decorators import decorator_from_middleware
 from django.middleware.cache import CacheMiddleware
 from datetime import datetime
-
+logger = logging.getLogger(__name__)
 
 class NoCacheMiddleware(CacheMiddleware):
     def __init__(self, get_response=None):
@@ -194,97 +197,11 @@ def employees(request):
 
 
 
-# below one is new one
-# @login_required
-# @no_cache
-# def leave(request):
-#     employee = Employee.objects.get(email=request.user.email)  # The logged-in user
-#     leave_applications_to_approve = LeaveApplication.objects.none()  # Start with no applications
-#     logged_in_user = LeaveApplication.objects.filter(employee=employee)
 
-#     # Fetch leave applications that require this user as an approver based on submitter's role hierarchy
-#     all_applications = LeaveApplication.objects.all()
-#     for application in all_applications:
-#         submitter_role = application.employee.position  # Role of the submitter
-
-#         # Fetch hierarchy list for the submitter's role
-#         approval_hierarchy = Hierarchy.objects.filter(position=submitter_role).order_by('order_number')
-#         approvers = [approver.approver for approver in approval_hierarchy]
-
-#         # Check if the logged-in user is the current approver
-#         if application.current_approver == employee:
-#             leave_applications_to_approve |= LeaveApplication.objects.filter(id=application.id)
-
-#     leave_form = LeaveForm()
-#     leave_application_form = LeaveApplicationForm(employee=employee)
-
-#     if request.method == 'POST':
-#         if 'leave_application_form' in request.POST:
-#             leave_application_form = LeaveApplicationForm(request.POST, employee=employee)
-#             if leave_application_form.is_valid():
-#                 leave_application = leave_application_form.save(commit=False)
-#                 leave_application.employee = employee  # Submitter of the application
-
-#                 # Fetch the first approver in the hierarchy for the submitter’s role
-#                 approval_hierarchy = Hierarchy.objects.filter(position=leave_application.employee.position).order_by('order_number')
-#                 approvers = [approver.approver for approver in approval_hierarchy]
-
-#                 if approvers:
-#                     leave_application.current_approver = approvers[0]  # Set the first approver
-#                 leave_application.save()
-                
-#                 messages.success(request, 'Leave application has been successfully submitted!')
-#                 return redirect('leave')
-
-#         elif 'status' in request.POST:
-#             leave_application_id = request.POST.get('leave_application_id')
-#             leave_application = LeaveApplication.objects.get(id=leave_application_id)
-#             current_user = employee  # Approver
-
-#             # Check if the application has already been rejected
-#             if leave_application.status == 'rejected':
-#                 messages.error(request, 'This application has already been rejected.')
-#                 return redirect('leave')
-
-#             if request.POST.get('status') == 'rejected':
-#                 leave_application.status = 'rejected'
-#                 leave_application.remarks = request.POST.get('remarks', '')
-#                 leave_application.current_approver = None
-#                 leave_application.save()
-#                 messages.success(request, 'Leave application has been rejected.')
-#                 return redirect('leave')
-
-#             # Check hierarchy for the submitter's role again
-#             submitter_role = leave_application.employee.position  # Get submitter's role
-#             approval_hierarchy = Hierarchy.objects.filter(position=submitter_role).order_by('order_number')
-#             approvers = [approver.approver for approver in approval_hierarchy]
-
-#             # Approve the leave if the current user is the expected approver
-#             if leave_application.current_approver == current_user:
-#                 current_index = approvers.index(current_user) if current_user in approvers else -1
-#                 next_index = current_index + 1
-
-#                 # Move to the next approver if available, else mark as approved
-#                 if next_index < len(approvers):
-#                     leave_application.current_approver = approvers[next_index]
-#                     leave_application.status = 'pending'
-#                 else:
-#                     leave_application.current_approver = None
-#                     leave_application.status = 'approved'
-
-#                 messages.success(request, 'Leave application status updated successfully.')
-#                 return redirect('leave')
-
-#     return render(request, 'templates/leave.html', {
-#         'leave_form': leave_form,
-#         'leave_application_form': leave_application_form,
-#         'leave_applications': leave_applications_to_approve,  # Show applications requiring approval
-#         'logged_in_user': logged_in_user,
-#     })                 leave_application.save()
-#
 @login_required
 @no_cache
 def leave(request):
+    leaves=Leaves.objects.all()
     employee = Employee.objects.get(email=request.user.email)
     leave_applications_to_approve = LeaveApplication.objects.none()
     logged_in_user = LeaveApplication.objects.filter(employee=employee)
@@ -419,6 +336,7 @@ def leave(request):
         'leave_application_form': leave_application_form,
         'leave_applications': leave_applications_to_approve,
         'logged_in_user': logged_in_user,
+        'all_leaves' : leaves,
     })
 
 
@@ -561,96 +479,33 @@ def files(request):
     })
 
 
-# @login_required
-# @no_cache
-# def timesheet(request):
-    
-#     employee = Employee.objects.get(email=request.user.email)
 
-    
-#     timesheets = Timesheet.objects.filter(employee=employee).order_by('-date')
-#     timesheets_all = Timesheet.objects.all()
-
-    
-#     projects = Projects.objects.filter(team_members=employee)
-
-#     months = [month_name[i] for i in range(1, 13)]
-#     today = datetime.today().strftime('%Y-%m-%d')
-
-#     if request.method == 'POST':
-#         # Get form data
-#         date_submitted = request.POST.get('date')
-#         task_description = request.POST.get('task_description')
-#         location = request.POST.get('location')
-#         notes = request.POST.get('notes')
-#         project_id = request.POST.get('project_id')
-        
-
-#         existing_timesheet = Timesheet.objects.filter(
-#             employee=employee, 
-#             project_id=project_id, 
-#             date=today
-#         ).first()
-
-#         if existing_timesheet:
-#             if existing_timesheet.status == 'pending':
-#                 messages.error(request, "You have already submitted a timesheet for this project today.")
-#                 return redirect('timesheet')
-#             elif existing_timesheet.status == 'accepted':
-#                 messages.error(request, "Your timesheet for this project today has been accepted. You cannot submit another one.")
-#                 return redirect('timesheet')
-#             elif existing_timesheet.status == 'rejected':
-                
-#                 existing_timesheet.task_description = task_description
-#                 existing_timesheet.location = location
-#                 existing_timesheet.notes = notes
-#                 existing_timesheet.status = 'pending'  # Reset status to pending
-#                 existing_timesheet.save()
-#                 messages.success(request, 'Timesheet resubmitted successfully after rejection.')
-#                 return redirect('timesheet')
-
-#         try:
-            
-#             project = Projects.objects.get(id=project_id)
-#         except Projects.DoesNotExist:
-            
-#             messages.error(request, 'The selected project does not exist.')
-#             return redirect('timesheet')
-
-        
-#         timesheet = Timesheet(
-#             date=date_submitted,
-#             task_description=task_description,
-#             location=location,
-#             notes=notes,
-#             employee=employee,
-#             project=project,
-#             status='pending'  
-#         )
-#         timesheet.save()
-
-#         messages.success(request, 'Timesheet submitted successfully!')
-#         return redirect('timesheet')
-
-#     context = {
-#         'projects': projects,
-#         'timesheets': timesheets,
-#         'timesheet_all': timesheets_all,
-#         'employee' : employee,
-#         'today': today, 
-#         'months': months,
-#     }
-#     return render(request, 'templates/timesheet.html', context)
 
 
 @login_required
 @no_cache
 def timesheet(request):
     employee = Employee.objects.get(email=request.user.email)
-    timesheets = Timesheet.objects.filter(employee=employee).order_by('-date')
+    timesheets = (
+        Timesheet.objects.filter(employee=employee)
+        .values('timesheet_group_id', 'project__project_name', 'status','reject_reason')
+        .annotate(start_date=Min('date'), end_date=Max('date'))
+        .order_by('-start_date')
+    )
     projects = Projects.objects.filter(team_members=employee)
     months = [month_name[i] for i in range(1, 13)]
     today = datetime.today().strftime('%Y-%m-%d')
+
+    # Fetch timesheets awaiting approval for the current approver
+    pending_approval_timesheets = (
+        Timesheet.objects.filter(
+            status='pending',
+            current_approver=employee  # Check if the employee is the current approver
+        )
+        .values('timesheet_group_id', 'project__project_name', 'employee__first_name')
+        .annotate(start_date=Min('date'), end_date=Max('date'))
+        .order_by('-start_date')
+    )
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -671,6 +526,10 @@ def timesheet(request):
         # Parse the date range
         start_date = datetime.strptime(date_from, '%Y-%m-%d')
         end_date = datetime.strptime(date_to, '%Y-%m-%d')
+
+        # Generate a unique timesheet group ID for this range
+        timesheet_group_id = str(uuid.uuid4())
+
         current_date = start_date
         missing_fields = False  # Flag to check if any required field is missing
 
@@ -678,17 +537,16 @@ def timesheet(request):
             date_str = current_date.strftime('%Y-%m-%d')
             day_of_week = current_date.weekday()  # 5 = Saturday, 6 = Sunday
 
-            # Skip weekends
+            # For weekdays, check for required fields
             if day_of_week not in [5, 6]:  # Not Saturday or Sunday
                 task_description = request.POST.get(f'task_description_{date_str}', '').strip()
                 location = request.POST.get(f'location_{date_str}', '').strip()
-                notes = request.POST.get(f'notes_{date_str}', '').strip()
 
                 # Check if any required field is missing for weekdays
                 if not task_description or not location:
                     missing_fields = True
                     messages.error(request, f'Missing required fields on {date_str} (weekdays must have all fields filled).')
-                
+            
             current_date += timedelta(days=1)
 
         # If any required fields are missing, prevent form submission
@@ -701,51 +559,264 @@ def timesheet(request):
             while current_date <= end_date:
                 date_str = current_date.strftime('%Y-%m-%d')
                 day_of_week = current_date.weekday()
-                
-                if day_of_week not in [5, 6]:  # Only process weekdays
-                    task_description = request.POST.get(f'task_description_{date_str}', '').strip()
-                    location = request.POST.get(f'location_{date_str}', '').strip()
-                    notes = request.POST.get(f'notes_{date_str}', '').strip()
 
-                    timesheet, created = Timesheet.objects.get_or_create(
-                        employee=employee,
-                        project=project,
-                        date=date_str,
-                        defaults={
-                            'task_description': task_description,
-                            'location': location,
-                            'notes': notes,
-                            'status': 'saved',
-                            'is_editable': True,
-                        }
-                    )
-                    if not created:
-                        # Update existing timesheet entry if needed
-                        timesheet.task_description = task_description
-                        timesheet.location = location
-                        timesheet.notes = notes
-                        timesheet.is_editable = True
-                        timesheet.status = 'saved'
-                        timesheet.save()
+                # Process all days, including Saturday and Sunday
+                task_description = request.POST.get(f'task_description_{date_str}', '').strip()
+                location = request.POST.get(f'location_{date_str}', '').strip()
+                notes = request.POST.get(f'notes_{date_str}', '').strip()
+
+                timesheet, created = Timesheet.objects.get_or_create(
+                    employee=employee,
+                    project=project,
+                    date=date_str,
+                    defaults={
+                        'task_description': task_description,
+                        'location': location,
+                        'notes': notes,
+                        'status': 'saved',
+                        'is_editable': True,
+                        'timesheet_group_id': timesheet_group_id,
+                    }
+                )
+                if not created:
+                    # Update existing timesheet entry if needed
+                    timesheet.task_description = task_description
+                    timesheet.location = location
+                    timesheet.notes = notes
+                    timesheet.is_editable = True
+                    timesheet.status = 'saved'
+                    timesheet.timesheet_group_id = timesheet_group_id
+                    timesheet.save()
 
                 current_date += timedelta(days=1)
 
             messages.success(request, 'Timesheet saved successfully!')
-
-        elif action == 'submit':
-            # Similar processing as 'save', but with 'submitted' status or additional checks
-            pass
 
         return redirect('timesheet')
 
     context = {
         'projects': projects,
         'timesheets': timesheets,
+        'pending_approval_timesheets': pending_approval_timesheets,  # Include pending timesheets
         'employee': employee,
         'today': today,
         'months': months,
     }
     return render(request, 'templates/timesheet.html', context)
+
+
+@login_required
+@no_cache
+def view_timesheet(request, timesheet_group_id):
+    timesheets = Timesheet.objects.filter(timesheet_group_id=timesheet_group_id)
+    project_name = timesheets.first().project.project_name
+    employee_name = timesheets.first().employee.first_name
+    
+    if not timesheets.exists():
+        messages.error(request, 'No timesheets found for this group.')
+        return redirect('timesheet')
+
+    context = {
+        'timesheets': timesheets,
+        'timesheet_group_id': timesheet_group_id,
+        'project_name': project_name,
+        'employee_name': employee_name,
+    }
+    
+    return render(request, 'templates/sub_templates/view_timesheet.html', context)
+
+
+
+
+
+@login_required
+@no_cache
+def accept_timesheet(request, timesheet_group_id):
+    current_employee = Employee.objects.get(email=request.user.email)
+    timesheet_group = Timesheet.objects.filter(timesheet_group_id=timesheet_group_id)
+
+    if not timesheet_group.exists():
+        messages.error(request, 'Timesheet does not exist.')
+        return redirect('timesheet')
+
+    timesheet = timesheet_group.first()
+    project_name = timesheet.project
+    submitting_employee = timesheet.employee
+    employee_role = submitting_employee.position
+
+    approval_hierarchy = Hierarchy.objects.filter(
+        approval_type='timesheet',
+        project_name=project_name,
+        position=employee_role,
+    ).order_by('order_number')  
+
+    if not approval_hierarchy.exists():
+        messages.error(request, 'No approval hierarchy found for this project.')
+        return redirect('timesheet')
+
+    # Determine the action (accept or reject) from the POST request
+    action = request.POST.get('action')
+   
+    current_approver_index = approval_hierarchy.filter(approver_id=current_employee.id).first()
+    final_approver = approval_hierarchy.last()
+
+    if action == 'accept':
+        if current_approver_index:
+            if current_employee.id == final_approver.approver_id:
+                timesheet_group.update(status='accepted', current_approver_id=None)
+                messages.success(request, 'Timesheet accepted successfully!')
+            else:
+                # Mark as pending for final approval
+                timesheet_group.update(status='pending', current_approver_id=current_employee.id)
+                messages.success(request, 'Timesheet marked as approved and is pending final approval.')
+
+                # Update the current approver to the next in the hierarchy
+                next_approver = approval_hierarchy.filter(order_number__gt=current_approver_index.order_number).first()
+                if next_approver:
+                    timesheet_group.update(current_approver_id=next_approver.approver_id)
+        else:
+            messages.error(request, 'You are not authorized to approve this timesheet.')
+
+    elif action == 'reject':
+        reject_reason = request.POST.get('reject_reason', '').strip()
+        print(f"Reject Reason: {reject_reason}")  # Debugging line
+        if reject_reason:  # Check if reject_reason is not empty
+            timesheet_group.update(status='rejected', reject_reason=reject_reason, current_approver_id=None)
+            messages.success(request, f'Timesheet Rejected due to reason: {reject_reason}')
+        else:
+            messages.error(request, 'Rejection reason is required.')
+
+    return redirect('timesheet')
+
+
+
+
+
+@login_required
+@no_cache
+def delete_timesheet(request, timesheet_group_id):
+    if request.method == 'POST':
+        # Filter timesheets by the group ID
+        timesheets = Timesheet.objects.filter(timesheet_group_id=timesheet_group_id)
+
+        # Check if any timesheets exist for the given group ID
+        if timesheets.exists():
+            # Delete all timesheets in this group
+            timesheets.delete()
+            messages.success(request, "All timesheets for this group have been deleted successfully.")
+        else:
+            messages.error(request, "No timesheets found for the specified group.")
+
+    return redirect('timesheet')  # Adjust this as per your URL pattern
+
+
+
+
+@login_required
+def submit_timesheet(request, timesheet_group_id):
+    if request.method == 'POST':
+        timesheets = Timesheet.objects.filter(timesheet_group_id=timesheet_group_id)
+        employee = Employee.objects.get(email=request.user.email)
+        employee_role=employee.position
+
+
+        if not timesheets.exists():
+            messages.error(request, "No timesheets found for this group.")
+            return redirect('some_view_name')
+
+        project_name = timesheets.first().project  
+        hierarchy = Hierarchy.objects.filter(
+            approval_type='timesheet',
+            project_name=project_name,
+            position=employee_role,
+        ).order_by('order_number')
+
+        if hierarchy.exists():
+            first_approver = hierarchy.first()
+            timesheets.update(
+                status='pending',
+                current_approver=first_approver.approver,
+            )
+
+            messages.success(request, 'Timesheet group submitted for approval!')
+        else:
+            messages.error(request, "No approval hierarchy exists for this project's timesheet group. Please contact HR for assistance.")
+
+        return redirect('timesheet')  
+
+    return render(request, 'templates/timesheet.html')  
+
+
+
+@login_required
+@no_cache
+def edit_timesheet(request, timesheet_group_id):
+    timesheets = Timesheet.objects.filter(timesheet_group_id=timesheet_group_id)
+    if not timesheets:
+        messages.error(request, "Timesheet group not found.")
+        return redirect('timesheet')
+
+    employee = timesheets[0].employee
+    project = timesheets[0].project
+
+    if request.method == 'POST':
+        print("Incoming POST data:", request.POST)  # Debugging POST data
+
+        try:
+            with transaction.atomic():
+                # Update existing timesheets
+                for timesheet in timesheets:
+                    date_str = timesheet.date.strftime('%Y-%m-%d')
+                    
+                    # Retrieve updated values
+                    task_description = request.POST.get(f'task_description_{date_str}', timesheet.task_description)
+                    location = request.POST.get(f'location_{date_str}', timesheet.location)
+                    notes = request.POST.get(f'notes_{date_str}', timesheet.notes)
+
+                    # Debug print to verify updated values
+                    print(f"Updating timesheet for {date_str}:")
+                    print(f"Task: {task_description}, Location: {location}, Notes: {notes}")
+
+                    # Assign and save changes
+                    timesheet.task_description = task_description
+                    timesheet.location = location
+                    timesheet.notes = notes
+                    timesheet.save()
+
+                # Handle new timesheet rows
+                new_dates = request.POST.getlist('new_date')  # List of new dates submitted
+
+                for new_date in new_dates:
+                    if new_date:  # Ensure the date is valid
+                        # Convert the date string to a datetime object
+                        date_obj = datetime.strptime(new_date, '%Y-%m-%d')
+
+                        # Create new timesheet entry with updated values
+                        Timesheet.objects.create(
+                            employee=employee,
+                            project=project,
+                            date=date_obj,
+                            task_description=request.POST.get(f'task_description_{new_date}', ''),
+                            location=request.POST.get(f'location_{new_date}', ''),
+                            notes=request.POST.get(f'notes_{new_date}', ''),
+                            status='saved',
+                            timesheet_group_id=timesheet_group_id  # Same group ID for the new row
+                        )
+
+            messages.success(request, "Timesheet updated successfully.")
+
+        except Exception as e:
+            logger.error(f"Error updating timesheet: {e}")
+            messages.error(request, "Failed to update timesheet. Please try again.")
+
+        return redirect('timesheet')
+
+    context = {
+        'employee': employee,
+        'project': project,
+        'timesheets': timesheets,
+    }
+    return render(request, 'templates/sub_templates/edit_timesheet.html', context)
 
 
 
@@ -904,148 +975,15 @@ def calculate_employee_salary(request, employee_id):
     })
 
 
-# @login_required
-# @no_cache
-# def setting(request):
-#     hierarchies = Hierarchy.objects.all()
-#     projects = Projects.objects.all()  # Fetch all projects
-    
-#     if request.method == 'POST':
-#         form = ApprovalHierarchyForm(request.POST)
-#         if form.is_valid():
-#             approval_type = form.cleaned_data['approval_type']
-#             project_name = form.cleaned_data['project_name']
-#             approver = form.cleaned_data['approver']  # Ensure approver field is included in the form
-#             position = form.cleaned_data['position']
-#             is_final_approver = form.cleaned_data['is_final_approver']  # Assuming this field is in the form
-
-#             # If this is a final approver, check if an existing hierarchy exists
-#             if is_final_approver:
-#                 if Hierarchy.objects.filter(approval_type=approval_type, project_name=project_name, is_final_approver=True).exists():
-#                     messages.error(request, f"A final approver for {approval_type} and project {project_name} is already set.")
-#                     return redirect('settings')  
-
-#             # If it's not a final approver, check if a final approver exists
-#             else:
-#                 if Hierarchy.objects.filter(approval_type=approval_type, project_name=project_name, is_final_approver=True).exists():
-#                     messages.error(request, f"A final approver for {approval_type} and project {project_name} is already set. No new approver can be added.")
-#                     return redirect('settings')  
-
-#             # Save the new hierarchy with automatic order number assignment
-#             approval_hierarchy = Hierarchy(
-#                 approval_type=approval_type,
-#                 project_name=project_name,
-#                 approver=approver,
-#                 position=position,
-#                 is_final_approver=is_final_approver
-#             )
-#             approval_hierarchy.save()  # Calls the overridden save method to handle order number assignment
-            
-#             messages.success(request, "Approval hierarchy has been successfully saved.")
-#             return redirect('settings')  
-#     else:
-#         form = ApprovalHierarchyForm()
-
-#     return render(request, 'templates/settings.html', {
-#         'form': form,
-#         'hierarchies': hierarchies,
-#         'projects': projects,
-#     })
 
 
 
-
-
-# @login_required
-# @no_cache
-# def setting(request):
-#     hierarchies = Hierarchy.objects.all()
-#     projects = Projects.objects.all()  # Fetch all projects
-
-#     if request.method == 'POST':
-#         form = ApprovalHierarchyForm(request.POST)
-#         if form.is_valid():
-#             approval_type = form.cleaned_data['approval_type']
-#             project_name = form.cleaned_data['project_name']
-#             position = form.cleaned_data['position']
-#             approver = form.cleaned_data['approver']
-#             is_final_approver = form.cleaned_data['is_final_approver']
-
-#             # Debugging output
-#             print(f"Received Data - Approval Type: {approval_type}, Project: {project_name}, Position: {position}, Approver: {approver}, Is Final: {is_final_approver}")
-
-#             # Check if the approver is a final approver
-#             if is_final_approver:
-#                 # Check if a final approver already exists for this approval type and position
-#                 existing_final_approver = Hierarchy.objects.filter(
-#                     approval_type=approval_type,
-#                     project_name=project_name,
-#                     position=position,
-#                     is_final_approver=True
-#                 ).first()
-
-#                 # Debugging output
-#                 if existing_final_approver:
-#                     print(f"Final approver already exists: {existing_final_approver}")
-#                     messages.error(request, f"A final approver for {approval_type} and project '{project_name}' with position '{position}' is already set.")
-#                     return redirect('settings')
-
-#             # Check for existing order numbers to avoid duplication
-#             existing_hierarchy = Hierarchy.objects.filter(
-#                 approval_type=approval_type,
-#                 project_name=project_name,
-#                 position=position,
-#                 approver=approver
-#             ).first()
-
-#             # Debugging output
-#             if existing_hierarchy:
-#                 print(f"Existing Hierarchy Entry Found: {existing_hierarchy}")
-#                 messages.error(request, f"An approver '{approver}' for {approval_type} with position '{position}' is already set.")
-#                 return redirect('settings')
-
-#             # Determine the new order number
-#             last_hierarchy = Hierarchy.objects.filter(
-#                 approval_type=approval_type,
-#                 project_name=project_name,
-#                 position=position
-#             ).order_by('order_number').last()
-
-#             # Debugging output for last hierarchy
-#             new_order_number = 1 if last_hierarchy is None else last_hierarchy.order_number + 1
-#             print(f"New Order Number: {new_order_number}")
-
-#             # Create and save the new approval hierarchy entry
-#             approval_hierarchy = Hierarchy(
-#                 approval_type=approval_type,
-#                 project_name=project_name,
-#                 approver=approver,
-#                 position=position,
-#                 order_number=new_order_number,
-#                 is_final_approver=is_final_approver
-#             )
-#             approval_hierarchy.save()
-
-#             print(f"Approval Hierarchy Saved: {approval_hierarchy}")
-#             messages.success(request, "Approval hierarchy successfully saved.")
-#             return redirect('settings')
-
-#     else:
-#         form = ApprovalHierarchyForm()
-
-#     return render(request, 'templates/settings.html', {
-#         'form': form,
-#         'hierarchies': hierarchies,
-#         'projects': projects,
-#     })
 
 
 @login_required
 @no_cache
 def setting(request):
-    # hierarchies = Hierarchy.objects.all()
     hierarchies = Hierarchy.objects.all()
-  # Fetch all projects
 
     if request.method == 'POST':
         form = ApprovalHierarchyForm(request.POST)
@@ -1056,12 +994,9 @@ def setting(request):
             approver = form.cleaned_data['approver']
             is_final_approver = form.cleaned_data['is_final_approver']
 
-            # Debugging output
             print(f"Received Data - Approval Type: {approval_type}, Project: {project_name}, Position: {position}, Approver: {approver}, Is Final: {is_final_approver}")
 
-            # Check if the approver is a final approver
             if is_final_approver:
-                # Check if a final approver already exists for this approval type and position
                 existing_final_approver = Hierarchy.objects.filter(
                     approval_type=approval_type,
                     project_name=project_name,
@@ -1069,13 +1004,11 @@ def setting(request):
                     is_final_approver=True
                 ).first()
 
-                # Debugging output
                 if existing_final_approver:
                     print(f"Final approver already exists: {existing_final_approver}")
                     messages.error(request, f"A final approver for {approval_type} and project '{project_name}' with position '{position}' is already set.")
                     return redirect('settings')
 
-            # Check for existing order numbers to avoid duplication
             existing_hierarchy = Hierarchy.objects.filter(
                 approval_type=approval_type,
                 project_name=project_name,
@@ -1083,24 +1016,20 @@ def setting(request):
                 approver=approver
             ).first()
 
-            # Debugging output
             if existing_hierarchy:
                 print(f"Existing Hierarchy Entry Found: {existing_hierarchy}")
                 messages.error(request, f"An approver '{approver}' for {approval_type} with position '{position}' is already set.")
                 return redirect('settings')
 
-            # Determine the new order number
             last_hierarchy = Hierarchy.objects.filter(
                 approval_type=approval_type,
                 project_name=project_name,
                 position=position
             ).order_by('order_number').last()
 
-            # Debugging output for last hierarchy
             new_order_number = 1 if last_hierarchy is None else last_hierarchy.order_number + 1
             print(f"New Order Number: {new_order_number}")
 
-            # Create and save the new approval hierarchy entry
             approval_hierarchy = Hierarchy(
                 approval_type=approval_type,
                 project_name=project_name,

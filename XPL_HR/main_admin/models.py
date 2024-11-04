@@ -238,27 +238,15 @@ class LeaveApplication(models.Model):
     def leave_days(self):
         return (self.end_date - self.start_date).days + 1
     
-    
-# class Timesheet(models.Model):
-#     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-#     project = models.ForeignKey(Projects, on_delete=models.CASCADE)
-#     date = models.DateField()
-#     task_description = models.TextField()
-#     location = models.CharField(max_length=50, choices=[('onsite', 'Onsite'), ('offsite', 'Offsite'), ('remote', 'Remote')])
-#     notes = models.TextField(blank=True)
-#     supervisor_approved = models.BooleanField(default=False)
-#     is_editable = models.BooleanField(default=True)
-#     status = models.CharField(max_length=20, default='pending')
-
-#     def __str__(self):
-#         return f"{self.employee.first_name} - {self.project.project_name} - {self.date}"
-
 
 class Timesheet(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     project = models.ForeignKey(Projects, on_delete=models.CASCADE)
     date = models.DateField()
-    task_description = models.TextField()
+    task_description = models.TextField(blank=True, null=True)
+    current_approver = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name='current_approvers')
+    reject_reason = models.TextField(blank=True, null=True)
+
     location = models.CharField(
         max_length=50,
         choices=[('onsite', 'Onsite'),
@@ -271,12 +259,12 @@ class Timesheet(models.Model):
         ('accepted', 'Accepted'),
         ('rejected', 'Rejected')
     ]
-    notes = models.TextField(blank=True)
+    notes = models.TextField(blank=True, null=True)
     supervisor_approved = models.BooleanField(default=False)
-    is_editable = models.BooleanField(default=True)  # This will be set to False for weekends in the view
+    is_editable = models.BooleanField(default=True)  
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
-    timesheet_group_id = models.CharField(max_length=100, blank=True, null=True)  # Optional ID to group entries
+    timesheet_group_id = models.CharField(max_length=100, blank=True, null=True)  
 
     def __str__(self):
         return f"{self.employee.first_name} - {self.project.project_name} - {self.date}"

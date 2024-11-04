@@ -48,10 +48,10 @@
         {% endfor %}
     </div>
 </div>
-{% if request.session.role == 'admin' %}
 
 <br>
-<h3 class="text-center">All Timesheets</h3>
+{% if pending_approval_timesheets %}
+<h3 class="text-center">All Timesheets Pending Approval</h3>
     <!-- Scrollable Table -->
     <div class="table-container">
         <table class="table table-hover" id="employeeTable">
@@ -59,82 +59,116 @@
                 <tr class="table-header">
                     <th>Employee Name</th>
                     <th>Project Name</th>
-                    <th>Date</th>
-                    <th>Task Description</th>
-                    <th>Location</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                {% for timesheet in timesheet_all %}
+                {% for timesheet in pending_approval_timesheets %}
                 <tr>
-                    <td>{{ timesheet.employee.first_name }} {{ timesheet.employee.last_name }}</td>
-                    <td>{{ timesheet.project.project_name}}</td>
-                    <td>{{ timesheet.date }}</td>
-                    <td>{{ timesheet.task_description }}</td>
-                    <td>{{ timesheet.location }}</td>
+                    <td>{{timesheet.employee__first_name}}</td>
+                    <td>{{ timesheet.project__project_name }}</td>
+                    <td>{{ timesheet.start_date }}</td>
+                    <td>{{ timesheet.end_date }}</td>
                     <td>
-                        {% if timesheet.status == 'pending' %}
-                        <form method="POST" action="{% url 'timesheet_action' timesheet.id %}">
-                            {% csrf_token %}
-                            <button type="submit" name="action" value="accept" class="btn btn-success btn-sm">Accept</button>
-                            <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                        </form>
-                    {% else %}
-                        {{ timesheet.status|title }}
-                    {% endif %}
+                        <a href="{% url 'view_timesheet' timesheet.timesheet_group_id %}" class="btn btn-info btn-sm"><i class="fa-regular fa-eye"></i></a>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center">No timesheet entries found.</td>
+                    <td colspan="5" class="text-center">No timesheet pending approval.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-    {% endif %}
     <br>
+{% endif %}   
 
-
-
-<h3 class="text-center">All Timesheets for {{ employee.first_name }} {{ employee.last_name }}</h3>
+<br>
+    <h3 class="text-center">All Timesheets for {{ employee.first_name }} {{ employee.last_name }}</h3>
     <!-- Scrollable Table -->
     <div class="table-container">
         <table class="table table-hover" id="employeeTable">
             <thead class="table-primary">
                 <tr class="table-header">
                     <th>Project Name</th>
-                    <th>Date</th>
-                    <th>Task Description</th>
-                    <th>Location</th>
-                    <th>Notes</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
                     <th>Status</th>
+                    <th>Reason</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for timesheet in timesheets %}
-                <tr>
-                    <td>{{ timesheet.project.project_name}}</td>
-                    <td>{{ timesheet.date }}</td>
-                    <td>{{ timesheet.task_description }}</td>
-                    <td>{{ timesheet.location }}</td>
-                    <td>{{ timesheet.notes }}</td>
-                    <td>{% if timesheet.status == "accepted" %}
-                        <span class="badge bg-success">Approved</span>
-                    {% elif timesheet.status == "rejected" %}
-                        <span class="badge bg-danger">Rejected</span>
-                    {% else %}
-                        <span class="badge bg-warning">Pending</span>
-                    {% endif %}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center">No timesheet entries found.</td>
-                </tr>
-                {% endfor %}
+                {% if timesheets %}
+                    {% for group in timesheets %}
+                    <tr>
+                        <td>{{ group.project__project_name }}</td>
+                        <td>{{ group.start_date }}</td>
+                        <td>{{ group.end_date }}</td>
+                        <td>
+                            {% if group.status == "accepted" %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif group.status == "rejected" %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% elif group.status == "saved" %}
+                                <span class="badge bg-info rounded-pill text-dark">Saved</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if group.status == 'rejected' %}
+                                {{ group.reject_reason }}  <!-- Show rejection reason -->
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if group.status == "saved" %}
+                            <!-- Edit Button -->
+                            <a href="{% url 'edit_timesheet' group.timesheet_group_id %}" class="btn btn-primary btn-sm"><i class="fas fa-pencil-alt"></i></a>
+
+                            <form method="post" action="{% url 'delete_timesheet' group.timesheet_group_id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete all timesheets for this group?');">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                            <form action="{% url 'submit_timesheet' group.timesheet_group_id %}" style="display:inline;" method="post" onsubmit="return confirm('Are you sure you want to submit this timesheet for approval?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-paper-plane"></i> 
+                                </button>
+                            </form>
+                            {% elif group.status == "rejected" %}
+                            <a href="{% url 'edit_timesheet' group.timesheet_group_id %}" class="btn btn-primary btn-sm"><i class="fas fa-pencil-alt"></i></a>
+                            <form action="{% url 'submit_timesheet' group.timesheet_group_id %}" style="display:inline;" method="post" onsubmit="return confirm('Are you sure you want to submit this timesheet for approval?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-paper-plane"></i> 
+                                </button>
+                            </form>
+                            {% elif group.status == "accepted" %}
+                                Approved
+                            {% endif %}
+
+                        </td>
+                        
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">No timesheet entries found.</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
+    
+
+
     
     <br>

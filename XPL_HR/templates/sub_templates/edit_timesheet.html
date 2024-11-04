@@ -1,0 +1,145 @@
+{% extends 'templates/navs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+
+{% block content %}
+<div class="header-image"> </div>
+<div class="container-fluid mt-6">
+    <div class="scrollable-container">
+        <h2 class="text-center mb-4">Edit Timesheet for {{ project }} Project</h2>
+        <div class="row">
+            <div class="col-6">
+            <div>
+                <label><strong>Project Name:</strong></label>
+                <input type="text" class="form-control" value="{{ project }}" readonly>
+            </div>
+            <div>
+                <label><strong>Employee/Consultant Name:</strong></label>
+                <input type="text" class="form-control" value="{{ employee }}" readonly>
+            </div>
+            </div>
+        </div>
+        <br>
+
+       
+        <form method="post">
+            {% csrf_token %}
+            <table class="table table-hover" id="employeeTable">
+                <thead class="table-primary">
+                    <tr class="table-header">
+                        <th>Date</th>
+                        <th>Task Description</th>
+                        <th>Location</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="timesheetBody">
+                    {% for timesheet in timesheets %}
+                    <tr data-timesheet-id="{{ timesheet.id }}">
+                        <!-- Date Display -->
+                        <td>
+                            <label>{{ timesheet.date|date:"Y-m-d" }}</label>
+                            <input type="hidden" name="date_{{ timesheet.date|date:"Y-m-d" }}" value="{{ timesheet.date|date:"Y-m-d" }}">
+                        </td>
+        
+                        <td>
+                            <textarea class="form-control {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}bg-light text-muted{% endif %}" 
+                                      name="task_description_{{ timesheet.date|date:"Y-m-d" }}" 
+                                      placeholder="Task description" 
+                                      {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}readonly{% endif %}>{{ timesheet.task_description }}</textarea>
+                        </td>
+        
+                        <td>
+                            <select name="location_{{ timesheet.date|date:"Y-m-d" }}" class="form-control" 
+                                    {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}disabled{% endif %}>
+                                <option value="onsite" {% if timesheet.location == "onsite" %}selected{% endif %}>Onsite</option>
+                                <option value="remote" {% if timesheet.location == "remote" %}selected{% endif %}>Remote</option>
+                            </select>
+                        </td>
+        
+                        <td>
+                            <textarea class="form-control {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}bg-light text-muted{% endif %}" 
+                                      name="notes_{{ timesheet.date|date:"Y-m-d" }}" 
+                                      placeholder="Notes (optional)" 
+                                      {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}readonly{% endif %}>{{ timesheet.notes }}</textarea>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="text-end mt-3">
+                <button type="button" class="btn btn-secondary" onclick="addNewRow()">Add New Row</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+        
+        <script>
+        function addNewRow() {
+            const tbody = document.getElementById('timesheetBody');
+            const newRow = document.createElement('tr');
+        
+            // Determine the date for the new row
+            const lastRow = tbody.lastElementChild;
+            let newDate = new Date();
+        
+            if (lastRow) {
+                // Get the last date from the last row's label
+                const lastDateLabel = lastRow.querySelector('label').textContent;
+                newDate = new Date(lastDateLabel);
+                newDate.setDate(newDate.getDate() + 1); // Increment date by 1
+            }
+            
+            // Format the new date for the input names
+            const newDateStr = newDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
+        
+            // Determine if the new date is a weekend
+            const isWeekend = newDate.getDay() === 0 || newDate.getDay() === 6; // Sunday (0) or Saturday (6)
+        
+            newRow.setAttribute('data-timesheet-id', 'new'); // Placeholder for new ID
+            newRow.innerHTML = `
+                <td>
+                    <label>${newDateStr}</label>
+                    <input type="hidden" name="new_date" value="${newDateStr}"> <!-- Changed to match the view logic -->
+                </td>
+                <td>
+                    <textarea class="form-control ${isWeekend ? 'bg-light text-muted' : ''}" 
+                              name="task_description_${newDateStr}" placeholder="Task description" ${isWeekend ? 'readonly' : ''}></textarea>
+                </td>
+                <td>
+                    <select name="location_${newDateStr}" class="form-control" ${isWeekend ? 'disabled' : ''}>
+                        <option value="onsite">Onsite</option>
+                        <option value="remote">Remote</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea class="form-control ${isWeekend ? 'bg-light text-muted' : ''}" 
+                              name="notes_${newDateStr}" placeholder="Notes" ${isWeekend ? 'readonly' : ''}></textarea>
+                </td>
+            `;
+        
+            tbody.appendChild(newRow);
+        }
+        </script>
+        
+</div>
+</div>
+<!-- <style>
+    .table-header {
+        font-weight: bold;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+    }
+    .text-end {
+        text-align: right;
+    }
+</style> -->
+
+
+
+
+
+{%endblock%}
