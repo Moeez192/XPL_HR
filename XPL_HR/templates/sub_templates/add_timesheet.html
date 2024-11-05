@@ -46,9 +46,6 @@
             </table>
 
             <div class="d-flex justify-content-end mt-4">
-                <!-- <button type="submit" name="action" value="submit" class="btn btn-success me-2">Submit</button>
-                <button type="submit" name="action" value="save" class="btn btn-primary">Save</button> -->
-                
                 <button type="submit" name="action" value="save" class="btn btn-primary">Save</button>
             </div>
         </form>
@@ -87,7 +84,7 @@
             taskInput.className = "form-control";  // Form control styling
             taskInput.placeholder = "Task description";
             taskInput.required = true;
-            if (dayOfWeek === 0 || dayOfWeek === 6) taskInput.disabled = true;
+            // if (dayOfWeek === 0 || dayOfWeek === 6) taskInput.disabled = true;
             taskCell.appendChild(taskInput);
             row.appendChild(taskCell);
     
@@ -97,13 +94,26 @@
             locationSelect.name = `location_${dateStr}`;
             locationSelect.className = "form-control";  // Form control styling
             locationSelect.required = true;
-            ["onsite", "offsite", "remote"].forEach(loc => {
+            ["onsite", "weekend", "remote"].forEach(loc => {
                 const option = document.createElement("option");
                 option.value = loc;
                 option.textContent = loc.charAt(0).toUpperCase() + loc.slice(1);
                 locationSelect.appendChild(option);
             });
-            if (dayOfWeek === 0 || dayOfWeek === 6) locationSelect.disabled = true;
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+    // Set the location to 'weekend'
+    locationSelect.value = "weekend";
+    locationSelect.disabled = true; // Keep it disabled for weekends
+
+    // Create a hidden input to store the value 'weekend'
+    const hiddenInput = document.createElement("input");
+    hiddenInput.type = "hidden";
+    hiddenInput.name = `location_${dateStr}`;
+    hiddenInput.value = "weekend";
+    locationCell.appendChild(hiddenInput); // Append the hidden input to the cell
+} else {
+    locationSelect.disabled = false; // Enable for weekdays
+}
             locationCell.appendChild(locationSelect);
             row.appendChild(locationCell);
     
@@ -113,7 +123,7 @@
             notesInput.name = `notes_${dateStr}`;
             notesInput.className = "form-control";  // Form control styling
             notesInput.placeholder = "Notes";
-            if (dayOfWeek === 0 || dayOfWeek === 6) notesInput.disabled = true;
+            // if (dayOfWeek === 0 || dayOfWeek === 6) notesInput.disabled = true;
             notesCell.appendChild(notesInput);
             row.appendChild(notesCell);
     

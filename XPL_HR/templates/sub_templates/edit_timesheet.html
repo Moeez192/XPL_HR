@@ -44,10 +44,10 @@
                         </td>
         
                         <td>
-                            <textarea class="form-control {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}bg-light text-muted{% endif %}" 
+                            <textarea class="form-control " 
                                       name="task_description_{{ timesheet.date|date:"Y-m-d" }}" 
                                       placeholder="Task description" 
-                                      {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}readonly{% endif %}>{{ timesheet.task_description }}</textarea>
+                                      >{{ timesheet.task_description }}</textarea>
                         </td>
         
                         <td>
@@ -55,14 +55,15 @@
                                     {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}disabled{% endif %}>
                                 <option value="onsite" {% if timesheet.location == "onsite" %}selected{% endif %}>Onsite</option>
                                 <option value="remote" {% if timesheet.location == "remote" %}selected{% endif %}>Remote</option>
+                                <option value="weekend" {% if timesheet.location == "weekend" %}selected{% endif %}>Weekend</option>
                             </select>
                         </td>
         
                         <td>
-                            <textarea class="form-control {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}bg-light text-muted{% endif %}" 
+                            <textarea class="form-control " 
                                       name="notes_{{ timesheet.date|date:"Y-m-d" }}" 
                                       placeholder="Notes (optional)" 
-                                      {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}readonly{% endif %}>{{ timesheet.notes }}</textarea>
+                                      >{{ timesheet.notes }}</textarea>
                         </td>
                     </tr>
                     {% endfor %}
@@ -104,18 +105,21 @@
                     <input type="hidden" name="new_date" value="${newDateStr}"> <!-- Changed to match the view logic -->
                 </td>
                 <td>
-                    <textarea class="form-control ${isWeekend ? 'bg-light text-muted' : ''}" 
-                              name="task_description_${newDateStr}" placeholder="Task description" ${isWeekend ? 'readonly' : ''}></textarea>
+                    <textarea class="form-control " 
+                              name="task_description_${newDateStr}" placeholder="Task description" ></textarea>
                 </td>
                 <td>
-                    <select name="location_${newDateStr}" class="form-control" ${isWeekend ? 'disabled' : ''}>
+                    <input type="hidden" name="location_${newDateStr}" value="weekend">
+
+                    <select name="location_display_${newDateStr}" class="form-control" disabled>
                         <option value="onsite">Onsite</option>
                         <option value="remote">Remote</option>
+                        <option value="weekend" selected>Weekend</option>
                     </select>
                 </td>
                 <td>
-                    <textarea class="form-control ${isWeekend ? 'bg-light text-muted' : ''}" 
-                              name="notes_${newDateStr}" placeholder="Notes" ${isWeekend ? 'readonly' : ''}></textarea>
+                    <textarea class="form-control }" 
+                              name="notes_${newDateStr}" placeholder="Notes" ></textarea>
                 </td>
             `;
         
@@ -125,6 +129,7 @@
         
 </div>
 </div>
+<!-- ${isWeekend ? 'readonly' : ''} -->
 <!-- <style>
     .table-header {
         font-weight: bold;
