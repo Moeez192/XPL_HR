@@ -251,7 +251,7 @@ class Timesheet(models.Model):
         max_length=50,
         choices=[('onsite', 'Onsite'),
                 ('remote', 'Remote'),
-                ('weekend','Weekend'),
+                # ('holiday','Holiday'),
                 ]
     )
     STATUS_CHOICES = [

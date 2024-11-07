@@ -50,6 +50,7 @@
 </div>
 
 <br>
+<!-- Table for Displaying only timesheets for approval here -->
 {% if pending_approval_timesheets %}
 <h3 class="text-center">All Timesheets Pending Approval</h3>
     <!-- Scrollable Table -->
@@ -73,6 +74,11 @@
                     <td>{{ timesheet.end_date }}</td>
                     <td>
                         <a href="{% url 'view_timesheet' timesheet.timesheet_group_id %}" class="btn btn-info btn-sm"><i class="fa-regular fa-eye"></i></a>
+                        <form id="timesheet-form" method="post" style="display:inline;" action="{% url 'accept_timesheet' timesheet.timesheet_group_id %}">
+                            {% csrf_token %}
+                            <button type="submit" name="action" value="accept" class="btn btn-success btn-sm"><i class="fa fa-check" aria-hidden="true"></i></button>
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#rejectModal"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        </form>
                     </td>
                 </tr>
                 {% empty %}
@@ -87,6 +93,8 @@
 {% endif %}   
 
 <br>
+
+<!-- Displaying all timesheets here -->
     <h3 class="text-center">All Timesheets for {{ employee.first_name }} {{ employee.last_name }}</h3>
     <!-- Scrollable Table -->
     <div class="table-container">
@@ -172,3 +180,61 @@
 
     
     <br>
+
+<!-- modal for reject -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectModalLabel">Reason for Rejection</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="rejectReason" class="form-control" rows="4" placeholder="Enter the reason for rejection here..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="confirmReject">Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.getElementById('confirmReject').onclick = function() {
+        var reason = document.getElementById('rejectReason').value;
+
+        if (reason.trim() === '') {
+            alert('Please provide a reason for rejection.');
+            return; 
+        }
+
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'action';  
+        input.value = 'reject';  
+
+        var reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'reject_reason';  
+        reasonInput.value = reason;
+
+        var form = document.getElementById('timesheet-form');
+        form.appendChild(input);
+        form.appendChild(reasonInput);
+
+        form.submit();
+    };
+</script>
+
+    
+    
+    
+{% endblock %}

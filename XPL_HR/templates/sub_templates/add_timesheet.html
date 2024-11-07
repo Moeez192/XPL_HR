@@ -80,11 +80,12 @@
             // Task Description Cell
             const taskCell = document.createElement("td");
             const taskInput = document.createElement("textarea");
+            //Task description cell
             taskInput.name = `task_description_${dateStr}`;
-            taskInput.className = "form-control";  // Form control styling
+            taskInput.className = "form-control";  
             taskInput.placeholder = "Task description";
             taskInput.required = true;
-            // if (dayOfWeek === 0 || dayOfWeek === 6) taskInput.disabled = true;
+            if (dayOfWeek === 0 || dayOfWeek === 6) taskInput.required = false;
             taskCell.appendChild(taskInput);
             row.appendChild(taskCell);
     
@@ -94,43 +95,41 @@
             locationSelect.name = `location_${dateStr}`;
             locationSelect.className = "form-control";  // Form control styling
             locationSelect.required = true;
-            ["onsite", "weekend", "remote"].forEach(loc => {
+            ["onsite", "holiday", "remote"].forEach(loc => {
                 const option = document.createElement("option");
                 option.value = loc;
                 option.textContent = loc.charAt(0).toUpperCase() + loc.slice(1);
                 locationSelect.appendChild(option);
             });
             if (dayOfWeek === 0 || dayOfWeek === 6) {
-    // Set the location to 'weekend'
-    locationSelect.value = "weekend";
-    locationSelect.disabled = true; // Keep it disabled for weekends
-
-    // Create a hidden input to store the value 'weekend'
-    const hiddenInput = document.createElement("input");
-    hiddenInput.type = "hidden";
-    hiddenInput.name = `location_${dateStr}`;
-    hiddenInput.value = "weekend";
-    locationCell.appendChild(hiddenInput); // Append the hidden input to the cell
-} else {
-    locationSelect.disabled = false; // Enable for weekdays
-}
+                locationSelect.value = "holiday";
+                locationSelect.disabled = true; 
+                // Create a hidden input to store the value 'weekend'
+                const hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = `location_${dateStr}`;
+                hiddenInput.value = "holiday";
+                locationCell.appendChild(hiddenInput); // Append the hidden input to the cell
+                } 
+            else {
+                    locationSelect.disabled = false; // Enable for weekdays
+                }
             locationCell.appendChild(locationSelect);
             row.appendChild(locationCell);
-    
+                    
             // Notes Cell
             const notesCell = document.createElement("td");
             const notesInput = document.createElement("textarea");
             notesInput.name = `notes_${dateStr}`;
             notesInput.className = "form-control";  // Form control styling
             notesInput.placeholder = "Notes";
-            // if (dayOfWeek === 0 || dayOfWeek === 6) notesInput.disabled = true;
+            notesInput.required=true;
+            if (dayOfWeek === 0 || dayOfWeek === 6) notesInput.required = false;
             notesCell.appendChild(notesInput);
             row.appendChild(notesCell);
     
-            // Append row to main container
             timesheetContainer.appendChild(row);
     
-            // Move to the next day
             currentDate.setDate(currentDate.getDate() + 1);
         }
     }

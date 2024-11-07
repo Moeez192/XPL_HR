@@ -55,14 +55,14 @@
                                     {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}disabled{% endif %}>
                                 <option value="onsite" {% if timesheet.location == "onsite" %}selected{% endif %}>Onsite</option>
                                 <option value="remote" {% if timesheet.location == "remote" %}selected{% endif %}>Remote</option>
-                                <option value="weekend" {% if timesheet.location == "weekend" %}selected{% endif %}>Weekend</option>
+                                <option value="holiday" {% if timesheet.location == "holiday" %}selected{% endif %}>Holiday</option>
                             </select>
                         </td>
         
                         <td>
                             <textarea class="form-control " 
                                       name="notes_{{ timesheet.date|date:"Y-m-d" }}" 
-                                      placeholder="Notes (optional)" 
+                                      placeholder="Notes" 
                                       >{{ timesheet.notes }}</textarea>
                         </td>
                     </tr>
@@ -114,7 +114,7 @@
                     <select name="location_display_${newDateStr}" class="form-control" disabled>
                         <option value="onsite">Onsite</option>
                         <option value="remote">Remote</option>
-                        <option value="weekend" selected>Weekend</option>
+                        <option value="holiday" selected>Holiday</option>
                     </select>
                 </td>
                 <td>
