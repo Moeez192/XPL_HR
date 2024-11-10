@@ -666,34 +666,47 @@ def timesheet(request):
         if 'range_form_submit' in request.POST:
             range_form = PeriodForm(request.POST)
             if range_form.is_valid():
-                # Get the start and end dates from the form
+                # Get the start and end dates, and project from the form
                 start_date = range_form.cleaned_data['start_date']
                 end_date = range_form.cleaned_data['end_date']
                 project = range_form.cleaned_data['project']
-                
-                # Check for existing date ranges for the same project
+
+                # Check for existing date ranges for the same project within the specified range
                 overlapping_ranges = DateRange.objects.filter(
                     project=project,
-                    end_date__gte=start_date,  # End date overlaps with the new start date
-                    start_date__lte=end_date    # Start date overlaps with the new end date
+                    end_date__gte=start_date,
+                    start_date__lte=end_date
                 )
-                
+
                 if overlapping_ranges.exists():
                     messages.error(request, 'Date range overlaps with an existing range for this project.')
                 else:
-                    # Check if there's a current date range and allow new range only after it ends
+                    # Check if an active range exists for the project
                     last_date_range = DateRange.objects.filter(project=project).order_by('-end_date').first()
+                    
                     if last_date_range and last_date_range.end_date >= timezone.now().date():
                         messages.error(request, 'Cannot add a new date range until the current one ends.')
                     else:
-                        # Save the date range
-                        date_range = range_form.save(commit=False)
-                        date_range.employee = employee  # Optional: associate with employee
-                        date_range.save()
-                        messages.success(request, 'Timesheet date range set successfully!')
+                        # Check if a range already exists for the project
+                        existing_range = DateRange.objects.filter(project=project).first()
+                        
+                        if existing_range:
+                            # Update the existing range with new dates
+                            existing_range.start_date = start_date
+                            existing_range.end_date = end_date
+                            existing_range.save()
+                            messages.success(request, 'Date range updated successfully!')
+                        else:
+                            # Create a new date range
+                            date_range = range_form.save(commit=False)
+                            date_range.employee = employee  # Optional: associate with employee
+                            date_range.save()
+                            messages.success(request, 'New date range set successfully!')
+                        
                         return redirect('timesheet')
             else:
                 messages.error(request, 'Invalid date range. Please try again.')
+
         
         
         if 'action' in request.POST:
@@ -746,23 +759,34 @@ def timesheet(request):
             # If all required fields are present, proceed with save or submit action
             if action == 'save':
                 current_date = start_date
+                duplicate_found = False  # Flag to track if any duplicate is found
+
                 while current_date <= end_date:
                     date_str = current_date.strftime('%Y-%m-%d')
                     day_of_week = current_date.weekday()
 
-                # Log data to check what is being sent
+                    # Check if a timesheet already exists for this date and project
+                    existing_timesheet = Timesheet.objects.filter(
+                        employee=employee,
+                        project=project,
+                        date=date_str
+                    ).first()
+
+                    if existing_timesheet:
+                        print(f"Timesheet already exists for {employee} on {date_str} for project {project}. Skipping.")
+                        if not duplicate_found:
+                            messages.error(request,'A duplicate timesheet already exists for the project')
+                            duplicate_found = True  # Mark that we've found a duplicate
+                        current_date += timedelta(days=1)
+                        continue  # Skip saving for this date
+
                     print(f"Saving timesheet for {employee} on {date_str} for project {project}")
 
                     task_description = request.POST.get(f'task_description_{date_str}', '').strip()
                     location = request.POST.get(f'location_{date_str}', '').strip()
                     notes = request.POST.get(f'notes_{date_str}', '').strip()
 
-            # Check if fields are present
-                    # if not task_description or not location:
-                    #     missing_fields = True
-                    #     messages.error(request, f'Missing required fields on {date_str} (weekdays must have all fields filled).')
-
-                # Save or update the timesheet
+                    # Save or update the timesheet
                     timesheet, created = Timesheet.objects.get_or_create(
                         employee=employee,
                         project=project,
@@ -777,6 +801,7 @@ def timesheet(request):
                         }
                     )
                     if not created:
+                        # If timesheet already exists, update it
                         timesheet.task_description = task_description
                         timesheet.location = location
                         timesheet.notes = notes
@@ -787,8 +812,14 @@ def timesheet(request):
 
                     current_date += timedelta(days=1)
 
+                # If a duplicate was found, do not redirect to 'timesheet'
+                if duplicate_found:
+                    return redirect('timesheet')
+
                 messages.success(request, 'Timesheet saved successfully!')
                 return redirect('timesheet')
+
+
 
 
     context = {
