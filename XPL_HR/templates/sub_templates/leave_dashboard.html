@@ -100,7 +100,14 @@
                         <td>{{ leaves.start_date }}</td>
                         <td>{{ leaves.end_date }}</td>
                         <td>{{ leaves.reason }}</td>
-                        <td>{{ leaves.status }}</td>
+                        <td>{% if leaves.status == "approved" %}
+                            <span class="badge bg-success">Approved</span>
+                        {% elif group.status == "rejected" %}
+                            <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                            <span class="badge bg-info rounded-pill text-dark">Pending</span>
+                        
+                        {% endif %}</td>
                         <td>
                             {% if leaves.status == 'pending' %}
                                 {% if leaves.current_approver.id == request.user.id %}
@@ -152,7 +159,16 @@
         <tr>
             <td>{{ leaves.leave_type }}</td>
             <td>{{ leaves.leave_days }}</td>
-            <td>{{ leaves.status }}</td>
+            <td>
+                {% if leaves.status == "approved" %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif group.status == "rejected" %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% else %}
+                                <span class="badge bg-info rounded-pill text-dark">Pending</span>
+                            
+                            {% endif %}
+            </td>
             <td class="remarks">{{leaves.remarks}}</td>
         </tr>
         {% empty %}

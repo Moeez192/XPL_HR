@@ -331,3 +331,13 @@ class Hierarchy(models.Model):
                 self.order_number = 1  # Start numbering from 1 if none exist
 
         super().save(*args, **kwargs)
+
+
+class DateRange(models.Model):
+    project = models.ForeignKey(Projects,on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    month_range = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.project.project_name}: {self.start_date} - {self.end_date}"

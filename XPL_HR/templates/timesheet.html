@@ -13,6 +13,7 @@
         <nav class="nav-bar-nav">
             <a href="#" class="navbar-link active" data-tab="option1">Overview</a>
             <a href="#" class="navbar-link" data-tab="option2">Add TimeSheet</a>
+            <a href="#" class="navbar-link" data-tab="option3">TimeSheet Range</a>
         </nav>
     </div>
 </header>
@@ -27,6 +28,12 @@
 <div class="container-fluid" id="option2-section" style="display: none;">
     {% include "templates/sub_templates/add_timesheet.html" %}
 </div>
+
+
+<div class="container-fluid" id="option3-section" style="display: none;">
+    {% include "templates/sub_templates/set_timesheet_date_range.html" %}
+</div>
+
 
 
 

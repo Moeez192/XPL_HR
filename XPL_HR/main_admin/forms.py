@@ -1,5 +1,5 @@
 from django import forms
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 
@@ -206,3 +206,14 @@ class ApprovalHierarchyForm(forms.ModelForm):
                 raise forms.ValidationError(f"A final approver is already set for the {position} position in the {approval_type} approval type and {project_name} project.")
 
         return cleaned_data
+
+
+
+class PeriodForm(forms.ModelForm):
+    class Meta:
+        model = DateRange
+        fields = ['project', 'start_date', 'end_date','month_range']
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
+        }

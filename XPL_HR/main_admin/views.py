@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect , get_object_or_404
-from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy
+from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange
 from django.contrib import messages 
 import uuid  
+from django.utils import timezone
+import json
 from django.db import transaction
 import logging
 from django.db.models import Min, Max
@@ -480,23 +482,154 @@ def files(request):
 
 
 
+# @login_required
+# @no_cache
+# def timesheet(request):
+#     employee = Employee.objects.get(email=request.user.email)
+#     timesheets = (
+#         Timesheet.objects.filter(employee=employee)
+#         .values('timesheet_group_id', 'project__project_name', 'status', 'reject_reason')
+#         .annotate(start_date=Min('date'), end_date=Max('date'))
+#         .order_by('-start_date')
+#     )
+#     projects = Projects.objects.filter(team_members=employee)
+#     months = [month_name[i] for i in range(1, 13)]
+#     today = datetime.today().strftime('%Y-%m-%d')
 
+#     # Initialize the form for date range
+#     range_form = PeriodForm()
 
+#     # Fetch timesheets awaiting approval for the current approver
+#     pending_approval_timesheets = (
+#         Timesheet.objects.filter(
+#             status='pending',
+#             current_approver=employee  # Check if the employee is the current approver
+#         )
+#         .values('timesheet_group_id', 'project__project_name', 'employee__first_name')
+#         .annotate(start_date=Min('date'), end_date=Max('date'))
+#         .order_by('-start_date')
+#     )
+
+#     if request.method == 'POST':
+#         # Handle the date range form submission
+#         if 'range_form_submit' in request.POST:
+#             range_form = PeriodForm(request.POST)
+#             if range_form.is_valid():
+#                 # Save the date range
+#                 date_range = range_form.save(commit=False)
+#                 date_range.employee = employee  # Optional: associate with employee
+#                 date_range.save()
+#                 messages.success(request, 'Timesheet date range set successfully!')
+#                 return redirect('timesheet')
+
+#         # Handle the timesheet save or submit logic
+#         action = request.POST.get('action')
+#         date_from = request.POST.get('date_from')
+#         date_to = request.POST.get('date_to')
+#         project_id = request.POST.get('project_id')
+
+#         if not date_from or not date_to:
+#             messages.error(request, 'Please provide a valid date range.')
+#             return redirect('timesheet')
+
+#         try:
+#             project = Projects.objects.get(id=project_id)
+#         except Projects.DoesNotExist:
+#             messages.error(request, 'The selected project does not exist.')
+#             return redirect('timesheet')
+
+#         # Parse the date range
+#         start_date = datetime.strptime(date_from, '%Y-%m-%d')
+#         end_date = datetime.strptime(date_to, '%Y-%m-%d')
+
+#         # Generate a unique timesheet group ID for this range
+#         timesheet_group_id = str(uuid.uuid4())
+
+#         current_date = start_date
+#         missing_fields = False  # Flag to check if any required field is missing
+
+#         while current_date <= end_date:
+#             date_str = current_date.strftime('%Y-%m-%d')
+#             day_of_week = current_date.weekday()  # 5 = Saturday, 6 = Sunday
+
+#             # For weekdays, check for required fields
+#             if day_of_week not in [5, 6]:  # Not Saturday or Sunday
+#                 task_description = request.POST.get(f'task_description_{date_str}', '').strip()
+#                 location = request.POST.get(f'location_{date_str}', '').strip()
+
+#                 # Check if any required field is missing for weekdays
+#                 if not task_description or not location:
+#                     missing_fields = True
+#                     messages.error(request, f'Missing required fields on {date_str} (weekdays must have all fields filled).')
+
+#             current_date += timedelta(days=1)
+
+#         # If any required fields are missing, prevent form submission
+#         if missing_fields:
+#             return redirect('timesheet')
+
+#         # If all required fields are present, proceed with save or submit action
+#         if action == 'save':
+#             current_date = start_date
+#             while current_date <= end_date:
+#                 date_str = current_date.strftime('%Y-%m-%d')
+#                 day_of_week = current_date.weekday()
+
+#                 # Process all days, including Saturday and Sunday
+#                 task_description = request.POST.get(f'task_description_{date_str}', '').strip()
+#                 location = request.POST.get(f'location_{date_str}', '').strip()
+#                 notes = request.POST.get(f'notes_{date_str}', '').strip()
+
+#                 timesheet, created = Timesheet.objects.get_or_create(
+#                     employee=employee,
+#                     project=project,
+#                     date=date_str,
+#                     defaults={
+#                         'task_description': task_description,
+#                         'location': location,
+#                         'notes': notes,
+#                         'status': 'saved',
+#                         'is_editable': True,
+#                         'timesheet_group_id': timesheet_group_id,
+#                     }
+#                 )
+#                 if not created:
+#                     # Update existing timesheet entry if needed
+#                     timesheet.task_description = task_description
+#                     timesheet.location = location
+#                     timesheet.notes = notes
+#                     timesheet.is_editable = True
+#                     timesheet.status = 'saved'
+#                     timesheet.timesheet_group_id = timesheet_group_id
+#                     timesheet.save()
+
+#                 current_date += timedelta(days=1)
+
+#             messages.success(request, 'Timesheet saved successfully!')
+
+#         return redirect('timesheet')
+
+#     context = {
+#         'projects': projects,
+#         'timesheets': timesheets,
+#         'pending_approval_timesheets': pending_approval_timesheets,  # Include pending timesheets
+#         'employee': employee,
+#         'today': today,
+#         'months': months,
+#         'range_form': range_form,  # Pass the form to the template
+#     }
+#     return render(request, 'templates/timesheet.html', context)
 @login_required
 @no_cache
 def timesheet(request):
     employee = Employee.objects.get(email=request.user.email)
+    all_ranges = DateRange.objects.all()
     timesheets = (
         Timesheet.objects.filter(employee=employee)
-        .values('timesheet_group_id', 'project__project_name', 'status','reject_reason')
+        .values('timesheet_group_id', 'project__project_name', 'status', 'reject_reason')
         .annotate(start_date=Min('date'), end_date=Max('date'))
         .order_by('-start_date')
     )
-    projects = Projects.objects.filter(team_members=employee)
-    months = [month_name[i] for i in range(1, 13)]
-    today = datetime.today().strftime('%Y-%m-%d')
-
-    # Fetch timesheets awaiting approval for the current approver
     pending_approval_timesheets = (
         Timesheet.objects.filter(
             status='pending',
@@ -506,104 +639,188 @@ def timesheet(request):
         .annotate(start_date=Min('date'), end_date=Max('date'))
         .order_by('-start_date')
     )
+    projects = Projects.objects.filter(team_members=employee)
+    months = [month_name[i] for i in range(1, 13)]
+    today = datetime.today().strftime('%Y-%m-%d')
 
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        date_from = request.POST.get('date_from')
-        date_to = request.POST.get('date_to')
-        project_id = request.POST.get('project_id')
+    # Initialize the form for date range
+    range_form = PeriodForm()
 
-        if not date_from or not date_to:
-            messages.error(request, 'Please provide a valid date range.')
-            return redirect('timesheet')
+    # Initialize an empty dictionary to hold the date ranges for each project
+    project_date_ranges = {}
 
+    # Fetch date ranges for all projects
+    for project in projects:
         try:
-            project = Projects.objects.get(id=project_id)
-        except Projects.DoesNotExist:
-            messages.error(request, 'The selected project does not exist.')
-            return redirect('timesheet')
+            # Fetch the DateRange for the project
+            date_range = DateRange.objects.get(project=project)
+            project_date_ranges[project.id] = {
+                'start_date': date_range.start_date.strftime('%Y-%m-%d'),
+                'end_date': date_range.end_date.strftime('%Y-%m-%d'),
+            }
+        except DateRange.DoesNotExist:
+            project_date_ranges[project.id] = None  # No date range for this project
 
-        # Parse the date range
-        start_date = datetime.strptime(date_from, '%Y-%m-%d')
-        end_date = datetime.strptime(date_to, '%Y-%m-%d')
+    # Handle form submissions
+    if request.method == 'POST':
+        if 'range_form_submit' in request.POST:
+            range_form = PeriodForm(request.POST)
+            if range_form.is_valid():
+                # Get the start and end dates from the form
+                start_date = range_form.cleaned_data['start_date']
+                end_date = range_form.cleaned_data['end_date']
+                project = range_form.cleaned_data['project']
+                
+                # Check for existing date ranges for the same project
+                overlapping_ranges = DateRange.objects.filter(
+                    project=project,
+                    end_date__gte=start_date,  # End date overlaps with the new start date
+                    start_date__lte=end_date    # Start date overlaps with the new end date
+                )
+                
+                if overlapping_ranges.exists():
+                    messages.error(request, 'Date range overlaps with an existing range for this project.')
+                else:
+                    # Check if there's a current date range and allow new range only after it ends
+                    last_date_range = DateRange.objects.filter(project=project).order_by('-end_date').first()
+                    if last_date_range and last_date_range.end_date >= timezone.now().date():
+                        messages.error(request, 'Cannot add a new date range until the current one ends.')
+                    else:
+                        # Save the date range
+                        date_range = range_form.save(commit=False)
+                        date_range.employee = employee  # Optional: associate with employee
+                        date_range.save()
+                        messages.success(request, 'Timesheet date range set successfully!')
+                        return redirect('timesheet')
+            else:
+                messages.error(request, 'Invalid date range. Please try again.')
+        
+        
+        if 'action' in request.POST:
 
-        # Generate a unique timesheet group ID for this range
-        timesheet_group_id = str(uuid.uuid4())
+            action = request.POST.get('action')
+            date_from = request.POST.get('date_from')
+            date_to = request.POST.get('date_to')
+            project_id = request.POST.get('project_id')
 
-        current_date = start_date
-        missing_fields = False  # Flag to check if any required field is missing
+            if not date_from or not date_to:
+                messages.error(request, 'Please provide a valid date range.')
+                return redirect('timesheet')
 
-        while current_date <= end_date:
-            date_str = current_date.strftime('%Y-%m-%d')
-            day_of_week = current_date.weekday()  # 5 = Saturday, 6 = Sunday
+            try:
+                project = Projects.objects.get(id=project_id)
+            except Projects.DoesNotExist:
+                messages.error(request, 'The selected project does not exist.')
+                return redirect('timesheet')
 
-            # For weekdays, check for required fields
-            if day_of_week not in [5, 6]:  # Not Saturday or Sunday
-                task_description = request.POST.get(f'task_description_{date_str}', '').strip()
-                location = request.POST.get(f'location_{date_str}', '').strip()
+            # Parse the date range
+            start_date = datetime.strptime(date_from, '%Y-%m-%d')
+            end_date = datetime.strptime(date_to, '%Y-%m-%d')
 
-                # Check if any required field is missing for weekdays
-                if not task_description or not location:
-                    missing_fields = True
-                    messages.error(request, f'Missing required fields on {date_str} (weekdays must have all fields filled).')
-            
-            current_date += timedelta(days=1)
+            # Generate a unique timesheet group ID for this range
+            timesheet_group_id = str(uuid.uuid4())
 
-        # If any required fields are missing, prevent form submission
-        if missing_fields:
-            return redirect('timesheet')
-
-        # If all required fields are present, proceed with save or submit action
-        if action == 'save':
             current_date = start_date
+            missing_fields = False  # Flag to check if any required field is missing
+
             while current_date <= end_date:
                 date_str = current_date.strftime('%Y-%m-%d')
-                day_of_week = current_date.weekday()
+                day_of_week = current_date.weekday()  # 5 = Saturday, 6 = Sunday
 
-                # Process all days, including Saturday and Sunday
-                task_description = request.POST.get(f'task_description_{date_str}', '').strip()
-                location = request.POST.get(f'location_{date_str}', '').strip()
-                notes = request.POST.get(f'notes_{date_str}', '').strip()
+                # For weekdays, check for required fields
+                if day_of_week not in [5, 6]:  # Not Saturday or Sunday
+                    task_description = request.POST.get(f'task_description_{date_str}', '').strip()
+                    location = request.POST.get(f'location_{date_str}', '').strip()
 
-                timesheet, created = Timesheet.objects.get_or_create(
-                    employee=employee,
-                    project=project,
-                    date=date_str,
-                    defaults={
-                        'task_description': task_description,
-                        'location': location,
-                        'notes': notes,
-                        'status': 'saved',
-                        'is_editable': True,
-                        'timesheet_group_id': timesheet_group_id,
-                    }
-                )
-                if not created:
-                    # Update existing timesheet entry if needed
-                    timesheet.task_description = task_description
-                    timesheet.location = location
-                    timesheet.notes = notes
-                    timesheet.is_editable = True
-                    timesheet.status = 'saved'
-                    timesheet.timesheet_group_id = timesheet_group_id
-                    timesheet.save()
+                    # Check if any required field is missing for weekdays
+                    # if not task_description or not location:
+                    #     # missing_fields = True
+                    #     messages.error(request, f'Missing required fields on {date_str} (weekdays must have all fields filled).')
 
                 current_date += timedelta(days=1)
 
-            messages.success(request, 'Timesheet saved successfully!')
+            # If any required fields are missing, prevent form submission
+            if missing_fields:
+                return redirect('timesheet')
 
-        return redirect('timesheet')
+            # If all required fields are present, proceed with save or submit action
+            if action == 'save':
+                current_date = start_date
+                while current_date <= end_date:
+                    date_str = current_date.strftime('%Y-%m-%d')
+                    day_of_week = current_date.weekday()
+
+                # Log data to check what is being sent
+                    print(f"Saving timesheet for {employee} on {date_str} for project {project}")
+
+                    task_description = request.POST.get(f'task_description_{date_str}', '').strip()
+                    location = request.POST.get(f'location_{date_str}', '').strip()
+                    notes = request.POST.get(f'notes_{date_str}', '').strip()
+
+            # Check if fields are present
+                    # if not task_description or not location:
+                    #     missing_fields = True
+                    #     messages.error(request, f'Missing required fields on {date_str} (weekdays must have all fields filled).')
+
+                # Save or update the timesheet
+                    timesheet, created = Timesheet.objects.get_or_create(
+                        employee=employee,
+                        project=project,
+                        date=date_str,
+                        defaults={
+                            'task_description': task_description,
+                            'location': location,
+                            'notes': notes,
+                            'status': 'saved',
+                            'is_editable': True,
+                            'timesheet_group_id': timesheet_group_id,
+                        }
+                    )
+                    if not created:
+                        timesheet.task_description = task_description
+                        timesheet.location = location
+                        timesheet.notes = notes
+                        timesheet.is_editable = True
+                        timesheet.status = 'saved'
+                        timesheet.timesheet_group_id = timesheet_group_id
+                        timesheet.save()
+
+                    current_date += timedelta(days=1)
+
+                messages.success(request, 'Timesheet saved successfully!')
+                return redirect('timesheet')
+
 
     context = {
         'projects': projects,
         'timesheets': timesheets,
-        'pending_approval_timesheets': pending_approval_timesheets,  # Include pending timesheets
         'employee': employee,
         'today': today,
         'months': months,
+        'pending_approval_timesheets': pending_approval_timesheets, 
+        'all_ranges':all_ranges,
+        'range_form': range_form,
+        'project_date_ranges': json.dumps(project_date_ranges),  
     }
+
     return render(request, 'templates/timesheet.html', context)
 
+@login_required
+@no_cache
+def delete_date_range(request, date_range_id):
+    # Ensure the request is POST for security (only allow deletions via form submissions, not URL access)
+    if request.method == 'POST':
+        date_range = get_object_or_404(DateRange, id=date_range_id)
+        
+        # Delete the date range
+        date_range.delete()
+        messages.success(request, 'Date range deleted successfully.')
+        
+    else:
+        messages.error(request, 'Invalid request method for deletion.')
+    
+    # Redirect back to the timesheet page or wherever the date ranges are listed
+    return redirect('timesheet')
 
 @login_required
 @no_cache

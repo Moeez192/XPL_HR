@@ -115,7 +115,7 @@
                 {% for employee in employee_list %}
                 <tr>
                     <td> {{ employee.employee_id }}</th>
-                    <td>{{ employee.first_name }}</td>
+                    <td>{{ employee.first_name }} {{employee.last_name}}</td>
                     <td>{{ employee.department }}</td>
                     <td>
                         {% if employee.employee_status == "active" %}

@@ -1,4 +1,4 @@
-<div class="containe-fluid mt-5">
+<!-- <div class="containe-fluid mt-5">
     <div class="scrollable-container">
         <h3 class="text-center">Add TimeSheet</h3>
 
@@ -10,10 +10,10 @@
                     <div class="project-info">
                         <div>
                             <label><strong>Select Project Name:</strong></label>
-                            <select name="project_id" class="form-control">
+                            <select name="project_id" id="project_id" class="form-control">
                                 {% for project in projects %}
-                                    <option value="{{ project.id }}">{{ project.project_name }}</option>
-                                {% endfor %}
+                <option value="{{ project.id }}" {% if project == selected_project %} selected {% endif %}>{{ project.project_name }}</option>
+            {% endfor %}
                             </select>
                         </div>
                         <div>
@@ -21,10 +21,14 @@
                             <input type="text" class="form-control" value="{{ request.user.first_name }} {{ request.user.last_name }}" readonly>
                         </div>
                         <div class="mt-3">
-                            <label><strong>Date Range:</strong></label>
-                            <div class="d-flex">
-                                <input type="date" id="date_from" name="date_from" class="form-control me-2" required>
-                                <input type="date" id="date_to" name="date_to" class="form-control" required>
+                            <div class="form-group">
+                                <label for="start_date">Start Date</label>
+                                <input type="date" id="start_date" name="start_date" class="form-control" {% if project_date_range %} value="{{ project_date_range.start_date }}" {% else %} disabled {% endif %}>
+                            </div>
+                        
+                            <div class="form-group">
+                                <label for="end_date">End Date</label>
+                                <input type="date" id="end_date" name="end_date" class="form-control" {% if project_date_range %} value="{{ project_date_range.end_date }}" {% else %} disabled {% endif %}>
                             </div>
                         </div>
                     </div>
@@ -41,18 +45,17 @@
                     </tr>
                 </thead>
                 <tbody id="timesheet-entries">
-                    <!-- dynamic fields according to the selected date range -->
                 </tbody>
             </table>
 
             <div class="d-flex justify-content-end mt-4">
-                <button type="submit" name="action" value="save" class="btn btn-primary">Save</button>
+                <button type="submit"  name="action" value="save" class="btn btn-primary">Save</button>
             </div>
         </form>
     </div>
 </div>
 
-<script>
+ <script>
     document.getElementById("date_to").addEventListener("change", generateFields);
     
     function generateFields() {
@@ -134,7 +137,296 @@
         }
     }
 </script>
+<script>
+    document.getElementById('project_id').addEventListener('change', function() {
+        var projectId = this.value;
+        
+        // Check if we have a project date range available in the context
+        {% if project_date_range %}
+            if (projectId == "{{ project_date_range.project.id }}") {
+                // Set the start and end date based on the selected project
+                document.getElementById('start_date').value = "{{ project_date_range.start_date }}";
+                document.getElementById('end_date').value = "{{ project_date_range.end_date }}";
+                
+                // Enable the fields to allow user interaction
+                document.getElementById('start_date').disabled = false;
+                document.getElementById('end_date').disabled = false;
+            }
+        {% endif %}
+    });
+</script> 
+<script>
+    // Step 1: Fill date range when a project is selected
+    document.getElementById('project_id').addEventListener('change', function() {
+        var projectId = this.value;
+        
+        // Loop through projects and fetch the date range for the selected project
+        {% for project in projects %}
+            if (projectId == "{{ project.id }}") {
+                // Fetch the date range for the selected project
+                var startDate = "{{ project.date_range.start_date }}";
+                var endDate = "{{ project.date_range.end_date }}";
+
+                // Set the start and end date fields with the selected project dates
+                document.getElementById('start_date').value = startDate;
+                document.getElementById('end_date').value = endDate;
+
+                // Enable the fields
+                document.getElementById('start_date').disabled = false;
+                document.getElementById('end_date').disabled = false;
+            }
+        {% endfor %}
+    })
+
+    // Step 2: Generate timesheet fields when the date range is selected
+    document.getElementById("date_to").addEventListener("change", generateFields);
     
+    function generateFields() {
+        const startDate = new Date(document.getElementById("date_from").value);
+        const endDate = new Date(document.getElementById("date_to").value);
+        const timesheetContainer = document.getElementById("timesheet-entries");
+        timesheetContainer.innerHTML = ""; // Clear previous fields
+    
+        let currentDate = new Date(startDate);
+        while (currentDate <= endDate) {
+            const dayOfWeek = currentDate.getDay(); // 0 for Sunday, 6 for Saturday
+            const dateStr = currentDate.toISOString().split("T")[0];
+    
+            // Create table row
+            const row = document.createElement("tr");
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                row.classList.add("weekend"); // Highlight weekends
+            }
+    
+            // Date Cell
+            const dateCell = document.createElement("td");
+            dateCell.textContent = dateStr;
+            row.appendChild(dateCell);
+    
+            // Task Description Cell
+            const taskCell = document.createElement("td");
+            const taskInput = document.createElement("textarea");
+            taskInput.name = `task_description_${dateStr}`;
+            taskInput.className = "form-control";  
+            taskInput.placeholder = "Task description";
+            taskInput.required = true;
+            if (dayOfWeek === 0 || dayOfWeek === 6) taskInput.required = false;
+            taskCell.appendChild(taskInput);
+            row.appendChild(taskCell);
+    
+            // Location Cell
+            const locationCell = document.createElement("td");
+            const locationSelect = document.createElement("select");
+            locationSelect.name = `location_${dateStr}`;
+            locationSelect.className = "form-control";  // Form control styling
+            locationSelect.required = true;
+            ["onsite", "holiday", "remote"].forEach(loc => {
+                const option = document.createElement("option");
+                option.value = loc;
+                option.textContent = loc.charAt(0).toUpperCase() + loc.slice(1);
+                locationSelect.appendChild(option);
+            });
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                locationSelect.value = "holiday";
+                locationSelect.disabled = true; 
+                // Create a hidden input to store the value 'weekend'
+                const hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = `location_${dateStr}`;
+                hiddenInput.value = "holiday";
+                locationCell.appendChild(hiddenInput); // Append the hidden input to the cell
+            } else {
+                locationSelect.disabled = false; // Enable for weekdays
+            }
+            locationCell.appendChild(locationSelect);
+            row.appendChild(locationCell);
+                    
+            // Notes Cell
+            const notesCell = document.createElement("td");
+            const notesInput = document.createElement("textarea");
+            notesInput.name = `notes_${dateStr}`;
+            notesInput.className = "form-control";  // Form control styling
+            notesInput.placeholder = "Notes";
+            notesInput.required = true;
+            if (dayOfWeek === 0 || dayOfWeek === 6) notesInput.required = false;
+            notesCell.appendChild(notesInput);
+            row.appendChild(notesCell);
+    
+            timesheetContainer.appendChild(row);
+    
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+    }
+</script>
+
+-->
+
+ <div class="containe-fluid mt-5">
+    <div class="scrollable-container">
+        <h3 class="text-center">Add TimeSheet</h3>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-6">
+                    <div class="project-info">
+                 <div>
+                    <label><strong>Employee/Consultant Name:</strong></label>
+                    <input type="text" class="form-control" value="{{ request.user.first_name }} {{ request.user.last_name }}" readonly>
+                 </div>
+                 <div>
+                    <label for="project"><strong>Select Project</strong></label>
+                    <select name="project_id" id="project_id" class="form-control">
+                        <option value="">-- Select a Project --</option>
+                        {% for project in projects %}
+                            <option value="{{ project.id }}" {% if project.id == selected_project.id %} selected {% endif %}>{{ project.project_name }}</option>
+                        {% endfor %}
+                    </select>
+                 </div>
+            
+
+                <div class="mt-3">
+                    <label><strong>Date Range:</strong></label>
+                    <div class="d-flex">
+                        <input type="date" id="date_from" name="date_from" class="form-control me-2" readonly />
+                        <input type="date" id="date_to" name="date_to" class="form-control" required readonly />
+                    </div>
+                </div>
+             </div>
+                </div>
+                </div>
+
+            <table class="table table-bordered mt-4">
+                <thead class="table-primary">
+                    <tr class="table-header">
+                        <th>Date</th>
+                        <th>Task Description</th>
+                        <th>Location</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="timesheet-entries">
+                </tbody>
+            </table>
+
+            <div class="d-flex justify-content-end mt-4">
+            <button type="submit"  name="action" value="save" class="btn btn-primary">Save</button>
+        </div>
+        </form>
+    </div>
+ </div> 
+
+
+
+
+
+
+
+
+
+
+<script>
+    document.getElementById("project_id").addEventListener("change", generateFields);
+    document.getElementById("date_to").addEventListener("change", generateFields);  // Optional if needed
+
+    function generateFields() {
+    const projectId = document.getElementById("project_id").value;
+
+    // Fetch the date range from the global project date ranges object
+    const projectDateRanges = JSON.parse('{{ project_date_ranges|escapejs }}');
+    const projectRange = projectDateRanges[projectId];
+    
+    if (!projectRange) {
+        // If no valid project is selected or there is no date range, clear the container and exit
+        document.getElementById("timesheet-entries").innerHTML = "";
+        return;
+    }
+
+    // Parse the start_date and end_date from the project range
+    const startDate = new Date(projectRange.start_date);
+    const endDate = new Date(projectRange.end_date);
+    
+    // Populate the date range fields
+    document.getElementById("date_from").value = startDate.toISOString().split("T")[0]; // Setting date_from
+    document.getElementById("date_to").value = endDate.toISOString().split("T")[0];   // Setting date_to
+    
+    const timesheetContainer = document.getElementById("timesheet-entries");
+    timesheetContainer.innerHTML = "";  // Clear previous fields
+
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+        const dayOfWeek = currentDate.getDay(); // 0 for Sunday, 6 for Saturday
+        const dateStr = currentDate.toISOString().split("T")[0];
+
+        // Create table row
+        const row = document.createElement("tr");
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            row.classList.add("weekend"); // Highlight weekends
+        }
+
+        // Date Cell
+        const dateCell = document.createElement("td");
+        dateCell.textContent = dateStr;
+        row.appendChild(dateCell);
+
+        // Task Description Cell
+        const taskCell = document.createElement("td");
+        const taskInput = document.createElement("textarea");
+        taskInput.name = `task_description_${dateStr}`;
+        taskInput.className = "form-control";  
+        taskInput.placeholder = "Task description";
+        // taskInput.required = true;
+        if (dayOfWeek === 0 || dayOfWeek === 6) taskInput.required = false;
+        taskCell.appendChild(taskInput);
+        row.appendChild(taskCell);
+
+        // Location Cell
+        const locationCell = document.createElement("td");
+        const locationSelect = document.createElement("select");
+        locationSelect.name = `location_${dateStr}`;
+        locationSelect.className = "form-control";  
+        locationSelect.required = true;
+        ["onsite", "holiday", "remote"].forEach(loc => {
+            const option = document.createElement("option");
+            option.value = loc;
+            option.textContent = loc.charAt(0).toUpperCase() + loc.slice(1);
+            locationSelect.appendChild(option);
+        });
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            locationSelect.value = "holiday";
+            locationSelect.disabled = true; // Disable for weekends
+            // Create a hidden input to store the value 'holiday'
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = `location_${dateStr}`;
+            hiddenInput.value = "holiday";
+            locationCell.appendChild(hiddenInput); // Append hidden input
+        } else {
+            locationSelect.disabled = false; // Enable for weekdays
+        }
+        locationCell.appendChild(locationSelect);
+        row.appendChild(locationCell);
+
+        // Notes Cell
+        const notesCell = document.createElement("td");
+        const notesInput = document.createElement("textarea");
+        notesInput.name = `notes_${dateStr}`;
+        notesInput.className = "form-control";  
+        notesInput.placeholder = "Notes";
+        // notesInput.required = true;
+        if (dayOfWeek === 0 || dayOfWeek === 6) notesInput.required = false;
+        notesCell.appendChild(notesInput);
+        row.appendChild(notesCell);
+
+        // Append the row to the timesheet container
+        timesheetContainer.appendChild(row);
+
+        // Increment currentDate to the next day
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+}
+
+</script>
 <style>
     .timesheet-entry {
         margin: 1rem 0;

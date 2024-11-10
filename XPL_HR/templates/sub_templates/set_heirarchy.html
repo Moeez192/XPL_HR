@@ -81,6 +81,13 @@
         </form>
 
 <br>
+<div class="table-controls mb-3">
+    <div class="search-container">
+        <input type="text" id="employeeSearch" class="form-control" placeholder="Search...">
+        <i class="fas fa-search search-icon"></i>
+    </div>
+    
+</div>
         <h3 class="text-center">Approved Heirarchy</h3>
     <!-- Scrollable Table -->
     <div class="table-container">
@@ -118,3 +125,35 @@
 
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('employeeSearch');
+    const employeeTable = document.getElementById('employeeTable');
+    const rows = employeeTable.querySelectorAll('tbody tr');
+
+    function filterTable() {
+        const searchValue = searchInput.value.toLowerCase();
+
+        rows.forEach(row => {
+            const columns = row.querySelectorAll('td');
+            const employeeName = `${columns[0].textContent} ${columns[1].textContent} ${columns[3].textContent}`.toLowerCase(); // Check correct indices
+            
+            console.log("Employee Name:", employeeName); // For debugging
+
+            const matchesSearch = employeeName.includes(searchValue);
+
+            if (matchesSearch) {
+                row.style.display = ''; 
+            } else {
+                row.style.display = 'none'; 
+            }
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+});
+
+</script>
