@@ -199,7 +199,7 @@ class Projects(models.Model):
             total_days = (self.deadline - self.start_date).days
             elapsed_days = (timezone.now().date() - self.start_date).days
             remaining = total_days - elapsed_days
-            return max(0, remaining)  # Return 0 if all days have elapsed
+            return remaining  # Return 0 if all days have elapsed
         return None  # or return a default value if start_date or deadline is None
     def __str__(self):
             return self.project_name
@@ -331,6 +331,21 @@ class Hierarchy(models.Model):
                 self.order_number = 1  # Start numbering from 1 if none exist
 
         super().save(*args, **kwargs)
+
+
+
+class ProjectFile(models.Model):
+    project = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name="files")
+    file = models.FileField(upload_to="project_files")
+    file_name= models.CharField(max_length=100,null=False, blank=False)
+    uploaded_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
+    uploaded_on = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(null=False, blank=False)
+
+    def __str__(self):
+        return f"File for {self.project.project_name} uploaded by {self.uploaded_by.username if self.uploaded_by else 'Unknown'}"
+
+
 
 
 class DateRange(models.Model):

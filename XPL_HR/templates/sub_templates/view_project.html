@@ -9,9 +9,14 @@
 <header class="nav-bar">
     <div class="nav-bar-left">
         <nav class="nav-bar-nav">
-            <a href="#" class="navbar-link active" data-tab="option1">Overview</a>
-            <a href="#" class="navbar-link" data-tab="option2">Configure Projects</a>
-        </nav>
+            <a href="#" class="navbar-link active" data-tab="option1">Project Overview</a>
+            <a href="#" class="navbar-link " data-tab="option2">Discussions</a>
+            <a href="#" class="navbar-link " data-tab="option3">Additional Files Upload</a>
+            <a href="#" class="navbar-link " data-tab="option4">Project Files</a>
+
+
+
+                </nav>
     </div>
 </header>
 <div class="header-image"> </div>
@@ -19,9 +24,20 @@
 <div class="container-fluid active" id="option1-section" style="display: block;" >
     {% include "templates/sub_templates/specific_project/project_info.html" %}
 </div>
-<div class="container-fluid" id="option2-section" style="display: none;">
-<h3>hellow under working</h3>
+<div class="container-fluid" id="option2-section" style="display: none;" >
+    {% include "templates/sub_templates/specific_project/chat.html" %}
+</div>
+
+<div class="container-fluid" id="option3-section" style="display: none;" >
+    {% include "templates/sub_templates/specific_project/additional_files_upload.html" %}
+</div>
+
+<div class="container-fluid" id="option4-section" style="display: none;" >
+    {% include "templates/sub_templates/specific_project/project_files.html" %}
 </div>
 
 
+
 {%endblock%}
+
+

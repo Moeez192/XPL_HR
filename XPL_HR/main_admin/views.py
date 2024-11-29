@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect , get_object_or_404
-from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange
+from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm , ProjectFileForm
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange , ProjectFile
 from django.contrib import messages 
 import uuid  
 from django.utils import timezone
@@ -59,15 +59,15 @@ def login_view(request):
 
         if user is not None:
             print("User authenticated successfully")
-            login(request, user)  # Log the user in
+            login(request, user)  
             
-            # Fetch the role from the Employee model and store it in session
+            #  role from  Employee model 
             try:
                 employee = Employee.objects.get(email=email)
-                request.session['role'] = employee.employee_role  # Store the role in session
+                request.session['role'] = employee.employee_role  
                 
                 print("Session after login:", request.session.keys())  
-                return redirect("dashboard")  # Redirect to dashboard
+                return redirect("dashboard")  
             except Employee.DoesNotExist:
                 messages.error(request, "Employee data not found.")
                 return render(request, "templates/login.html", {"form": form})
@@ -78,7 +78,6 @@ def login_view(request):
             return render(request, "templates/login.html", {"form": form})
 
     return render(request, "templates/login.html", {"form": form})
-
 
 @login_required
 @no_cache
@@ -104,6 +103,7 @@ def edit_employee(request, employee_id):
         form = EmployeeForm(request.POST, instance=employee)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Edited Successfully')
             return redirect('employees')  # Redirect to the employee list or details page after saving
     else:
         form = EmployeeForm(instance=employee)
@@ -121,7 +121,8 @@ def edit_employee_self(request):
         form = EmployeeUpdateForm(request.POST, request.FILES, instance=employee)
         if form.is_valid():
             form.save()
-            return redirect('dashboard')  # Redirect to the employee list or details page after saving
+            messages.success(request, 'Edited Successfully')
+            return redirect('edit_employee_self')  # Redirect to the employee list or details page after saving
     else:
         form = EmployeeUpdateForm(instance=employee)
     
@@ -407,6 +408,7 @@ def projects(request):
 def project_delete_view(request, pk):
     project = get_object_or_404(Projects, pk=pk)
     project.delete()
+    messages.success(request,"Project Deleted Successfully!")
     return redirect('projects')
 
 @login_required
@@ -415,9 +417,10 @@ def project_edit_view(request, pk):
     project = get_object_or_404(Projects, pk=pk)
 
     if request.method == 'POST':
-        form = ProjectForm(request.POST, instance=project)
+        form = ProjectForm(request.POST, request.FILES ,instance=project )
         if form.is_valid():
             form.save()
+            messages.success(request,"Project Eddited Successfully!")
             return redirect('projects')  # Replace with your project list view name
     else:
         form = ProjectForm(instance=project)
@@ -426,17 +429,51 @@ def project_edit_view(request, pk):
         'form': form,
         'project': project,
     }
-    return render(request, 'templates/sub_templates/edit_project.html', context)  # Replace with your template name
+    return render(request, 'templates/sub_templates/edit_project.html', context)  
 
 @login_required
-@no_cache
+@no_cache 
 def project_detail_view(request, pk):
     project = get_object_or_404(Projects, pk=pk)
-    
+
+    if request.method == 'POST':
+        form = ProjectFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            project_file = form.save(commit=False)
+            project_file.project = project
+            project_file.uploaded_by = request.user  
+            project_file.save()
+
+            messages.success(request, 'File uploaded successfully!')
+            return redirect('project_detail', pk=pk)
+    else:
+        form = ProjectFileForm()
+
+    project_files = ProjectFile.objects.filter(project=project)
+
     context = {
         'project': project,
+        'form': form,
+        'project_files': project_files,
     }
-    return render(request, 'templates/sub_templates/view_project.html', context)  # Replace with your template name
+
+    return render(request, 'templates/sub_templates/view_project.html', context)
+
+def delete_project_file(request, file_id):
+    # Get the file object
+    project_file = get_object_or_404(ProjectFile, id=file_id)
+
+    # Check if the current user is the one who uploaded the file (optional for security)
+    if project_file.uploaded_by != request.user:
+        messages.error(request, "You can only delete file uploaded by you!!.")
+        return redirect('project_detail', pk=project_file.project.id)
+
+    # Delete the file
+    project_file.delete()
+    
+    messages.success(request, "File deleted successfully!")
+    return redirect('project_detail', pk=project_file.project.id)
+
 
 @login_required
 @no_cache 
@@ -463,7 +500,9 @@ def files(request):
 
             # Restrict file size to 3MB (3 * 1024 * 1024 = 3145728 bytes)
             if document.document_file.size > 3145728:
-                messages.error(request, "Each file must be 3MB or less.")
+                print("File greater than 3 mb")
+                messages.error(request, "File must be 3MB or less.")
+                # return redirect('files')
             else:
                 document.save()
                 messages.success(request, "Document uploaded successfully!")
@@ -639,7 +678,10 @@ def timesheet(request):
         .annotate(start_date=Min('date'), end_date=Max('date'))
         .order_by('-start_date')
     )
-    projects = Projects.objects.filter(team_members=employee)
+    # projects = Projects.objects.filter(team_members=employee)
+    projects = Projects.objects.filter(
+        Q(team_members=employee) | Q(project_manager=employee)
+        ).distinct()
     months = [month_name[i] for i in range(1, 13)]
     today = datetime.today().strftime('%Y-%m-%d')
 

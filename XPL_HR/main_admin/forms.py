@@ -1,5 +1,5 @@
 from django import forms
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 
@@ -145,8 +145,8 @@ class EducationalDocumentForm(forms.ModelForm):
         file = self.cleaned_data.get('document_file')
 
         # Limit file size to 3MB
-        if file and file.size > 3 * 1024 * 1024:
-            raise forms.ValidationError("File size should be 3MB or less.")
+        # if file and file.size > 3 * 1024 * 1024:
+        #     raise forms.ValidationError("File size should be 3MB or less.")
         return file
 
 class EmployeeUpdateForm(forms.ModelForm):
@@ -207,7 +207,18 @@ class ApprovalHierarchyForm(forms.ModelForm):
 
         return cleaned_data
 
+class ProjectFileForm(forms.ModelForm):
+    class Meta:
+        model = ProjectFile
+        fields = ['file_name','file', 'description']
 
+        widgets = {
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2})
+        }
+
+    # file = forms.FileField(required=True)
+    # file_name=
+    # description = forms.CharField(widget=forms.Textarea, required=False)
 
 class PeriodForm(forms.ModelForm):
     class Meta:

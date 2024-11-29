@@ -1,0 +1,35 @@
+{% load widget_tweaks %}
+<div class="containe-fluid mt-6">
+    <div class="scrollable-container"> 
+            <h2 class="text-center mb-4">Project: {{ project.project_name }}</h2>
+
+        <!-- <h1>Welcome to Additional Project Files  Section<h1> -->
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="file_name" class="form-label">Document Name</label>
+                        {% render_field form.file_name placeholder="Enter Document Name" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="document_file" class="form-label">Upload Document</label>
+                        {% render_field form.file class+="form-control" %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="document_file" class="form-label">File Description</label>
+                        {% render_field form.description placeholder="Enter Document Description" class+="form-control" %}
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
+            
+
+        <div class="text-center mt-4">
+            <a href="{% url 'projects' %}" class="btn btn-secondary">Back to Projects</a>
+        </div>
+
+        
+    </div>
+</div>

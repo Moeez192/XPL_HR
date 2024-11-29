@@ -53,7 +53,7 @@ urlpatterns = [
     path('view_timesheet_group/<str:timesheet_group_id>/', views.view_timesheet, name='view_timesheet'), 
     path('accept_timesheet/<str:timesheet_group_id>/', views.accept_timesheet, name='accept_timesheet'),
     path('delete-date-range/<int:date_range_id>/', views.delete_date_range, name='delete_date_range'),
-
+    path('project/<int:file_id>/', views.delete_project_file, name='delete_project_file'),
 
 
 

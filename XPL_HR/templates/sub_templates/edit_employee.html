@@ -4,6 +4,27 @@
 
 
 {% block content %}
+<style>
+    .alert {
+        position: relative;
+    }
+
+    .close {
+        transition: color 0.2s;
+    }
+
+    .close:hover {
+        color: #ff2a00; /* Color on hover */
+    }
+
+    .alert-info {
+        border-color: #b8daff; /* Optional: customize border color */
+    }
+
+    .alert-info p {
+        margin-bottom: 0; /* Remove bottom margin from the paragraph */
+    }
+</style>
 <div class="header-image"> </div>
 <div class="container-fluid mt-6">
     <div class="scrollable-container">

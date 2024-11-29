@@ -339,6 +339,8 @@
     if (!projectRange) {
         // If no valid project is selected or there is no date range, clear the container and exit
         document.getElementById("timesheet-entries").innerHTML = "";
+        document.getElementById("date_from").value = "";
+        document.getElementById("date_to").value = "";
         return;
     }
 
