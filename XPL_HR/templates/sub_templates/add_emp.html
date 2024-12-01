@@ -4,9 +4,9 @@
         <h2 class="text-center mb-4">Add Employee</h2>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            <!-- Personal Information Section-->
+            <!-- Basic Information Section-->
             <div class="mb-3">
-                <h4>Personal Information</h4>
+                <h4>Basic Information</h4>
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
@@ -20,8 +20,17 @@
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="dob" class="form-label">Date of Birth</label>
+                    <label for="" class="form-label">Nick Name</label>
+                    {% render_field form.nick_name placeholder="Nick Name" class+="form-control" %}
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="id_dob" class="form-label">Date of Birth</label>
                     {% render_field form.dob placeholder="Date Of Birth" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="id_age" class="form-label">Age</label>
+                    {% render_field form.age placeholder="Age" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
                     <label for="gender" class="form-label">Gender</label>
@@ -29,21 +38,34 @@
                 </div>
             </div>
             <div class="row mb-3">
+                
                 <div class="col-md-6">
-                    <label for="email" class="form-label">Email</label>
-                    {% render_field form.email placeholder="Email" class+="form-control" %}
+                    <label for="skills-input" class="form-label">Skills/Expertise</label>
+                    <div id="tags-container" class="tags-container">
+                        <!-- Tags will appear here -->
+                    </div>
+                    <input 
+                        type="text" 
+                        id="skills-input" 
+                        placeholder="Enter Skills / Expertise and press Enter" 
+                        class="form-control"
+                    />
+                    <!-- Hidden field to store the comma-separated skills -->
+                    {% render_field form.skills id="skills-hidden" style="display: none;" %}
+                </div>
+                
+               
+                <div class="col-md-6">
+                    <label for="address" class="form-label">Marital Status</label>
+                    {% render_field form.marital_status class+="form-control" %}
                 </div>
                 <div class="col-md-6">
-                    <label for="password" class="form-label">Password</label>
-                    {% render_field form.password placeholder="Default Password is Pakistan if left Empty" class+="form-control" %}
+                    <label for="address" class="form-label">Linkdin</label>
+                    {% render_field form.linkdln class+="form-control" placeholder="Linkdin Profile URL" %}
                 </div>
                 <div class="col-md-6">
-                    <label for="phone" class="form-label">Phone Number</label>
-                    {% render_field form.phone placeholder="Phone Number" class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="address" class="form-label">Address</label>
-                    {% render_field form.address class+="form-control" %}
+                    <label for="address" class="form-label">X/Twitter</label>
+                    {% render_field form.x_twitter class+="form-control" placeholder="X/Twitter URL" %}
                 </div>
             </div>
             
@@ -52,53 +74,101 @@
                 {% render_field form.nationality placeholder="Enter Nationality" class+="form-control" %}
             </div>
 
-            <!-- Job Details Section -->
+            <!-- Work Information Section -->
             <div class="mb-3">
-                <h4>Job Details</h4>
+                <h4>Work Information</h4>
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="employeeId" class="form-label">Employee ID</label>
-                    {% render_field form.employee_id placeholder="Enter Employee ID" class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="jobTitle" class="form-label">Job Title</label>
-                    {% render_field form.job_title placeholder="Job Title" class+="form-control" %}
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="department" class="form-label">Department</label>
-                    {% render_field form.department placeholder="Enter Department" class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="issupervisor" class="form-label">Is Supervisor</label>
-                    {% render_field form.is_supervisor  class+="form-control" %}
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="employmentType" class="form-label">Employment Type</label>
-                    {% render_field form.employment_type class+="form-control" %}
+                    <label for="employeeRole" class="form-label">Business Unit</label>
+                    {% render_field form.business_unit class+="form-control" placeholder="Business Unit" %}
                 </div>
                 <div class="col-md-6">
                     <label for="dateOfJoining" class="form-label">Date of Joining</label>
                     {% render_field form.date_of_joining  class+="form-control" %}
                 </div>
-            </div>
-            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="department" class="form-label">Department</label>
+                    {% render_field form.department placeholder="Enter Department" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Rate Basis</label>
+                    {% render_field form.rate_basis  class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="employmentType" class="form-label">Employment Type</label>
+                    {% render_field form.employment_type class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="employeeId" class="form-label">Employee ID</label>
+                    {% render_field form.employee_id placeholder="Enter Employee ID" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bonus" class="form-label">Onsite Rate</label>
+                    {% render_field form.onsite_salary placeholder="Onsite Rate" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bonus" class="form-label">Remote Rate</label>
+                    {% render_field form.remote_salary placeholder="Remote Rate" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bonus" class="form-label">Bonus/Allowances</label>
+                    {% render_field form.bonus placeholder="Enter Bonus" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bonus" class="form-label">Billing Type</label>
+                    {% render_field form.billing_type placeholder="Enter Bonus" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Work Location</label>
+                    {% render_field form.work_location placeholder="Enter Work Location" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="jobTitle" class="form-label">Job Title</label>
+                    {% render_field form.job_title placeholder="Job Title" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Contract beginning Date</label>
+                    {% render_field form.contract_start_date  class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Contract end date</label>
+                    {% render_field form.contract_end_date  class+="form-control" %}
+                </div>
                 <div class="col-md-6">
                     <label for="employeeStatus" class="form-label">Employee Status</label>
                     {% render_field form.employee_status class+="form-control" %}
 
                 </div>
                 <div class="col-md-6">
-                    <label for="workLocation" class="form-label">Work Location</label>
-                    {% render_field form.work_location placeholder="Enter Work Location" class+="form-control" %}
+                    <label for="wps_profile" class="form-label">WPS Profile</label>
+                    {% render_field form.wps_profile placeholder="WPS Profile" class+="form-control" id="wps_profile" %}
                 </div>
-                 
-            </div>
-            <div class="row mb-3">
+                <div class="col-md-6" id="mol_id_container">
+                    <label for="mol_id" class="form-label">MOL ID</label>
+                    {% render_field form.mol_id placeholder="MOL ID" class+="form-control" id="mol_id" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Leave Policy</label>
+                    {% render_field form.leave_policy  class+="form-control" placeholder="Source of hire" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Source of hire</label>
+                    {% render_field form.source_of_hire  class+="form-control" placeholder="Source of hire" %}
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Sap Certifications</label>
+                    {% render_field form.sap_certifications  class+="form-control" placeholder="Sap Certifiactions" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Total Expirence</label>
+                    {% render_field form.total_expirence class+="form-control" placeholder="Total Expirence" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="issupervisor" class="form-label">Is Supervisor</label>
+                    {% render_field form.is_supervisor  class+="form-control" %}
+                </div>
                 <div class="col-md-6">
                     <label for="employeeRole" class="form-label">Employee Role</label>
                     {% render_field form.employee_role class+="form-control" %}
@@ -108,27 +178,29 @@
                     {% render_field form.position placeholder="Position" class+="form-control" %}
                 </div>
             </div>
-
-            <!-- Salary and Compensation Section-->
-            <div class="mb-3">
-                <h4>Salary and Compensation</h4>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="bonus" class="form-label">Remote Salary</label>
-                    {% render_field form.remote_salary placeholder="Enter Bonus" class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="bonus" class="form-label">Onsite Salary Salary</label>
-                    {% render_field form.onsite_salary placeholder="Enter Bonus" class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="bonus" class="form-label">Bonus/Allowances</label>
-                    {% render_field form.bonus placeholder="Enter Bonus" class+="form-control" %}
-                </div>
-                
-            </div>
             
+                
+
+            <!-- Seperation Information Section  -->
+
+            <div class="mb-3">
+                <h4>Seperation Information</h4>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">Date of Exit</label>
+                        {% render_field form.date_of_exit placeholder="Date Of Exit" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">Reason For Exit</label>
+                        {% render_field form.reason_for_exit placeholder="Reason For Exit" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">Can Join Again</label>
+                        {% render_field form.can_join_again  class+="form-control" %}
+                    </div>
+
+                </div>
+            </div>
 
             <!-- Bank Account Details Section-->
             <div class="mb-3">
@@ -140,6 +212,14 @@
                 {% render_field form.bank_account placeholder="Bank Name" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
+                    <label for="bankAccount" class="form-label">Bank Country</label>
+                {% render_field form.bank_country  class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bankAccount" class="form-label">Account Type</label>
+                {% render_field form.account_type placeholder="Account Type" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
                     <label for="bankAccount" class="form-label">Account Number</label>
                 {% render_field form.account_number placeholder="Account Number" class+="form-control" %}
                 </div>
@@ -147,14 +227,50 @@
                     <label for="bankAccount" class="form-label">Iban Number</label>
                 {% render_field form.iban_number placeholder="Iban Number" class+="form-control" %}
                 </div>
+                <div class="col-md-6">
+                    <label for="bankAccount" class="form-label">Routing Code</label>
+                {% render_field form.routing_code placeholder="Routing Code" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bankAccount" class="form-label">Swift Code</label>
+                {% render_field form.swift_code placeholder="Swift Code" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bankAccount" class="form-label">IFSC Code</label>
+                {% render_field form.ifsc_code placeholder="IFSC Code" class+="form-control" %}
+                </div>
                 
             </div>
 
-            <!-- Emergency Contact Section-->
+            <!-- Contact Section-->
             <div class="mb-3">
-                <h4>Emergency Contact</h4>
+                <h4>Contact Details</h4>
             </div>
             <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="email" class="form-label">Email</label>
+                    {% render_field form.email placeholder="Email" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="password" class="form-label">Password</label>
+                    {% render_field form.password placeholder="Default Password is Pakistan if left Empty" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="phone" class="form-label">Work Phone Number</label>
+                    {% render_field form.phone placeholder="Work Phone Number" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="phone" class="form-label">Personel Phone Number</label>
+                    {% render_field form.personel_phone placeholder="Personel Phone Number" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="address" class="form-label">Present Address</label>
+                    {% render_field form.address class+="form-control" placeholder="Present Address" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="address" class="form-label">Permanent Address</label>
+                    {% render_field form.permanent_address class+="form-control" placeholder="Permanent Address" %}
+                </div>
                 <div class="col-md-6">
                     <label for="emergencyName" class="form-label">Emergency Contact Name</label>
                     {% render_field form.emergency_name placeholder="Emergency Contact Name" class+="form-control" %}
@@ -168,21 +284,40 @@
                 <label for="emergencyPhone" class="form-label">Emergency Contact Phone</label>
                 {% render_field form.emergency_phone placeholder="Contact Number" class+="form-control" %}
             </div>
+
+            <div class="mb-3">
+                <h4>Travel History</h4>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="emergencyName" class="form-label">First Entry Into Country</label>
+                    {% render_field form.first_entry_in_country placeholder="Emergency Contact Name" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="emergencyName" class="form-label">Latest Exit From Country</label>
+                    {% render_field form.latest_exit_from_country  class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="id_latest_entry_in_country" class="form-label">Latest Entry Into Country</label>
+                    {% render_field form.latest_entry_in_country placeholder="Emergency Contact Name" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="id_days_from_latest_entry" class="form-label">Days from Latest Entry Into Country</label>
+                    {% render_field form.days_from_latest_entry  class+="form-control" %}
+                </div>
+
+            </div>
             <!-- File Upload Fields Section-->
             <div class="mb-3">
-                <h4>File Uploads</h4>
+                <h4>Attachments</h4>
             </div>
+            
             <div class="mb-3">
-                <label for="profilePhoto" class="form-label">Upload Profile Photo</label>
-                {% render_field form.profile_photo  class+="form-control" %}
+                <label for="id_docs" class="form-label">Select Document</label>
+                {% render_field form.docs class+="form-control" %}
             </div>
-            <div class="mb-3">
-                <label for="cvUpload" class="form-label">Upload CV</label>
-                {% render_field form.cv_upload  class+="form-control" %}
-            </div>
-            <div class="mb-3">
-                <label for="signedContract" class="form-label">Upload Signed Contract</label>
-                {% render_field form.signed_contract  class+="form-control" %}
+            <div id="document-upload-container">
+
             </div>
             <!-- Submit Button -->
             <div class="text-center">
@@ -191,3 +326,250 @@
         </form>
     </div>
 </div>
+
+
+<!-- Dynamic inpput fields  -->
+<script type="text/javascript">
+    // Keep track of already added document fields
+    const addedDocs = new Set();
+
+    // Function to dynamically create a file upload input field
+    function createFileInputField(docType) {
+        const container = document.getElementById('document-upload-container');
+        
+        // Check if the file input for this document type already exists
+        if (!addedDocs.has(docType)) {
+            // Create new div container for the file input
+            const div = document.createElement('div');
+            div.classList.add('mb-3');
+            
+            // Create the label for the file input
+            const label = document.createElement('label');
+            label.classList.add('form-label');
+            label.setAttribute('for', 'id_' + docType + '_file');
+            label.textContent = 'Upload ' + docType.charAt(0).toUpperCase() + docType.slice(1);  // Dynamic label
+            
+            // Create the file input field
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.name = docType + '_file';  // Set the name dynamically based on docType
+            input.id = 'id_' + docType + '_file';
+            input.classList.add('form-control');
+            
+            // Set the required attribute if needed (you can remove this line if not required)
+            input.required = true;
+
+            // Append label and input field to the div
+            div.appendChild(label);
+            div.appendChild(input);
+
+            // Append the div to the container
+            container.appendChild(div);
+            
+            // Mark this document type as added
+            addedDocs.add(docType);
+        }
+    }
+
+    document.getElementById('id_docs').addEventListener('change', function () {
+        const selectedDocType = this.options[this.selectedIndex].text; // Use text instead of value
+
+        console.log("Selected Document Type: ", selectedDocType); // Debugging log to check selected value
+        
+        if (selectedDocType) {
+            // Call the function to create a new file input field for the selected document type
+            createFileInputField(selectedDocType);
+        }
+    });
+</script>
+
+
+<!-- age calculator -->
+<script>
+document.getElementById('id_dob').addEventListener('change', function () {
+    const dobInput = this.value; // Get the raw input value
+    console.log("Raw DOB Input:", dobInput);
+
+    // Validate input format for YYYY-MM-DD
+    const datePattern = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
+    if (!datePattern.test(dobInput)) {
+        console.error("Invalid Format:", dobInput);
+        document.getElementById('id_age').value = "Invalid DOB";
+        return;
+    }
+
+    // Parse YYYY-MM-DD into a Date object
+    const [year, month, day] = dobInput.split('-').map(Number);
+    const dob = new Date(year, month - 1, day); // Month is zero-based in JavaScript
+    console.log("Parsed Date:", dob);
+
+    // Check if the parsed date is valid
+    if (isNaN(dob.getTime())) {
+        console.error("Invalid Date:", dob);
+        document.getElementById('id_age').value = "Invalid DOB";
+        return;
+    }
+
+    const today = new Date(); // Current date
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+
+    console.log("Calculated Age:", age);
+    document.getElementById('id_age').value = age >= 0 ? age : "Invalid DOB";
+});
+
+
+
+</script>
+
+
+
+<!-- latest entry days counter -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const latestEntryField = document.getElementById('id_latest_entry_in_country');
+        const daysField = document.getElementById('id_days_from_latest_entry');
+
+        // Function to calculate the number of days between two dates
+        function calculateDaysFromLatestEntry() {
+            const latestEntryDate = new Date(latestEntryField.value);
+            const currentDate = new Date();
+
+            // Calculate the difference in time
+            const timeDifference = currentDate - latestEntryDate;
+            const daysDifference = Math.floor(timeDifference / (1000 * 3600 * 24)); // Convert to days
+
+            // Display the calculated days with "Days" appended in the days field
+            daysField.value = daysDifference + " Days";
+        }
+
+        // Event listener to trigger the calculation when the date is selected
+        latestEntryField.addEventListener('change', function() {
+            calculateDaysFromLatestEntry();
+        });
+
+        // Call the function once on page load if the date is already filled
+        if (latestEntryField.value) {
+            calculateDaysFromLatestEntry();
+        }
+    });
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const wpsProfileField = document.getElementById("wps_profile");
+        const molIdContainer = document.getElementById("mol_id_container");
+
+        function toggleMolId() {
+            if (wpsProfileField.value === "no") {
+                molIdContainer.style.display = "none";
+            } else {
+                molIdContainer.style.display = "block";
+            }
+        }
+
+        // Initial check when the page loads
+        toggleMolId();
+
+        // Add an event listener for changes in the WPS Profile field
+        wpsProfileField.addEventListener("change", toggleMolId);
+    });
+</script>
+
+
+
+<style>
+    .tags-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 5px;
+        background: #f9f9f9;
+    }
+
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .tag {
+        background-color: #007bff;
+        color: white;
+        margin-bottom: 5px;
+        padding: 5px 10px;
+        border-radius: 10px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .tag .remove-tag {
+        margin-left: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 14px;
+    }
+
+    #skills-input {
+        flex: 1;
+        min-width: 100px;
+    }
+
+    #skills-input:focus {
+        outline: none;
+    }
+</style>
+
+<script>
+    const skillsInput = document.getElementById("skills-input");
+    const tagsContainer = document.getElementById("tags-container");
+    const skillsHidden = document.getElementById("skills-hidden");
+
+    let skillsArray = skillsHidden.value ? skillsHidden.value.split(",") : []; 
+
+    function renderTags() {
+        tagsContainer.innerHTML = "";
+        skillsArray.forEach((skill, index) => {
+            const tag = document.createElement("div");
+            tag.className = "tag";
+            tag.innerHTML = `${skill} <span class="remove-tag" data-index="${index}">&times;</span>`;
+            tagsContainer.appendChild(tag);
+        });
+        updateHiddenInput();
+    }
+
+    skillsInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            const skill = skillsInput.value.trim();
+            if (skill && !skillsArray.includes(skill)) {
+                skillsArray.push(skill);
+                renderTags();
+                skillsInput.value = "";
+            }
+        }
+    });
+
+    tagsContainer.addEventListener("click", function (event) {
+        if (event.target.classList.contains("remove-tag")) {
+            const index = event.target.dataset.index;
+            skillsArray.splice(index, 1);
+            renderTags();
+        }
+    });
+
+    function updateHiddenInput() {
+        skillsHidden.value = skillsArray.join(",");
+    }
+
+    renderTags();
+</script>
+

@@ -2,8 +2,41 @@ from django.db import models
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.conf import settings
+from django.utils.timezone import now, timedelta
+import uuid , requests
 from django.utils.timezone import now
 
+
+
+def get_country_choices():
+
+    try:
+        response = requests.get("https://restcountries.com/v3.1/all")
+        response.raise_for_status()  
+        data = response.json()
+        return [(country["cca2"], country["name"]["common"]) for country in data]
+    except requests.RequestException as e:
+        print(f"Error fetching country data: {e}")
+        return []
+
+
+class LeavePolicy(models.Model):
+    leave_policy = models.CharField(max_length=50)
+    def __str__(self):
+        return f"{self.leave_policy}"
+    
+class uploadDocType(models.Model):
+    doc_type = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"{self.doc_type}" 
+
+
+class BillingType(models.Model):
+    billing_type=models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.billing_type}"
 
 
 class Employee(models.Model):
@@ -23,7 +56,7 @@ class Employee(models.Model):
     last_login = models.DateTimeField(null=True, blank=True) 
     password = models.CharField(max_length=255,default="pakistan",blank=True )
     phone = models.CharField(max_length=20)
-    address = models.CharField(max_length=100)
+    address = models.TextField()
     nationality = models.CharField(max_length=100)
 
     
@@ -52,6 +85,8 @@ class Employee(models.Model):
         null=True,                   
         blank=True                   
     )
+
+    
     
     EMPLOYMENT_TYPE_CHOICES = [
         ('full-time', 'Full-Time'),
@@ -61,12 +96,13 @@ class Employee(models.Model):
     ]
     employment_type = models.CharField(max_length=20, choices=EMPLOYMENT_TYPE_CHOICES)
     
-    date_of_joining = models.DateField()
+    
     
     EMPLOYEE_STATUS_CHOICES = [
         ('active', 'Active'),
-        ('inactive', 'Inactive'),
-        ('on-leave', 'On Leave'),
+        ('resigned', 'Resigned'),
+        ('fired', 'Fired'),
+        ('blacklisted', 'Blacklisted'),
         ('terminated', 'Terminated'),
     ]
     
@@ -82,8 +118,72 @@ class Employee(models.Model):
     
     # salary = models.PositiveIntegerField()
     bonus = models.PositiveIntegerField()
+
+
+
     
-    # (new fields)
+    #new Fields (new ones) 2
+    RATE_BASIS = [
+        ('daily', 'Daily'),
+        ('monthly', 'Monthly'),
+        ('n/a', 'N/A'),
+    ]
+    rate_basis=models.CharField(max_length=20, choices=RATE_BASIS)
+    nick_name = models.CharField(max_length=100)
+    business_unit = models.CharField(max_length=40)
+    mol_id = models.CharField(max_length=50,null=True,blank=True)
+    source_of_hire = models.TextField(max_length=50)
+    contract_start_date =  models.DateField()
+    contract_end_date = models.DateField()
+    MARTIAL_STATUS = [
+        ('single', 'Single'),
+        ('maried ', 'Maried'),
+        ('divorced', 'Divorced'),
+        ('widowed', 'Widowed'),
+        ('seperated', 'Seperated'),
+    ]
+    marital_status = models.TextField(max_length=20,choices=MARTIAL_STATUS,default='single')
+    linkdln=models.TextField(null=True,blank=True)
+    x_twitter=models.TextField(null=True,blank=True)
+    personel_phone = models.CharField(max_length=20)
+    permanent_address = models.TextField()
+
+        #Seperation Information
+
+    date_of_exit= models.DateField(null=True,blank=True)
+    reason_for_exit= models.TextField(null=True,blank=True)
+    CAN_JOIN_AGAIN  = [
+        ('yes', 'Yes'),
+        ('no', 'No'),
+    ]
+    can_join_again = models.TextField(max_length=4,choices=CAN_JOIN_AGAIN)
+    account_type = models.CharField(max_length=256)
+    routing_code= models.CharField(max_length=256)
+    swift_code = models.CharField(max_length=256)
+    ifsc_code = models.CharField(max_length=256)
+    first_entry_in_country= models.DateField()
+    latest_entry_in_country= models.DateField()
+    total_expirence = models.CharField(max_length=20)
+    latest_exit_from_country= models.DateField(null=True,blank=True)
+    leave_policy = models.ForeignKey(LeavePolicy, on_delete=models.SET_NULL,null=True, related_name='employee_leave_policy')
+    sap_certifications = models.TextField()
+    age = models.CharField(max_length=50,default='0')
+    docs = models.ForeignKey(uploadDocType, on_delete=models.SET_NULL,null=True, related_name='employee_docs_upload')
+    billing_type = models.ForeignKey(BillingType, on_delete=models.SET_NULL,null=True, related_name='billing_type_table')
+    days_from_latest_entry=models.CharField(max_length=50,default='0')
+    bank_country = models.CharField(max_length=100, choices=get_country_choices(), blank=True, null=True)
+    WPS_PROFILE =[
+        ('yes-uae','Yes-UAE'),
+        ('yes-ksa','Yes-KSA'),
+        ('no','No')
+    ] 
+    wps_profile= models.TextField(max_length=10,choices=WPS_PROFILE,default='no')
+    skills=models.TextField(default="no skill")
+
+
+
+    
+    # (new fields (old ones))
     bank_account = models.CharField(max_length=100)
     onsite_salary = models.PositiveIntegerField(null=True)
     remote_salary = models.PositiveIntegerField(null=True)
@@ -110,6 +210,7 @@ class Employee(models.Model):
 
     # employeement_type=models.CharField(max_length=35,null=True)
 
+    date_of_joining = models.DateField()
 
 
 
@@ -134,7 +235,10 @@ class Employee(models.Model):
         self.password = make_password(raw_password)
         
 
-
+class EmployeeDocument(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='documents')
+    doctype = models.ForeignKey(uploadDocType, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='employee_documents/',blank=True, null=True)
 
 class Department(models.Model):
     dep_name=models.CharField(max_length=50)
@@ -346,7 +450,22 @@ class ProjectFile(models.Model):
         return f"File for {self.project.project_name} uploaded by {self.uploaded_by.username if self.uploaded_by else 'Unknown'}"
 
 
+class PasswordResetToken(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="reset_tokens")
+    token = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expiry_at = models.DateTimeField()
 
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = uuid.uuid4().hex  # Generate a unique token
+        if not self.expiry_at:
+            self.expiry_at = now() + timedelta(minutes=5)  # Set expiry to 5 minutes from now
+        super().save(*args, **kwargs)
+
+    def is_valid(self):
+        """Check if the token is still valid."""
+        return now() <= self.expiry_at
 
 class DateRange(models.Model):
     project = models.ForeignKey(Projects,on_delete=models.CASCADE)

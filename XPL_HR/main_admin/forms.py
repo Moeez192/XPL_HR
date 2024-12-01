@@ -1,9 +1,24 @@
 from django import forms
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile, LeavePolicy, uploadDocType, BillingType
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 
 
+
+class LeavePolicyForm(forms.ModelForm):
+    class Meta:
+        model = LeavePolicy
+        fields = ['leave_policy']
+
+class uploadDocTypeForm(forms.ModelForm):
+    class Meta:
+        model = uploadDocType
+        fields = ['doc_type']
+
+class BillingTypeForm(forms.ModelForm):
+    class Meta:
+        model = BillingType
+        fields = ['billing_type']
 
 class EmployeeForm(forms.ModelForm):
     class Meta:
@@ -11,14 +26,37 @@ class EmployeeForm(forms.ModelForm):
         fields = ['first_name', 'last_name', 'dob', 'gender', 'email', 'password', 'phone', 'address', 
                   'nationality', 'employee_id', 'job_title', 'department', 'employment_type',
                   'date_of_joining', 'employee_status', 'work_location', 'bonus', 'bank_account',
-                  'emergency_name', 'emergency_relation', 'emergency_phone', 'profile_photo', 'cv_upload', 
-                  'signed_contract','is_supervisor','employee_role','last_login','onsite_salary','remote_salary','account_number','iban_number','work_location','position']  
+                  'emergency_name', 'emergency_relation', 'emergency_phone','is_supervisor','employee_role','last_login','onsite_salary','remote_salary','account_number','iban_number','work_location','position','rate_basis','nick_name','business_unit','mol_id','source_of_hire','contract_start_date','contract_end_date','marital_status','linkdln','x_twitter','personel_phone','permanent_address','date_of_exit','reason_for_exit','can_join_again','account_type','account_type','swift_code','ifsc_code','routing_code','first_entry_in_country','latest_entry_in_country','latest_exit_from_country','total_expirence','leave_policy','sap_certifications','docs','age','days_from_latest_entry','billing_type','bank_country','wps_profile','skills']  
+        
+        
 
         widgets = {
             'password': forms.PasswordInput(),
+            'address' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
+            'linkdln' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
+            'x_twitter' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
+            'source_of_hire' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
+            'sap_certifications' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
+            'permanent_address' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
+            'skills' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
+            'reason_for_exit' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
             'dob': forms.DateInput(attrs={'type': 'date'}),
             'date_of_joining': forms.DateInput(attrs={'type': 'date'}),
+            'contract_start_date': forms.DateInput(attrs={'type': 'date'}),
+            'contract_end_date': forms.DateInput(attrs={'type': 'date'}),
+            'date_of_exit': forms.DateInput(attrs={'type': 'date'}),
+            'first_entry_in_country': forms.DateInput(attrs={'type': 'date'}),
+            'latest_entry_in_country': forms.DateInput(attrs={'type': 'date'}),
+            'latest_exit_from_country': forms.DateInput(attrs={'type': 'date'}),
+            'age' : forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
+            'days_from_latest_entry' : forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
+
         }
+    docs = forms.ModelChoiceField(queryset=uploadDocType.objects.all(), empty_label="Select Document")
+    def clean_skills(self):
+        skills = self.cleaned_data.get("skills", "")
+        # Optional validation for special characters, etc.
+        return skills
 
 
 class DepForm(forms.ModelForm):
@@ -154,7 +192,7 @@ class EmployeeUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Employee
-        fields = ['email', 'phone', 'new_password', 'emergency_name', 'emergency_relation', 'emergency_phone', 'profile_photo', 'cv_upload', 'signed_contract']  # Removed 'password'
+        fields = ['email', 'phone', 'new_password', 'emergency_name', 'emergency_relation', 'emergency_phone','profile_photo', 'cv_upload', 'signed_contract']  # Removed 'password' 'profile_photo', 'cv_upload', 'signed_contract'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
