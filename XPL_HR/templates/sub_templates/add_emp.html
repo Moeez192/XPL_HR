@@ -67,12 +67,13 @@
                     <label for="address" class="form-label">X/Twitter</label>
                     {% render_field form.x_twitter class+="form-control" placeholder="X/Twitter URL" %}
                 </div>
+                <div class="col-md-6">
+                    <label for="nationality" class="form-label">Nationality</label>
+                {% render_field form.nationality placeholder="Enter Nationality" class+="form-control" %}
+                </div>
             </div>
             
-            <div class="mb-3">
-                <label for="nationality" class="form-label">Nationality</label>
-                {% render_field form.nationality placeholder="Enter Nationality" class+="form-control" %}
-            </div>
+            
 
             <!-- Work Information Section -->
             <div class="mb-3">
@@ -162,6 +163,10 @@
                     {% render_field form.sap_certifications  class+="form-control" placeholder="Sap Certifiactions" %}
                 </div>
                 <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Timesheet Required</label>
+                    {% render_field form.timesheet_required  class+="form-control" placeholder="Sap Certifiactions" %}
+                </div>
+                <div class="col-md-6">
                     <label for="workLocation" class="form-label">Total Expirence</label>
                     {% render_field form.total_expirence class+="form-control" placeholder="Total Expirence" %}
                 </div>
@@ -176,6 +181,10 @@
                 <div class="col-md-6">
                     <label for="workLocation" class="form-label">Position</label>
                     {% render_field form.position placeholder="Position" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Reporting Manager</label>
+                    {% render_field form.reporting_manager placeholder="Position" class+="form-control" %}
                 </div>
             </div>
             
@@ -279,10 +288,10 @@
                     <label for="emergencyRelation" class="form-label">Relationship</label>
                     {% render_field form.emergency_relation placeholder="Emergency Relation" class+="form-control" %}
                 </div>
-            </div>
-            <div class="mb-3">
-                <label for="emergencyPhone" class="form-label">Emergency Contact Phone</label>
+                <div class="col-md-6">
+                    <label for="emergencyPhone" class="form-label">Emergency Contact Phone</label>
                 {% render_field form.emergency_phone placeholder="Contact Number" class+="form-control" %}
+                </div>
             </div>
 
             <div class="mb-3">
@@ -311,14 +320,22 @@
             <div class="mb-3">
                 <h4>Attachments</h4>
             </div>
-            
-            <div class="mb-3">
+            <div class="col-md-6">
                 <label for="id_docs" class="form-label">Select Document</label>
                 {% render_field form.docs class+="form-control" %}
             </div>
-            <div id="document-upload-container">
+            
+            <br>
+            <div id="document-upload-container" class="mb-3">
+                
+                <br>
 
             </div>
+            
+            
+           
+            <br>
+
             <!-- Submit Button -->
             <div class="text-center">
                 <button type="submit" name="employee_submit" class="btn btn-primary">Add Employee</button>
@@ -329,7 +346,7 @@
 
 
 <!-- Dynamic inpput fields  -->
-<script type="text/javascript">
+ <!-- <script type="text/javascript">
     // Keep track of already added document fields
     const addedDocs = new Set();
 
@@ -381,7 +398,221 @@
             createFileInputField(selectedDocType);
         }
     });
+</script>  -->
+<!-- <script type="text/javascript">
+    // To keep track of the count for each document type
+    const docTypeCounter = {};
+
+    // Function to dynamically create a file upload input field
+    function createFileInputField(docType) {
+        const container = document.getElementById('document-upload-container');
+        
+        // If it's the first time the document type is being selected, initialize the counter
+        if (!docTypeCounter[docType]) {
+            docTypeCounter[docType] = 1;
+        } else {
+            // Increment the counter for repeated document types
+            docTypeCounter[docType]++;
+        }
+
+        // Create new div container for the file input
+        const div = document.createElement('div');
+        div.classList.add('mb-3');
+        div.classList.add(docType); // Add the document type class to the div to handle it easily
+
+        // Create the label for the file input (with number)
+        const label = document.createElement('label');
+        label.classList.add('form-label');
+        label.setAttribute('for', 'id_' + docType + '_file');
+        label.textContent = `Upload ${docType.charAt(0).toUpperCase() + docType.slice(1)} ${docTypeCounter[docType]}`;  // Dynamic label with number
+
+        // Create the file input field
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.name = docType + '_file';  // Set the name dynamically based on docType
+        input.id = 'id_' + docType + '_file';
+        input.classList.add('form-control');
+        
+        // Allow multiple file uploads for the same document type
+        input.setAttribute('multiple', 'multiple');
+        
+        // Append label and input field to the div
+        div.appendChild(label);
+        div.appendChild(input);
+
+        // Append the div to the container
+        container.appendChild(div);
+    }
+
+    // Function to handle when a document type is selected
+    document.getElementById('id_docs').addEventListener('change', function () {
+        const selectedDocType = this.options[this.selectedIndex].text; // Use text instead of value
+
+        console.log("Selected Document Type: ", selectedDocType); // Debugging log to check selected value
+        
+        if (selectedDocType) {
+            // Call the function to create a new file input field for the selected document type
+            createFileInputField(selectedDocType);
+
+            // Clear the dropdown after selection
+            this.value = ''; // Clears the dropdown
+        }
+    });
+</script> -->
+
+<script type="text/javascript">
+    // Keep track of dynamically added document fields and their counters
+    const addedDocs = new Set();
+    let docCounter = {};  // To count and differentiate documents of the same type
+
+    // Function to dynamically create a file upload input field
+    function createFileInputField(docType) {
+        const container = document.getElementById('document-upload-container');
+
+        // Initialize counter for document type if not already
+        if (!docCounter[docType]) {
+            docCounter[docType] = 1;  // Start counter from 1 for this document type
+        } else {
+            docCounter[docType]++;  // Increment the counter if it's already used
+        }
+
+        // Create new div container for the file input with Bootstrap grid system
+        const div = document.createElement('div');
+        div.classList.add('row');
+        div.classList.add('mb-4');  // Add margin bottom for spacing between sections
+        div.setAttribute('id', docType + '-' + docCounter[docType]);  // Unique ID for multiple same document types
+
+        // Create the first column for the file upload
+        const col1 = document.createElement('div');
+        col1.classList.add('col-md-6');
+        
+        // Create label for the file input
+        const label1 = document.createElement('label');
+        label1.classList.add('form-label');
+        label1.setAttribute('for', 'id_' + docType + '_' + docCounter[docType] + '_file');
+        label1.textContent = 'Upload ' + docType.charAt(0).toUpperCase() + docType.slice(1) + ' ' + docCounter[docType];  // Label with count
+        
+        // Create the file input field
+        const input1 = document.createElement('input');
+        input1.type = 'file';
+        input1.name = docType + '_file_' + docCounter[docType];  // Unique name for each file input
+        input1.id = 'id_' + docType + '_' + docCounter[docType] + '_file';  // Unique ID for each file input
+        input1.classList.add('form-control');
+        input1.required = true;
+        
+        // Append label and input field to the first column
+        col1.appendChild(label1);
+        col1.appendChild(input1);
+
+        // Create the second column for issue date
+        const col2 = document.createElement('div');
+        col2.classList.add('col-md-6');
+        
+        // Create label for issue date
+        const issueDateLabel = document.createElement('label');
+        issueDateLabel.classList.add('form-label');
+        issueDateLabel.textContent = 'Issue Date';
+        
+        // Create the issue date input field
+        const issueDateInput = document.createElement('input');
+        issueDateInput.type = 'date';
+        issueDateInput.name = docType + '_issue_date_' + docCounter[docType];  // Unique name for each issue date
+        issueDateInput.id = docType + '_issue_date_' + docCounter[docType];
+        issueDateInput.classList.add('form-control');
+
+        // Append label and input field to the second column
+        col2.appendChild(issueDateLabel);
+        col2.appendChild(issueDateInput);
+
+        // Create the third column for expiry date
+        const col3 = document.createElement('div');
+        col3.classList.add('col-md-6');
+        
+        // Create label for expiry date
+        const expiryDateLabel = document.createElement('label');
+        expiryDateLabel.classList.add('form-label');
+        expiryDateLabel.textContent = 'Expiry Date';
+        
+        // Create the expiry date input field
+        const expiryDateInput = document.createElement('input');
+        expiryDateInput.type = 'date';
+        expiryDateInput.name = docType + '_expiry_date_' + docCounter[docType];  // Unique name for each expiry date
+        expiryDateInput.id = docType + '_expiry_date_' + docCounter[docType];
+        expiryDateInput.classList.add('form-control');
+
+        // Append label and input field to the third column
+        col3.appendChild(expiryDateLabel);
+        col3.appendChild(expiryDateInput);
+
+        // Create the fourth column for notes
+        const col4 = document.createElement('div');
+        col4.classList.add('col-md-6');
+        
+        // Create label for notes
+        const notesLabel = document.createElement('label');
+        notesLabel.classList.add('form-label');
+        notesLabel.textContent = 'Notes';
+        
+        // Create the notes input field
+        const notesInput = document.createElement('textarea');
+        notesInput.name = docType + '_notes_' + docCounter[docType];  // Unique name for each notes field
+        notesInput.id = docType + '_notes_' + docCounter[docType];
+        notesInput.classList.add('form-control');
+
+        // Append label and input field to the fourth column
+        col4.appendChild(notesLabel);
+        col4.appendChild(notesInput);
+
+        // Create the Cancel Button
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.classList.add('btn', 'btn-danger' ,'btn-sm', 'mt-2');
+        cancelBtn.textContent = 'Remove Field';
+        cancelBtn.addEventListener('click', function() {
+            div.remove();  // Remove the section
+            addedDocs.delete(docType);  // Remove the document type from the addedDocs set
+            docCounter[docType] = 0; // Reset the count for the document type
+        });
+
+        // Create a column for the Cancel button
+        const col5 = document.createElement('div');
+        col5.classList.add('col-md-12');
+        col5.appendChild(cancelBtn);
+
+        // Append all columns to the row
+        div.appendChild(col1);
+        div.appendChild(col2);
+        div.appendChild(col3);
+        div.appendChild(col4);
+        div.appendChild(col5);
+
+        // Append the row to the container
+        container.appendChild(div);
+    }
+
+    // Add an event listener to the dropdown
+    document.getElementById('id_docs').addEventListener('change', function () {
+        const selectedDocType = this.options[this.selectedIndex].text;
+
+        if (selectedDocType && !addedDocs.has(selectedDocType)) {
+            // If the document type is not already added, create a new field
+            addedDocs.add(selectedDocType);
+            createFileInputField(selectedDocType);
+        } else if (addedDocs.has(selectedDocType)) {
+            // If the document type is already added, create again
+            createFileInputField(selectedDocType);
+        }
+    });
 </script>
+
+
+
+
+
+
+
+
+
 
 
 <!-- age calculator -->

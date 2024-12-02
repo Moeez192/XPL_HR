@@ -157,6 +157,11 @@ class Employee(models.Model):
         ('no', 'No'),
     ]
     can_join_again = models.TextField(max_length=4,choices=CAN_JOIN_AGAIN)
+    TIMESHEET_REQUIRED=[
+        ('yes','Yes'),
+        ('no','No')
+    ]
+    timesheet_required=models.CharField(max_length=4,choices=TIMESHEET_REQUIRED,default='yes')
     account_type = models.CharField(max_length=256)
     routing_code= models.CharField(max_length=256)
     swift_code = models.CharField(max_length=256)
@@ -178,7 +183,8 @@ class Employee(models.Model):
         ('no','No')
     ] 
     wps_profile= models.TextField(max_length=10,choices=WPS_PROFILE,default='no')
-    skills=models.TextField(default="no skill")
+    skills=models.TextField()
+    reporting_manager = models.ForeignKey('self',on_delete=models.SET_NULL,null=True,blank=True,related_name="report_to_manager")
 
 
 
@@ -219,9 +225,9 @@ class Employee(models.Model):
     emergency_relation = models.CharField(max_length=100)
     emergency_phone = models.CharField(max_length=12)
 
-    profile_photo = models.ImageField(upload_to='profile_photos/')
-    cv_upload = models.FileField(upload_to='cv_uploads/')
-    signed_contract = models.FileField(upload_to='signed_contracts/')
+    profile_photo = models.ImageField(upload_to='profile_photos/',null=True,blank=True)
+    cv_upload = models.FileField(upload_to='cv_uploads/',null=True,blank=True)
+    signed_contract = models.FileField(upload_to='signed_contracts/',null=True,blank=True)
     
     @property
     def is_authenticated(self):
@@ -239,6 +245,12 @@ class EmployeeDocument(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='documents')
     doctype = models.ForeignKey(uploadDocType, on_delete=models.CASCADE)
     file = models.FileField(upload_to='employee_documents/',blank=True, null=True)
+    issue_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.doctype.doc_type} - {self.file.name}"
 
 class Department(models.Model):
     dep_name=models.CharField(max_length=50)

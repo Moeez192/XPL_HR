@@ -38,7 +38,7 @@
                     <div class="profile-card2">
                         <div class="text-center">
                             <h6>Reporting To</h6>
-                            <p><strong>Anjum Ali</strong></p>
+                            <p><strong>{{ user.reporting_manager.first_name }} {{ user.reporting_manager.last_name }} </strong></p>
                         </div>
                     </div>
                     <div class="profile-card2">
@@ -103,7 +103,7 @@
                                     <div class="col-md-4">
                                         <div class="d-flex align-items-center">
                                             <span class="icon">&#128100;</span>
-                                            <span>Business Unit: Global Operations</span>
+                                            <span>Business Unit: {{ user.business_unit }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -115,7 +115,7 @@
                                     <div class="col-md-4">
                                         <div class="d-flex align-items-center">
                                             <span class="icon">&#128102;</span>
-                                            <span>Department: Consulting Services</span>
+                                            <span>Department: {{ user.department }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -133,24 +133,24 @@
                                 <h6>Work Information</h6>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>Business Unit:</strong> Global Operations</p>
-                                        <p><strong>Department:</strong> Consulting Services</p>
-                                        <p><strong>Rate Basis:</strong> Monthly Rate</p>
-                                        <p><strong>Onsite Rate:</strong> 100.00</p>
-                                        <p><strong>Location:</strong> Dhahran</p>
-                                        <p><strong>Designation:</strong> Business Process Consultant</p>
+                                        <p><strong>Business Unit:</strong> {{ user.business_unit }}</p>
+                                        <p><strong>Department:</strong> {{ user.department }}</p>
+                                        <p><strong>Rate Basis:</strong> {{ user.rate_basis }}</p>
+                                        <p><strong>Onsite Rate:</strong> {{ user.onsite_salary }}</p>
+                                        <p><strong>Location:</strong> {{ user.work_location }}</p>
+                                        <p><strong>Designation:</strong> {{ user.position}}</p>
                                         <p><strong>Streams:</strong> Consulting - Functional - Business Process</p>
-                                        <p><strong>WPS Profile:</strong> Yes</p>
+                                        <p><strong>WPS Profile:</strong> {{ user.wps_profile }}</p>
                                     </div>
                                     <div class="col-md-6">
                                         <p><strong>Zoho Role:</strong> Admin</p>
                                         <p><strong>Division:</strong> Consulting Services</p>
-                                        <p><strong>Employment Type:</strong> Permanent</p>
-                                        <p><strong>Remote Rate:</strong> 50.00</p>
-                                        <p><strong>Billing Type:</strong> C Rate</p>
-                                        <p><strong>Employee Status:</strong> Active</p>
-                                        <p><strong>Leaves Policy:</strong> 12 Days</p>
-                                        <p><strong>Timesheet Required:</strong> No</p>
+                                        <p><strong>Employment Type:</strong> {{ user.employment_type }}</p>
+                                        <p><strong>Remote Rate:</strong> {{ user.remote_salary }}</p>
+                                        <p><strong>Billing Type:</strong> {{ user.billing_type }}</p>
+                                        <p><strong>Employee Status:</strong> {{ user.employee_status }}</p>
+                                        <p><strong>Leaves Policy:</strong> {{ user.leave_policy }}</p>
+                                        <p><strong>Timesheet Required:</strong> {{ user.timesheet_required }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -158,10 +158,7 @@
                                 <h6>Hierarchy Information</h6>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>Reporting Manager</strong> Farooq Shaik EOOO1</p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p><strong>Secondary Reporting Manager</strong> </p>
+                                        <p><strong>Reporting Manager</strong> {{ user.reporting_manager }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -169,14 +166,13 @@
                                 <h6>Personal Details</h6>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>Date of Birth</strong> </p>
-                                        <p><strong>Age</strong> </p>
+                                        <p><strong>Date of Birth</strong> {{ user.dob }}</p>
+                                        <p><strong>Age</strong> {{ user.age }}</p>
                                         <p><strong>Gender</strong> Male</p>
-                                        <p><strong>Onsite Rate:</strong> Married</p>
-                                        <p><strong>About</strong> </p>
+                                        <p><strong>Marital Status:</strong> {{ user.marital_status }}</p>
                                     </div>
                                     <div class="col-md-6">
-                                        <p><strong>Ask me about/ Expertise</strong> </p>
+                                        <p><strong>Ask me about/ Expertise</strong>{{ user.skills }} </p>
                                     </div>
                                 </div>
                             </div>

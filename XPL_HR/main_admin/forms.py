@@ -23,10 +23,11 @@ class BillingTypeForm(forms.ModelForm):
 class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
-        fields = ['first_name', 'last_name', 'dob', 'gender', 'email', 'password', 'phone', 'address', 
-                  'nationality', 'employee_id', 'job_title', 'department', 'employment_type',
-                  'date_of_joining', 'employee_status', 'work_location', 'bonus', 'bank_account',
-                  'emergency_name', 'emergency_relation', 'emergency_phone','is_supervisor','employee_role','last_login','onsite_salary','remote_salary','account_number','iban_number','work_location','position','rate_basis','nick_name','business_unit','mol_id','source_of_hire','contract_start_date','contract_end_date','marital_status','linkdln','x_twitter','personel_phone','permanent_address','date_of_exit','reason_for_exit','can_join_again','account_type','account_type','swift_code','ifsc_code','routing_code','first_entry_in_country','latest_entry_in_country','latest_exit_from_country','total_expirence','leave_policy','sap_certifications','docs','age','days_from_latest_entry','billing_type','bank_country','wps_profile','skills']  
+        # fields = ['first_name', 'last_name', 'dob', 'gender', 'email', 'password', 'phone', 'address', 
+        #           'nationality', 'employee_id', 'job_title', 'department', 'employment_type',
+        #           'date_of_joining', 'employee_status', 'work_location', 'bonus', 'bank_account',
+        #           'emergency_name', 'emergency_relation', 'emergency_phone','is_supervisor','employee_role','last_login','onsite_salary','remote_salary','account_number','iban_number','work_location','position','rate_basis','nick_name','business_unit','mol_id','source_of_hire','contract_start_date','contract_end_date','marital_status','linkdln','x_twitter','personel_phone','permanent_address','date_of_exit','reason_for_exit','can_join_again','account_type','account_type','swift_code','ifsc_code','routing_code','first_entry_in_country','latest_entry_in_country','latest_exit_from_country','total_expirence','leave_policy','sap_certifications','docs','age','days_from_latest_entry','billing_type','bank_country','wps_profile','skills']  
+        fields = '__all__'
         
         
 

@@ -101,19 +101,130 @@ def employee_delete_view(request, pk):
 @no_cache
 def edit_employee(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
+
+
+    # if request.method == 'POST':
+    #         # Check for a document deletion request
+    #     if 'delete_document' in request.POST:
+    #         document_id = request.POST['delete_document']
+    #         document = get_object_or_404(EmployeeDocument, id=document_id, employee=employee)
+            
+    #         # Delete the document
+    #         document.delete()
+    #         messages.success(request, f"Document {document.doctype.doc_type} deleted successfully!")
+    #         return redirect('edit_employee', employee_id=employee_id)
+
+
     if request.method == 'POST':
-        form = EmployeeForm(request.POST, instance=employee)
+        form = EmployeeForm(request.POST, request.FILES, instance=employee)
+
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Edited Successfully')
-            return redirect('employees')  # Redirect to the employee list or details page after saving
+            form.save()  # Save the employee details first
+            print("Employee data saved successfully.")
+
+            # Handle updating existing documents
+            for key in request.FILES:
+                if key.startswith('file_'):
+                    document_id = key.split('_')[1]  # Extract the document ID from the input name
+                    document = EmployeeDocument.objects.filter(id=document_id, employee=employee).first()
+
+                    if document:
+                        # Retrieve associated data for this document (issue date, expiry date, notes)
+                        issue_date = request.POST.get(f'issue_date_{document_id}')
+                        expiry_date = request.POST.get(f'expiry_date_{document_id}')
+                        notes = request.POST.get(f'notes_{document_id}')
+
+                        # Get the uploaded file (if any)
+                        file = request.FILES.get(key)
+
+                        # Update the file if a new one is uploaded
+                        if file:
+                            document.file = file
+                            print(f"Updated file for document {document_id}: {file.name}")
+
+                        # Update the document fields (issue_date, expiry_date, notes)
+                        document.issue_date = issue_date
+                        document.expiry_date = expiry_date
+                        document.notes = notes
+                        print(f"Updated document {document_id}: issue_date={issue_date}, expiry_date={expiry_date}, notes={notes}")
+
+                        # Save the updated document
+                        document.save()
+                        print(f"Document {document.id} updated successfully.")
+
+            # Handle adding new documents
+            for key in request.FILES:
+                if '_file_' in key:  # Check for new documents
+                    # Extract document type from the key (e.g., 'passport_file_1' => 'passport')
+                    doc_type = key.split('_file_')[0]
+                    doc_count = key.split('_file_')[1]  # To differentiate multiple fields of the same type
+                    issue_date = request.POST.get(f'{doc_type}_issue_date_{doc_count}')
+                    expiry_date = request.POST.get(f'{doc_type}_expiry_date_{doc_count}')
+                    notes = request.POST.get(f'{doc_type}_notes_{doc_count}')
+                    file = request.FILES[key]
+
+                    # Validate document fields
+                    if not file or not issue_date or not expiry_date:
+                        messages.error(request, f"Missing fields for {doc_type.capitalize()} document. Please fill all fields.")
+                        # Rollback transaction
+                        raise ValueError(f"Missing fields for {doc_type.capitalize()} document.")
+
+                    # Get the DocumentType object (e.g., 'Passport') from the database
+                    try:
+                        document_type = uploadDocType.objects.get(doc_type=doc_type)  # Use doc_type instead of name
+                    except uploadDocType.DoesNotExist:
+                        document_type = None
+                        messages.error(request, f"Document type '{doc_type.capitalize()}' not found in the database.")
+                        # Rollback transaction
+                        raise ValueError(f"Document type '{doc_type.capitalize()}' not found in the database.")
+
+                    if document_type:
+                        # Save the document to the EmployeeDocument model
+                        EmployeeDocument.objects.create(
+                            employee=employee,
+                            doctype=document_type,  # Pass the DocumentType object, not just its name
+                            file=file,
+                            issue_date=issue_date,
+                            expiry_date=expiry_date,
+                            notes=notes
+                        )
+                        print(f"New document {file.name} added successfully.")
+
+            messages.success(request, 'Employee Updated')
+            return redirect('employees')  # Redirect to employee list or details page after saving
+
     else:
         form = EmployeeForm(instance=employee)
+
+    # Fetch existing documents for this employee
+    existing_documents = EmployeeDocument.objects.filter(employee=employee)
+    print(f"Existing documents for employee {employee_id}: {existing_documents}")
+
+    
+    
+    # Fetch existing documents for this employee
+    # existing_documents = EmployeeDocument.objects.filter(employee=employee)
+    # print(f"Existing documents for employee {employee_id}: {existing_documents}")
+    
     
     return render(request, 'templates/sub_templates/edit_employee.html', {
-        'form': form, 
+        'form': form,
         'employee': employee,
-        })
+        'existing_documents': existing_documents,
+    })
+
+@login_required
+@no_cache
+def delete_employee_document(request, document_id):
+    document = get_object_or_404(EmployeeDocument, id=document_id)
+    employee_id = document.employee.id  # Save the employee id before deletion
+    
+    # Delete the document
+    document.delete()
+    
+    messages.success(request, f"Document {document.doctype.doc_type} deleted successfully!")
+    return redirect('edit_employee', employee_id=employee_id)
+
 
 @login_required
 @no_cache
@@ -179,37 +290,58 @@ def employees(request):
         if 'employee_submit' in request.POST:
             # Handle Employee Form
             employee_form = EmployeeForm(request.POST, request.FILES)
-            
-            if employee_form.is_valid():
-                # Save the employee first
+
+        if employee_form.is_valid():
+            # Start a transaction
+            with transaction.atomic():
+                # Save the employee data first (we will roll back if document validation fails)
                 employee = employee_form.save()
 
-                # Now process the uploaded files
-                for doc_type in request.FILES:
-                    # Extract the document type name (passport_file, visa_file, etc.)
-                    doc_type_name = doc_type.split('_')[0]
+                # Now handle the document uploads
+                doc_counter = {}  # Counter to keep track of multiple document fields
+                for key in request.FILES:
+                    # Check if the key contains the document type name and field suffix
+                    if '_file_' in key:
+                        # Extract document type from the key (e.g., 'passport_file_1' => 'passport')
+                        doc_type = key.split('_file_')[0]
+                        doc_count = key.split('_file_')[1]  # To differentiate multiple fields of the same type
+                        issue_date = request.POST.get(f'{doc_type}_issue_date_{doc_count}')
+                        expiry_date = request.POST.get(f'{doc_type}_expiry_date_{doc_count}')
+                        notes = request.POST.get(f'{doc_type}_notes_{doc_count}')
+                        file = request.FILES[key]
 
-                    # Try to get the document type from the database
-                    try:
-                        doc_type_instance = uploadDocType.objects.get(doc_type=doc_type_name)
-                    except uploadDocType.DoesNotExist:
-                        messages.error(request, f"Document type '{doc_type_name}' not found.")
-                        continue  # Skip this document type if not found
+                        # Validate document fields
+                        if not file or not issue_date or not expiry_date:
+                            messages.error(request, f"Missing fields for {doc_type.capitalize()} document. Please fill all fields.")
+                            # Rollback transaction
+                            raise ValueError(f"Missing fields for {doc_type.capitalize()} document.")
 
-                    # Get the uploaded file
-                    file = request.FILES[doc_type]
+                        # Get the DocumentType object (e.g., 'Passport') from the database
+                        try:
+                            document_type = uploadDocType.objects.get(doc_type=doc_type.capitalize())  # Use doc_type instead of name
+                        except uploadDocType.DoesNotExist:
+                            document_type = None
+                            messages.error(request, f"Document type '{doc_type.capitalize()}' not found in the database.")
+                            # Rollback transaction
+                            raise ValueError(f"Document type '{doc_type.capitalize()}' not found in the database.")
 
-                    # Create the document record for the employee
-                    EmployeeDocument.objects.create(
-                        employee=employee,
-                        doctype=doc_type_instance,
-                        file=file
-                    )
+                        if document_type:
+                            # Save the document to the EmployeeDocument model
+                            EmployeeDocument.objects.create(
+                                employee=employee,
+                                doctype=document_type,  # Pass the DocumentType object, not just its name
+                                file=file,
+                                issue_date=issue_date,
+                                expiry_date=expiry_date,
+                                notes=notes
+                            )
+                        else:
+                            # If document_type is None, rollback
+                            raise ValueError(f"Document type '{doc_type.capitalize()}' could not be found in the database.")
 
-                messages.success(request, 'Employee added successfully!')
+                # If we reach here, all documents are valid, and employee is saved
+                messages.success(request, "Employee and documents saved successfully!")
                 return redirect('employees')
-            else:
-                 print("Form errors:", employee_form.errors)
         if 'department_submit' in request.POST:
             department_form = DepForm(request.POST)
             if department_form.is_valid():

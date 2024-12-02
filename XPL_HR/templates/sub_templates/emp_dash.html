@@ -125,6 +125,9 @@
                         {% endif %}
                     </td>
                     <td>
+                        <a href="{% url 'edit_employee' employee.id %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-pencil-alt"></i>
+                        </a>
                         
                         <form action="{% url 'employee_delete' employee.id %}" method="POST" style="display:inline;">
                             {% csrf_token %}
