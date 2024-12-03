@@ -1,6 +1,11 @@
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} Employees {% endblock %}
+{% block content %}
 {% load widget_tweaks %}
+
 <div class="containe-fluid mt-5">
-    <div class="scrollable-container">
+    <!-- <div class="scrollable-container"> -->
         <h2 class="text-center mb-4">Add Employee</h2>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
@@ -347,8 +352,8 @@
                 <button type="submit" name="employee_submit" class="btn btn-primary">Add Employee</button>
             </div>
         </form>
-    </div>
-</div>
+    <!-- </div> -->
+<!-- </div> -->
 
 
 <!-- Dynamic inpput fields  -->
@@ -525,6 +530,7 @@
         issueDateInput.name = docType + '_issue_date_' + docCounter[docType];  // Unique name for each issue date
         issueDateInput.id = docType + '_issue_date_' + docCounter[docType];
         issueDateInput.classList.add('form-control');
+        issueDateInput.required = true;
 
         // Append label and input field to the second column
         col2.appendChild(issueDateLabel);
@@ -545,6 +551,7 @@
         expiryDateInput.name = docType + '_expiry_date_' + docCounter[docType];  // Unique name for each expiry date
         expiryDateInput.id = docType + '_expiry_date_' + docCounter[docType];
         expiryDateInput.classList.add('form-control');
+        expiryDateInput.required = true;
 
         // Append label and input field to the third column
         col3.appendChild(expiryDateLabel);
@@ -665,7 +672,7 @@ document.getElementById('id_dob').addEventListener('change', function () {
 
 
 <!-- latest entry days counter -->
-<script>
+<!-- <script>
     document.addEventListener('DOMContentLoaded', function() {
         const latestEntryField = document.getElementById('id_latest_entry_in_country');
         const daysField = document.getElementById('id_days_from_latest_entry');
@@ -693,7 +700,50 @@ document.getElementById('id_dob').addEventListener('change', function () {
             calculateDaysFromLatestEntry();
         }
     });
+</script> -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const latestEntryField = document.getElementById('id_latest_entry_in_country');
+        const latestExitField = document.getElementById('id_latest_exit_from_country');
+        const daysField = document.getElementById('id_days_from_latest_entry');
+
+        // Function to calculate the number of days between two dates
+        function calculateDaysFromLatestEntry() {
+            const latestEntryDate = new Date(latestEntryField.value);
+            const latestExitDate = new Date(latestExitField.value);
+            const currentDate = new Date();
+
+            let daysDifference = 0;
+
+            if (latestExitDate > latestEntryDate) {
+                // If Latest Exit is greater than Latest Entry, calculate difference between Latest Entry and Latest Exit
+                daysDifference = Math.floor((latestExitDate - latestEntryDate) / (1000 * 3600 * 24));
+            } else {
+                // If Latest Exit is not greater, calculate difference between Current Date and Latest Exit
+                daysDifference = Math.floor((currentDate - latestExitDate) / (1000 * 3600 * 24));
+            }
+
+            // Display the calculated days with "Days" appended in the days field
+            daysField.value = daysDifference + " Days";
+        }
+
+        // Event listener to trigger the calculation when either the latest entry or latest exit is selected
+        latestEntryField.addEventListener('change', function() {
+            calculateDaysFromLatestEntry();
+        });
+
+        latestExitField.addEventListener('change', function() {
+            calculateDaysFromLatestEntry();
+        });
+
+        // Call the function once on page load if the dates are already filled
+        if (latestEntryField.value && latestExitField.value) {
+            calculateDaysFromLatestEntry();
+        }
+    });
 </script>
+
 
 
 <script>
@@ -809,4 +859,7 @@ document.getElementById('id_dob').addEventListener('change', function () {
 
     renderTags();
 </script>
+
+
+{%endblock%}
 

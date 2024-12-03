@@ -29,7 +29,7 @@
     padding: 20px;
     border-radius: 10px;
     transition: transform 0.3s;
-    background-color: #f8f9fa;
+    /* background-color: #f8f9fa; */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -86,7 +86,7 @@
     align-items: center;
     justify-content: center;
     color: white;
-    background-color: #6c757d; 
+    /* background-color: #6c757d;  */
     margin-right: 20px; 
 }
 

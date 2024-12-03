@@ -3,25 +3,12 @@
 {% block title %} Employees {% endblock %}
 {% block content %}
 <link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
-<header class="nav-bar">
-    <div class="nav-bar-left">
-        <nav class="nav-bar-nav">
-            <a href="#" class="navbar-link active" data-tab="option1">Overview</a>
-            <a href="#" class="navbar-link" data-tab="option2">Add Employee</a>
-            <a href="#" class="navbar-link" data-tab="option3">Departments</a>
-        </nav>
-    </div>
-</header>
-<div class="header-image"> </div>
 
-<div class="container-fluid active" id="option1-section" style="display: block;" >
+
     {% include "templates/sub_templates/emp_dash.html" %}
-</div>
-<div class="container-fluid" id="option2-section" style="display: none;">
-    {% include "templates/sub_templates/add_emp.html" %}
-</div>
-<div class="container-fluid" id="option3-section" style="display: none;">
-    {% include "templates/sub_templates/add_dep.html" %}
-</div>
+
+
+
 
 {%endblock%}
+

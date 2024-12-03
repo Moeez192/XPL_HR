@@ -244,6 +244,82 @@ def delete_department(request, department_id):
     messages.success(request, 'Department deleted successfully!')
     return redirect('employees')
 
+@login_required
+@no_cache
+def add_employee(request):
+    employee_form = EmployeeForm(request.POST, request.FILES)
+    if request.method == 'POST':
+        if 'employee_submit' in request.POST:
+            employee_form = EmployeeForm(request.POST, request.FILES)
+
+        if employee_form.is_valid():
+            with transaction.atomic():
+                employee = employee_form.save()
+
+                doc_counter = {}  
+                for key in request.FILES:
+                    if '_file_' in key:
+                        doc_type = key.split('_file_')[0]
+                        doc_count = key.split('_file_')[1]  # To differentiate multiple fields of the same type
+                        issue_date = request.POST.get(f'{doc_type}_issue_date_{doc_count}')
+                        expiry_date = request.POST.get(f'{doc_type}_expiry_date_{doc_count}')
+                        notes = request.POST.get(f'{doc_type}_notes_{doc_count}')
+                        file = request.FILES[key]
+
+                        # if not file or not issue_date or not expiry_date:
+                        #     messages.error(request, f"Missing fields for {doc_type.capitalize()} document. Please fill all fields.")
+                        #     # Rollback transaction
+                        #     raise ValueError(f"Missing fields for {doc_type.capitalize()} document.")
+
+                        try:
+                            document_type = uploadDocType.objects.get(doc_type=doc_type.capitalize())  # Use doc_type instead of name
+                        except uploadDocType.DoesNotExist:
+                            document_type = None
+                            messages.error(request, f"Document type '{doc_type.capitalize()}' not found in the database.")
+                            raise ValueError(f"Document type '{doc_type.capitalize()}' not found in the database.")
+
+                        if document_type:
+                            EmployeeDocument.objects.create(
+                                employee=employee,
+                                doctype=document_type,  
+                                file=file,
+                                issue_date=issue_date,
+                                expiry_date=expiry_date,
+                                notes=notes
+                            )
+                        else:
+                            
+                            raise ValueError(f"Document type '{doc_type.capitalize()}' could not be found in the database.")
+
+                messages.success(request, "Employee and documents saved successfully!")
+                return redirect('employees')
+    else:
+            employee_form = EmployeeForm()
+    return render(request, 'templates/sub_templates/add_emp.html', {
+        'form': employee_form,
+        
+    })
+
+
+def add_department(request):
+    department_form = DepForm(request.POST)
+
+    if request.method == 'POST':
+        if 'department_submit' in request.POST:
+            department_form = DepForm(request.POST)
+            if department_form.is_valid():
+                department_form.save()
+                messages.success(request, 'Department added successfully!')
+                return redirect('employees')  
+    else:
+        department_form = DepForm()  
+
+    return render(request, 'templates/sub_templates/add_dep.html', {
+        'dep_form': department_form,
+    })
+
+
+
 
 @login_required
 @no_cache
