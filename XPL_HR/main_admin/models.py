@@ -225,7 +225,7 @@ class Employee(models.Model):
     emergency_relation = models.CharField(max_length=100)
     emergency_phone = models.CharField(max_length=12)
 
-    profile_photo = models.ImageField(upload_to='profile_photos/',null=True,blank=True)
+    profile_photo = models.ImageField(upload_to='profile_photos/')
     cv_upload = models.FileField(upload_to='cv_uploads/',null=True,blank=True)
     signed_contract = models.FileField(upload_to='signed_contracts/',null=True,blank=True)
     
@@ -362,6 +362,7 @@ class Timesheet(models.Model):
     task_description = models.TextField(blank=True, null=True)
     current_approver = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name='current_approvers')
     reject_reason = models.TextField(blank=True, null=True)
+    time_in_hrs = models.CharField(max_length=6, null=True, blank=True)
 
     location = models.CharField(
         max_length=50,
@@ -483,7 +484,8 @@ class DateRange(models.Model):
     project = models.ForeignKey(Projects,on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
-    month_range = models.CharField(max_length=50)
+    month = models.CharField(max_length=50)
+    year = models.IntegerField(default=2019)
 
     def __str__(self):
         return f"{self.project.project_name}: {self.start_date} - {self.end_date}"

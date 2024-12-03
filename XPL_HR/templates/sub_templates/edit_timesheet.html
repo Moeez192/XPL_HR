@@ -31,6 +31,7 @@
                         <th>Date</th>
                         <th>Task Description</th>
                         <th>Location</th>
+                        <th>Time In Hrs</th>
                         <th>Notes</th>
                     </tr>
                 </thead>
@@ -49,6 +50,7 @@
                                       placeholder="Task description" 
                                       >{{ timesheet.task_description }}</textarea>
                         </td>
+                        
         
                         <td>
                             <select name="location_{{ timesheet.date|date:"Y-m-d" }}" class="form-control" 
@@ -57,6 +59,13 @@
                                 <option value="remote" {% if timesheet.location == "remote" %}selected{% endif %}>Remote</option>
                                 <option value="holiday" {% if timesheet.location == "holiday" %}selected{% endif %}>Holiday</option>
                             </select>
+                        </td>
+                        <td>
+                            <textarea class="form-control" 
+                                      name="time_in_hrs_{{ timesheet.date|date:"Y-m-d" }}" 
+                                      placeholder="HH:mm"
+                                      
+                                      >{{ timesheet.time_in_hrs }}</textarea>
                         </td>
         
                         <td>
@@ -76,7 +85,7 @@
             </div>
         </form>
         
-        <script>
+        <!-- <script>
         function addNewRow() {
             const tbody = document.getElementById('timesheetBody');
             const newRow = document.createElement('tr');
@@ -102,7 +111,7 @@
             newRow.innerHTML = `
                 <td>
                     <label>${newDateStr}</label>
-                    <input type="hidden" name="new_date" value="${newDateStr}"> <!-- Changed to match the view logic -->
+                    <input type="hidden" name="new_date" value="${newDateStr}"> 
                 </td>
                 <td>
                     <textarea class="form-control " 
@@ -125,8 +134,22 @@
         
             tbody.appendChild(newRow);
         }
-        </script>
+        </script> -->
+<script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+            const timeFields = document.querySelectorAll('textarea[name^="time_in_hrs_"]');
+            const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
         
+            timeFields.forEach(field => {
+                if (field.value && !timeRegex.test(field.value)) {
+                    event.preventDefault();
+                    alert(`Invalid time format: ${field.value}. Please use HH:mm.`);
+                    field.focus();
+                }
+            });
+        });
+        
+    </script>   
 </div>
 </div>
 <!-- ${isWeekend ? 'readonly' : ''} -->

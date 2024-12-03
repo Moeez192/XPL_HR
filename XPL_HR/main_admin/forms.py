@@ -163,7 +163,7 @@ class LeaveApplicationForm(forms.ModelForm):
 class TimesheetForm(forms.ModelForm):
     class Meta:
         model = Timesheet
-        fields = ['date', 'task_description', 'location', 'notes','status']
+        fields = ['date', 'task_description', 'location', 'notes','status','time_in_hrs']
 
         widgets = {
             'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
@@ -262,7 +262,7 @@ class ProjectFileForm(forms.ModelForm):
 class PeriodForm(forms.ModelForm):
     class Meta:
         model = DateRange
-        fields = ['project', 'start_date', 'end_date','month_range']
+        fields = ['project', 'start_date', 'end_date','year','month']
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),

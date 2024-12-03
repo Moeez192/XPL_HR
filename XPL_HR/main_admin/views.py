@@ -102,109 +102,81 @@ def employee_delete_view(request, pk):
 def edit_employee(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
 
-
-    # if request.method == 'POST':
-    #         # Check for a document deletion request
-    #     if 'delete_document' in request.POST:
-    #         document_id = request.POST['delete_document']
-    #         document = get_object_or_404(EmployeeDocument, id=document_id, employee=employee)
-            
-    #         # Delete the document
-    #         document.delete()
-    #         messages.success(request, f"Document {document.doctype.doc_type} deleted successfully!")
-    #         return redirect('edit_employee', employee_id=employee_id)
-
-
     if request.method == 'POST':
         form = EmployeeForm(request.POST, request.FILES, instance=employee)
 
-        if form.is_valid():
-            form.save()  # Save the employee details first
-            print("Employee data saved successfully.")
+        with transaction.atomic():
 
-            # Handle updating existing documents
-            for key in request.FILES:
-                if key.startswith('file_'):
-                    document_id = key.split('_')[1]  # Extract the document ID from the input name
-                    document = EmployeeDocument.objects.filter(id=document_id, employee=employee).first()
+            if form.is_valid():
+                form.save()  
+                print("Employee data saved successfully.")
 
-                    if document:
-                        # Retrieve associated data for this document (issue date, expiry date, notes)
-                        issue_date = request.POST.get(f'issue_date_{document_id}')
-                        expiry_date = request.POST.get(f'expiry_date_{document_id}')
-                        notes = request.POST.get(f'notes_{document_id}')
+                
+                for key in request.FILES:
+                    if key.startswith('file_'):
+                        document_id = key.split('_')[1]  
+                        document = EmployeeDocument.objects.filter(id=document_id, employee=employee).first()
 
-                        # Get the uploaded file (if any)
-                        file = request.FILES.get(key)
+                        if document:
+                            issue_date = request.POST.get(f'issue_date_{document_id}')
+                            expiry_date = request.POST.get(f'expiry_date_{document_id}')
+                            notes = request.POST.get(f'notes_{document_id}')
 
-                        # Update the file if a new one is uploaded
-                        if file:
-                            document.file = file
-                            print(f"Updated file for document {document_id}: {file.name}")
+                            file = request.FILES.get(key)
 
-                        # Update the document fields (issue_date, expiry_date, notes)
-                        document.issue_date = issue_date
-                        document.expiry_date = expiry_date
-                        document.notes = notes
-                        print(f"Updated document {document_id}: issue_date={issue_date}, expiry_date={expiry_date}, notes={notes}")
+                            if file:
+                                document.file = file
+                                print(f"Updated file for document {document_id}: {file.name}")
 
-                        # Save the updated document
-                        document.save()
-                        print(f"Document {document.id} updated successfully.")
+                            document.issue_date = issue_date
+                            document.expiry_date = expiry_date
+                            document.notes = notes
+                            print(f"Updated document {document_id}: issue_date={issue_date}, expiry_date={expiry_date}, notes={notes}")
 
-            # Handle adding new documents
-            for key in request.FILES:
-                if '_file_' in key:  # Check for new documents
-                    # Extract document type from the key (e.g., 'passport_file_1' => 'passport')
-                    doc_type = key.split('_file_')[0]
-                    doc_count = key.split('_file_')[1]  # To differentiate multiple fields of the same type
-                    issue_date = request.POST.get(f'{doc_type}_issue_date_{doc_count}')
-                    expiry_date = request.POST.get(f'{doc_type}_expiry_date_{doc_count}')
-                    notes = request.POST.get(f'{doc_type}_notes_{doc_count}')
-                    file = request.FILES[key]
+                            document.save()
+                            print(f"Document {document.id} updated successfully.")
+                doc_counter = {}  
 
-                    # Validate document fields
-                    if not file or not issue_date or not expiry_date:
-                        messages.error(request, f"Missing fields for {doc_type.capitalize()} document. Please fill all fields.")
-                        # Rollback transaction
-                        raise ValueError(f"Missing fields for {doc_type.capitalize()} document.")
+                for key in request.FILES:
+                    if '_file_' in key:  
+                        doc_type = key.split('_file_')[0]
+                        doc_count = key.split('_file_')[1]  
+                        issue_date = request.POST.get(f'{doc_type}_issue_date_{doc_count}')
+                        expiry_date = request.POST.get(f'{doc_type}_expiry_date_{doc_count}')
+                        notes = request.POST.get(f'{doc_type}_notes_{doc_count}')
+                        file = request.FILES[key]
 
-                    # Get the DocumentType object (e.g., 'Passport') from the database
-                    try:
-                        document_type = uploadDocType.objects.get(doc_type=doc_type)  # Use doc_type instead of name
-                    except uploadDocType.DoesNotExist:
-                        document_type = None
-                        messages.error(request, f"Document type '{doc_type.capitalize()}' not found in the database.")
-                        # Rollback transaction
-                        raise ValueError(f"Document type '{doc_type.capitalize()}' not found in the database.")
+                        if not file or not issue_date or not expiry_date:
+                            messages.error(request, f"Missing fields for {doc_type.capitalize()} document. Please fill all fields.")
+                            raise ValueError(f"Missing fields for {doc_type.capitalize()} document.")
 
-                    if document_type:
-                        # Save the document to the EmployeeDocument model
-                        EmployeeDocument.objects.create(
-                            employee=employee,
-                            doctype=document_type,  # Pass the DocumentType object, not just its name
-                            file=file,
-                            issue_date=issue_date,
-                            expiry_date=expiry_date,
-                            notes=notes
-                        )
-                        print(f"New document {file.name} added successfully.")
+                        try:
+                            document_type = uploadDocType.objects.get(doc_type=doc_type)  
+                        except uploadDocType.DoesNotExist:
+                            document_type = None
+                            messages.error(request, f"Document type '{doc_type.capitalize()}' not found in the database.")
+                            raise ValueError(f"Document type '{doc_type.capitalize()}' not found in the database.")
 
-            messages.success(request, 'Employee Updated')
-            return redirect('employees')  # Redirect to employee list or details page after saving
+                        if document_type:
+                            EmployeeDocument.objects.create(
+                                employee=employee,
+                                doctype=document_type,  
+                                file=file,
+                                issue_date=issue_date,
+                                expiry_date=expiry_date,
+                                notes=notes
+                            )
+                            print(f"New document {file.name} added successfully.")
+
+                messages.success(request, 'Employee Updated')
+                return redirect('employees') 
 
     else:
         form = EmployeeForm(instance=employee)
 
-    # Fetch existing documents for this employee
     existing_documents = EmployeeDocument.objects.filter(employee=employee)
     print(f"Existing documents for employee {employee_id}: {existing_documents}")
 
-    
-    
-    # Fetch existing documents for this employee
-    # existing_documents = EmployeeDocument.objects.filter(employee=employee)
-    # print(f"Existing documents for employee {employee_id}: {existing_documents}")
     
     
     return render(request, 'templates/sub_templates/edit_employee.html', {
@@ -213,13 +185,12 @@ def edit_employee(request, employee_id):
         'existing_documents': existing_documents,
     })
 
-@login_required
-@no_cache
+
 def delete_employee_document(request, document_id):
     document = get_object_or_404(EmployeeDocument, id=document_id)
-    employee_id = document.employee.id  # Save the employee id before deletion
+    employee_id = document.employee.id  
     
-    # Delete the document
+    
     document.delete()
     
     messages.success(request, f"Document {document.doctype.doc_type} deleted successfully!")
@@ -288,21 +259,15 @@ def employees(request):
 
     if request.method == 'POST':
         if 'employee_submit' in request.POST:
-            # Handle Employee Form
             employee_form = EmployeeForm(request.POST, request.FILES)
 
         if employee_form.is_valid():
-            # Start a transaction
             with transaction.atomic():
-                # Save the employee data first (we will roll back if document validation fails)
                 employee = employee_form.save()
 
-                # Now handle the document uploads
-                doc_counter = {}  # Counter to keep track of multiple document fields
+                doc_counter = {}  
                 for key in request.FILES:
-                    # Check if the key contains the document type name and field suffix
                     if '_file_' in key:
-                        # Extract document type from the key (e.g., 'passport_file_1' => 'passport')
                         doc_type = key.split('_file_')[0]
                         doc_count = key.split('_file_')[1]  # To differentiate multiple fields of the same type
                         issue_date = request.POST.get(f'{doc_type}_issue_date_{doc_count}')
@@ -310,26 +275,22 @@ def employees(request):
                         notes = request.POST.get(f'{doc_type}_notes_{doc_count}')
                         file = request.FILES[key]
 
-                        # Validate document fields
                         if not file or not issue_date or not expiry_date:
                             messages.error(request, f"Missing fields for {doc_type.capitalize()} document. Please fill all fields.")
                             # Rollback transaction
                             raise ValueError(f"Missing fields for {doc_type.capitalize()} document.")
 
-                        # Get the DocumentType object (e.g., 'Passport') from the database
                         try:
                             document_type = uploadDocType.objects.get(doc_type=doc_type.capitalize())  # Use doc_type instead of name
                         except uploadDocType.DoesNotExist:
                             document_type = None
                             messages.error(request, f"Document type '{doc_type.capitalize()}' not found in the database.")
-                            # Rollback transaction
                             raise ValueError(f"Document type '{doc_type.capitalize()}' not found in the database.")
 
                         if document_type:
-                            # Save the document to the EmployeeDocument model
                             EmployeeDocument.objects.create(
                                 employee=employee,
-                                doctype=document_type,  # Pass the DocumentType object, not just its name
+                                doctype=document_type,  
                                 file=file,
                                 issue_date=issue_date,
                                 expiry_date=expiry_date,
@@ -339,7 +300,6 @@ def employees(request):
                             # If document_type is None, rollback
                             raise ValueError(f"Document type '{doc_type.capitalize()}' could not be found in the database.")
 
-                # If we reach here, all documents are valid, and employee is saved
                 messages.success(request, "Employee and documents saved successfully!")
                 return redirect('employees')
         if 'department_submit' in request.POST:
@@ -347,10 +307,10 @@ def employees(request):
             if department_form.is_valid():
                 department_form.save()
                 messages.success(request, 'Department added successfully!')
-                return redirect('employees')  # Redirect to avoid form resubmission
+                return redirect('employees')  
     else:
-        employee_form = EmployeeForm()  # Initialize empty form on GET request
-        department_form = DepForm()  # Initialize empty form on GET request
+        employee_form = EmployeeForm()  
+        department_form = DepForm()  
 
     return render(request, 'templates/employees.html', {
         'form': employee_form,
@@ -740,17 +700,68 @@ def timesheet(request):
     # Initialize an empty dictionary to hold the date ranges for each project
     project_date_ranges = {}
 
-    # Fetch date ranges for all projects
+    # # Fetch date ranges for all projects
+    # for project in projects:
+    #     try:
+    #         # Fetch the DateRange for the project
+    #         date_range = DateRange.objects.get(project=project)
+    #         project_date_ranges[project.id] = {
+    #             'start_date': date_range.start_date.strftime('%Y-%m-%d'),
+    #             'end_date': date_range.end_date.strftime('%Y-%m-%d'),
+    #         }
+    #     except DateRange.DoesNotExist:
+    #         project_date_ranges[project.id] = None  # No date range for this project
+    # Initialize the dictionary that will hold the project date ranges
+    
+
+# Loop through each project
     for project in projects:
-        try:
-            # Fetch the DateRange for the project
-            date_range = DateRange.objects.get(project=project)
-            project_date_ranges[project.id] = {
-                'start_date': date_range.start_date.strftime('%Y-%m-%d'),
-                'end_date': date_range.end_date.strftime('%Y-%m-%d'),
-            }
-        except DateRange.DoesNotExist:
-            project_date_ranges[project.id] = None  # No date range for this project
+        print(f"Processing Project ID: {project.id}")  # Debug print
+
+        # Fetch all date ranges associated with the project
+        date_ranges = DateRange.objects.filter(project=project)
+        
+        if not date_ranges:
+            print(f"No date ranges found for Project ID: {project.id}")  # Debug print
+            continue
+
+        # Initialize an empty list to hold month ranges for each project
+        month_ranges = []
+        
+        for date_range in date_ranges:
+            print(f"Processing DateRange: {date_range}")  # Debug print
+
+            # Extract the month from start_date and end_date
+            start_month = date_range.start_date.strftime('%B')
+            start_year = date_range.start_date.year
+            end_month = date_range.end_date.strftime('%B')
+            end_year = date_range.end_date.year
+            
+            # Combine month and year for better identification
+            if start_month == end_month and start_year == end_year:
+                month_ranges.append({
+                    'month': f"{start_month} {start_year}",
+                    'start_date': date_range.start_date.strftime('%Y-%m-%d'),
+                    'end_date': date_range.end_date.strftime('%Y-%m-%d'),
+                })
+            else:
+                month_ranges.append({
+                    'month': f"{start_month} {start_year} - {end_month} {end_year}",
+                    'start_date': date_range.start_date.strftime('%Y-%m-%d'),
+                    'end_date': date_range.end_date.strftime('%Y-%m-%d'),
+                })
+
+        # If month_ranges is not empty, add it to project_date_ranges
+        if month_ranges:
+            project_date_ranges[project.id] = month_ranges
+        else:
+            print(f"No month ranges for Project ID: {project.id}")  # Debug print
+
+    # Print the final project_date_ranges for debugging
+    print(f"Project Date Ranges: {project_date_ranges}")
+
+    
+    
 
     # Handle form submissions
     if request.method == 'POST':
@@ -761,38 +772,44 @@ def timesheet(request):
                 start_date = range_form.cleaned_data['start_date']
                 end_date = range_form.cleaned_data['end_date']
                 project = range_form.cleaned_data['project']
+                month = range_form.cleaned_data['month']
+                year = range_form.cleaned_data['year']
 
                 # Check for existing date ranges for the same project within the specified range
                 overlapping_ranges = DateRange.objects.filter(
                     project=project,
                     end_date__gte=start_date,
-                    start_date__lte=end_date
+                    start_date__lte=end_date,
                 )
 
                 if overlapping_ranges.exists():
                     messages.error(request, 'Date range overlaps with an existing range for this project.')
                 else:
+                        date_range = range_form.save(commit=False)
+                        date_range.employee = employee  # Optional: associate with employee
+                        date_range.save()
+                        messages.success(request, 'New date range set successfully!')
                     # Check if an active range exists for the project
-                    last_date_range = DateRange.objects.filter(project=project).order_by('-end_date').first()
+                    # last_date_range = DateRange.objects.filter(project=project).order_by('-end_date').first()
                     
-                    if last_date_range and last_date_range.end_date >= timezone.now().date():
-                        messages.error(request, 'Cannot add a new date range until the current one ends.')
-                    else:
-                        # Check if a range already exists for the project
-                        existing_range = DateRange.objects.filter(project=project).first()
+                    # if last_date_range and last_date_range.end_date >= timezone.now().date():
+                    #     messages.error(request, 'Cannot add a new date range until the current one ends.')
+                    # else:
+                    #     # Check if a range already exists for the project
+                    #     existing_range = DateRange.objects.filter(project=project).first()
                         
-                        if existing_range:
-                            # Update the existing range with new dates
-                            existing_range.start_date = start_date
-                            existing_range.end_date = end_date
-                            existing_range.save()
-                            messages.success(request, 'Date range updated successfully!')
-                        else:
-                            # Create a new date range
-                            date_range = range_form.save(commit=False)
-                            date_range.employee = employee  # Optional: associate with employee
-                            date_range.save()
-                            messages.success(request, 'New date range set successfully!')
+                    #     if existing_range:
+                    #         # Update the existing range with new dates
+                    #         existing_range.start_date = start_date
+                    #         existing_range.end_date = end_date
+                    #         existing_range.save()
+                    #         messages.success(request, 'Date range updated successfully!')
+                    #     else:
+                    #         # Create a new date range
+                    #         date_range = range_form.save(commit=False)
+                    #         date_range.employee = employee  # Optional: associate with employee
+                    #         date_range.save()
+                    #         messages.success(request, 'New date range set successfully!')
                         
                         return redirect('timesheet')
             else:
@@ -836,10 +853,6 @@ def timesheet(request):
                     task_description = request.POST.get(f'task_description_{date_str}', '').strip()
                     location = request.POST.get(f'location_{date_str}', '').strip()
 
-                    # Check if any required field is missing for weekdays
-                    # if not task_description or not location:
-                    #     # missing_fields = True
-                    #     messages.error(request, f'Missing required fields on {date_str} (weekdays must have all fields filled).')
 
                 current_date += timedelta(days=1)
 
@@ -876,6 +889,7 @@ def timesheet(request):
                     task_description = request.POST.get(f'task_description_{date_str}', '').strip()
                     location = request.POST.get(f'location_{date_str}', '').strip()
                     notes = request.POST.get(f'notes_{date_str}', '').strip()
+                    time_in_hrs=request.POST.get(f'time_in_hrs_{date_str}', '').strip()
 
                     # Save or update the timesheet
                     timesheet, created = Timesheet.objects.get_or_create(
@@ -886,6 +900,7 @@ def timesheet(request):
                             'task_description': task_description,
                             'location': location,
                             'notes': notes,
+                            'time_in_hrs':time_in_hrs,
                             'status': 'saved',
                             'is_editable': True,
                             'timesheet_group_id': timesheet_group_id,
@@ -895,6 +910,7 @@ def timesheet(request):
                         # If timesheet already exists, update it
                         timesheet.task_description = task_description
                         timesheet.location = location
+                        timesheet.time_in_hrs=time_in_hrs
                         timesheet.notes = notes
                         timesheet.is_editable = True
                         timesheet.status = 'saved'
@@ -1111,6 +1127,7 @@ def edit_timesheet(request, timesheet_group_id):
                     task_description = request.POST.get(f'task_description_{date_str}', timesheet.task_description)
                     location = request.POST.get(f'location_{date_str}', timesheet.location)
                     notes = request.POST.get(f'notes_{date_str}', timesheet.notes)
+                    time_in_hrs = request.POST.get(f'time_in_hrs_{date_str}', timesheet.time_in_hrs)
 
                     # Debug print to verify updated values
                     print(f"Updating timesheet for {date_str}:")
@@ -1120,6 +1137,7 @@ def edit_timesheet(request, timesheet_group_id):
                     timesheet.task_description = task_description
                     timesheet.location = location
                     timesheet.notes = notes
+                    timesheet.time_in_hrs=time_in_hrs
                     timesheet.save()
 
                 # Handle new timesheet rows

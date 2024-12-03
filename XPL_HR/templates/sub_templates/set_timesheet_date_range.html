@@ -11,16 +11,20 @@
                     {% render_field range_form.project class+="form-control"%}
                 </div>
                 <div class="col-md-6 mb-3">
+                    <label  class="form-label">Enter for Month</label>
+                    {% render_field range_form.month class+="form-control"%}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label  class="form-label">Enter for Year</label>
+                    {% render_field range_form.year class+="form-control"%}
+                </div>
+                <div class="col-md-6 mb-3">
                     <label  class="form-label">Start Date</label>
                     {% render_field range_form.start_date class+="form-control" %}
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">End Date</label>
                     {% render_field range_form.end_date class+="form-control" %}
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">For Month</label>
-                    {% render_field range_form.month_range class+="form-control" %}
                 </div>
             </div>   
 
@@ -42,7 +46,8 @@
                         <th>Project Name</th>
                         <th>Start Date</th>
                         <th>End Date</th>
-                        <th>For Month</th>
+                        <th>Month</th>
+                        <th>Year</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -52,7 +57,8 @@
                         <td>{{ range.project.project_name}}</td>
                         <td>{{ range.start_date }}</td>
                         <td>{{ range.end_date }}</td>
-                        <td>{{ range.month_range }}</td>
+                        <td>{{ range.month }}</td>
+                        <td>{{ range.year }}</td>
                         <td> <form action="{% url 'delete_date_range' range.id %}" method="POST" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this date range?');">
@@ -63,7 +69,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center">No timesheet ranges.</td>
+                        <td colspan="6" class="text-center">No timesheet ranges.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

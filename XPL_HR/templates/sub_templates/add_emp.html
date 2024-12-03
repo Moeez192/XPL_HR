@@ -60,6 +60,10 @@
                     {% render_field form.marital_status class+="form-control" %}
                 </div>
                 <div class="col-md-6">
+                    <label for="profilePhoto" class="form-label">Upload Profile Photo</label>
+                    {% render_field form.profile_photo  class+="form-control" %}
+                </div>
+                <div class="col-md-6">
                     <label for="address" class="form-label">Linkdin</label>
                     {% render_field form.linkdln class+="form-control" placeholder="Linkdin Profile URL" %}
                 </div>
@@ -81,52 +85,52 @@
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="employeeRole" class="form-label">Business Unit</label>
-                    {% render_field form.business_unit class+="form-control" placeholder="Business Unit" %}
+                    <label for="employeeId" class="form-label">Employee ID</label>
+                    {% render_field form.employee_id placeholder="Enter Employee ID" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
-                    <label for="dateOfJoining" class="form-label">Date of Joining</label>
-                    {% render_field form.date_of_joining  class+="form-control" %}
+                    <label for="jobTitle" class="form-label">Job Title</label>
+                    {% render_field form.job_title placeholder="Job Title" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Position</label>
+                    {% render_field form.position placeholder="Position" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
                     <label for="department" class="form-label">Department</label>
                     {% render_field form.department placeholder="Enter Department" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
-                    <label for="workLocation" class="form-label">Rate Basis</label>
-                    {% render_field form.rate_basis  class+="form-control" %}
+                    <label for="employeeRole" class="form-label">Employee Role</label>
+                    {% render_field form.employee_role class+="form-control" %}
                 </div>
                 <div class="col-md-6">
-                    <label for="employmentType" class="form-label">Employment Type</label>
-                    {% render_field form.employment_type class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="employeeId" class="form-label">Employee ID</label>
-                    {% render_field form.employee_id placeholder="Enter Employee ID" class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="bonus" class="form-label">Onsite Rate</label>
-                    {% render_field form.onsite_salary placeholder="Onsite Rate" class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="bonus" class="form-label">Remote Rate</label>
-                    {% render_field form.remote_salary placeholder="Remote Rate" class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="bonus" class="form-label">Bonus/Allowances</label>
-                    {% render_field form.bonus placeholder="Enter Bonus" class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="bonus" class="form-label">Billing Type</label>
-                    {% render_field form.billing_type placeholder="Enter Bonus" class+="form-control" %}
+                    <label for="workLocation" class="form-label">Reporting Manager</label>
+                    {% render_field form.reporting_manager placeholder="Position" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
                     <label for="workLocation" class="form-label">Work Location</label>
                     {% render_field form.work_location placeholder="Enter Work Location" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
-                    <label for="jobTitle" class="form-label">Job Title</label>
-                    {% render_field form.job_title placeholder="Job Title" class+="form-control" %}
+                    <label for="bonus" class="form-label">Remote Rate</label>
+                    {% render_field form.remote_salary placeholder="Remote Rate" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bonus" class="form-label">Onsite Rate</label>
+                    {% render_field form.onsite_salary placeholder="Onsite Rate" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bonus" class="form-label">Billing Type</label>
+                    {% render_field form.billing_type placeholder="Enter Bonus" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Rate Basis</label>
+                    {% render_field form.rate_basis  class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="bonus" class="form-label">Bonus/Allowances</label>
+                    {% render_field form.bonus placeholder="Enter Bonus" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
                     <label for="workLocation" class="form-label">Contract beginning Date</label>
@@ -137,9 +141,23 @@
                     {% render_field form.contract_end_date  class+="form-control" %}
                 </div>
                 <div class="col-md-6">
+                    <label for="dateOfJoining" class="form-label">Date of Joining</label>
+                    {% render_field form.date_of_joining  class+="form-control" %}
+                </div>
+                
+                
+                <div class="col-md-6">
+                    <label for="employmentType" class="form-label">Employment Type</label>
+                    {% render_field form.employment_type class+="form-control" %}
+                </div>
+                <div class="col-md-6">
                     <label for="employeeStatus" class="form-label">Employee Status</label>
                     {% render_field form.employee_status class+="form-control" %}
 
+                </div>
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Leave Policy</label>
+                    {% render_field form.leave_policy  class+="form-control" placeholder="Source of hire" %}
                 </div>
                 <div class="col-md-6">
                     <label for="wps_profile" class="form-label">WPS Profile</label>
@@ -150,46 +168,32 @@
                     {% render_field form.mol_id placeholder="MOL ID" class+="form-control" id="mol_id" %}
                 </div>
                 <div class="col-md-6">
-                    <label for="workLocation" class="form-label">Leave Policy</label>
-                    {% render_field form.leave_policy  class+="form-control" placeholder="Source of hire" %}
-                </div>
-                <div class="col-md-6">
                     <label for="workLocation" class="form-label">Source of hire</label>
                     {% render_field form.source_of_hire  class+="form-control" placeholder="Source of hire" %}
-                </div>
-                
-                <div class="col-md-6">
-                    <label for="workLocation" class="form-label">Sap Certifications</label>
-                    {% render_field form.sap_certifications  class+="form-control" placeholder="Sap Certifiactions" %}
                 </div>
                 <div class="col-md-6">
                     <label for="workLocation" class="form-label">Timesheet Required</label>
                     {% render_field form.timesheet_required  class+="form-control" placeholder="Sap Certifiactions" %}
                 </div>
                 <div class="col-md-6">
-                    <label for="workLocation" class="form-label">Total Expirence</label>
-                    {% render_field form.total_expirence class+="form-control" placeholder="Total Expirence" %}
+                    <label for="workLocation" class="form-label">Sap Certifications</label>
+                    {% render_field form.sap_certifications  class+="form-control" placeholder="Sap Certifiactions" %}
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="workLocation" class="form-label">Total Experience</label>
+                    {% render_field form.total_expirence class+="form-control" placeholder="Total Experience" %}
                 </div>
                 <div class="col-md-6">
                     <label for="issupervisor" class="form-label">Is Supervisor</label>
                     {% render_field form.is_supervisor  class+="form-control" %}
                 </div>
                 <div class="col-md-6">
-                    <label for="employeeRole" class="form-label">Employee Role</label>
-                    {% render_field form.employee_role class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="workLocation" class="form-label">Position</label>
-                    {% render_field form.position placeholder="Position" class+="form-control" %}
-                </div>
-                <div class="col-md-6">
-                    <label for="workLocation" class="form-label">Reporting Manager</label>
-                    {% render_field form.reporting_manager placeholder="Position" class+="form-control" %}
+                    <label for="employeeRole" class="form-label">Business Unit</label>
+                    {% render_field form.business_unit class+="form-control" placeholder="Business Unit" %}
                 </div>
             </div>
             
-                
-
             <!-- Seperation Information Section  -->
 
             <div class="mb-3">
@@ -204,8 +208,8 @@
                         {% render_field form.reason_for_exit placeholder="Reason For Exit" class+="form-control" %}
                     </div>
                     <div class="col-md-6">
-                        <label for="bonus" class="form-label">Can Join Again</label>
-                        {% render_field form.can_join_again  class+="form-control" %}
+                        <label for="bonus" class="form-label" >Can Join Again</label>
+                        {% render_field form.can_join_again  class+="form-control" required="required"  %}
                     </div>
 
                 </div>
@@ -228,13 +232,15 @@
                     <label for="bankAccount" class="form-label">Account Type</label>
                 {% render_field form.account_type placeholder="Account Type" class+="form-control" %}
                 </div>
+                
+                
                 <div class="col-md-6">
                     <label for="bankAccount" class="form-label">Account Number</label>
                 {% render_field form.account_number placeholder="Account Number" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
-                    <label for="bankAccount" class="form-label">Iban Number</label>
-                {% render_field form.iban_number placeholder="Iban Number" class+="form-control" %}
+                    <label for="bankAccount" class="form-label">IBAN Number</label>
+                {% render_field form.iban_number placeholder="IBAN Number" class+="form-control" %}
                 </div>
                 <div class="col-md-6">
                     <label for="bankAccount" class="form-label">Routing Code</label>

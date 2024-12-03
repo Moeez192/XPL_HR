@@ -243,6 +243,10 @@
         </div>
         <div class="row mb-3">
             <div class="col-md-6">
+                <!-- <label for="profilePhoto" class="form-label">Upload Profile Photo</label> -->
+                {% render_field form.profile_photo  class+="form-control" %}
+            </div>
+            <div class="col-md-6">
                 <label for="" class="form-label">Nick Name</label>
                 {% render_field form.nick_name placeholder="Nick Name" class+="form-control" %}
             </div>
@@ -571,12 +575,12 @@
                     <label for="notes_{{ document.id }}">Notes</label>
                     <textarea class="form-control" name="notes_{{ document.id }}">{{ document.notes }}</textarea>
                 </div>
-                <div class="col-md-12 mt-2">
+                <!-- <div class="col-md-12 mt-2">
                     <form method="POST" action="{% url 'delete_employee_document' document.id %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-sm btn-danger">Delete Document</button>
                     </form>
-                </div>
+                </div> -->
                 
             </div>
             
