@@ -29,6 +29,7 @@
 </style>
 {% endblock %}
 <!-- <div class="container-fluid" > -->
+    
     <div class="row text-center mb-4">
         <div class="col-md-4">
             <div class="dashboard-card card-total-employees">
@@ -91,15 +92,22 @@
         </ul>
     </div>
 {% endif %}
+
     <div class="table-controls mb-3">
+        
         <div class="search-container">
+            
             <input type="text" id="employeeSearch" class="form-control" placeholder="Search...">
             <i class="fas fa-search search-icon"></i>
         </div>
         
+        
     </div>
     <br>
 <h3 class="text-center">Employee List</h3>
+<div style="margin-bottom: 3px;">
+    <a href="{% url 'add_employee' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> Employee</a>
+</div>
 <br>
     <div class="table-container">
         <table class="table table-hover" id="employeeTable">

@@ -300,7 +300,8 @@ def add_employee(request):
         
     })
 
-
+@login_required
+@no_cache
 def add_department(request):
     department_form = DepForm(request.POST)
 
@@ -318,7 +319,13 @@ def add_department(request):
         'dep_form': department_form,
     })
 
-
+@login_required
+@no_cache
+def department(request):
+    departments = Department.objects.all()
+    return render(request, 'templates/departments.html', {
+        'dep_list': departments,
+    })
 
 
 @login_required

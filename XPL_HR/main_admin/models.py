@@ -5,19 +5,20 @@ from django.conf import settings
 from django.utils.timezone import now, timedelta
 import uuid , requests
 from django.utils.timezone import now
-
+import os, json
 
 
 def get_country_choices():
-
+    
     try:
-        response = requests.get("https://restcountries.com/v3.1/all")
-        response.raise_for_status()  
-        data = response.json()
-        return [(country["cca2"], country["name"]["common"]) for country in data]
-    except requests.RequestException as e:
-        print(f"Error fetching country data: {e}")
+        file_path = "static/countries.json"
+        with open(file_path, "r") as file:
+            data = json.load(file)
+            return [(country["code"], country["name"]) for country in data]
+    except Exception as e:
+        print(f"Error reading country data: {e}")
         return []
+
 
 
 class LeavePolicy(models.Model):
@@ -41,7 +42,7 @@ class BillingType(models.Model):
 
 class Employee(models.Model):
     # Personal Information
-    first_name = models.CharField(max_length=100,)
+    first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     dob = models.DateField()
     
@@ -57,7 +58,7 @@ class Employee(models.Model):
     password = models.CharField(max_length=255,default="pakistan",blank=True )
     phone = models.CharField(max_length=20)
     address = models.TextField()
-    nationality = models.CharField(max_length=100)
+    nationality = models.CharField(max_length=100,choices=get_country_choices())
 
     
     def save(self, *args, **kwargs):
@@ -92,6 +93,7 @@ class Employee(models.Model):
         ('full-time', 'Full-Time'),
         ('part-time', 'Part-Time'),
         ('contract', 'Contract'),
+        ('trainee', 'Trainee'),
         ('intern', 'Intern'),
     ]
     employment_type = models.CharField(max_length=20, choices=EMPLOYMENT_TYPE_CHOICES)
@@ -117,7 +119,7 @@ class Employee(models.Model):
    
     
     # salary = models.PositiveIntegerField()
-    bonus = models.PositiveIntegerField()
+    bonus = models.PositiveIntegerField(null=True,blank=True)
 
 
 
@@ -129,10 +131,10 @@ class Employee(models.Model):
         ('n/a', 'N/A'),
     ]
     rate_basis=models.CharField(max_length=20, choices=RATE_BASIS)
-    nick_name = models.CharField(max_length=100)
-    business_unit = models.CharField(max_length=40)
-    mol_id = models.CharField(max_length=50,null=True,blank=True)
-    source_of_hire = models.TextField(max_length=50)
+    nick_name = models.CharField(max_length=100,null=True,blank=True)
+    business_unit = models.CharField(max_length=50,null=True,blank=True)
+    mol_id = models.PositiveIntegerField(max_length=14,null=True,blank=True)
+    source_of_hire = models.TextField(max_length=50,null=True,blank=True)
     contract_start_date =  models.DateField()
     contract_end_date = models.DateField()
     MARTIAL_STATUS = [
@@ -156,7 +158,7 @@ class Employee(models.Model):
         ('yes', 'Yes'),
         ('no', 'No'),
     ]
-    can_join_again = models.TextField(max_length=4,choices=CAN_JOIN_AGAIN)
+    can_join_again = models.TextField(max_length=4,choices=CAN_JOIN_AGAIN,null=True,blank=True)
     TIMESHEET_REQUIRED=[
         ('yes','Yes'),
         ('no','No')
@@ -171,10 +173,10 @@ class Employee(models.Model):
     total_expirence = models.CharField(max_length=20)
     latest_exit_from_country= models.DateField(null=True,blank=True)
     leave_policy = models.ForeignKey(LeavePolicy, on_delete=models.SET_NULL,null=True, related_name='employee_leave_policy')
-    sap_certifications = models.TextField()
+    sap_certifications = models.TextField(null=True,blank=True)
     age = models.CharField(max_length=50,default='0')
     docs = models.ForeignKey(uploadDocType, on_delete=models.SET_NULL,null=True, related_name='employee_docs_upload')
-    billing_type = models.ForeignKey(BillingType, on_delete=models.SET_NULL,null=True, related_name='billing_type_table')
+    billing_type = models.ForeignKey(BillingType, on_delete=models.SET_NULL,null=True,blank=True, related_name='billing_type_table')
     days_from_latest_entry=models.CharField(max_length=50,default='0')
     bank_country = models.CharField(max_length=100, choices=get_country_choices(), blank=True, null=True)
     WPS_PROFILE =[
@@ -221,9 +223,9 @@ class Employee(models.Model):
 
 
 
-    emergency_name = models.CharField(max_length=100)
-    emergency_relation = models.CharField(max_length=100)
-    emergency_phone = models.CharField(max_length=12)
+    emergency_name = models.CharField(max_length=256)
+    emergency_relation = models.CharField(max_length=256)
+    emergency_phone = models.CharField(max_length=20)
 
     profile_photo = models.ImageField(upload_to='profile_photos/')
     cv_upload = models.FileField(upload_to='cv_uploads/',null=True,blank=True)

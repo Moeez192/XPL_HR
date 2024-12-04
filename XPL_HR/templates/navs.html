@@ -19,14 +19,13 @@
 
         <!-- Page Title -->
         <title>Dashboard</title>
-        <!-- <link href="{% static 'css/home_styles.css' %}" rel="stylesheet"> -->
-    <!-- <link href="{% static 'css/configure_leaves.css' %}" rel="stylesheet"> -->
+        
     
         
         <!-- Styles Include -->
         <link rel="stylesheet" href="{% static 'css/main.css' %}" id="stylesheet">
         <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}" id="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
 
         
         
@@ -159,17 +158,14 @@
                       </svg></span> <span class="nav-text">Employee</span></a> 
                         <ul class="sub-menu">
                             <li class="menu-item {% if request.path == '/employees/' %} active {% else %} {% endif %}"><a href="{% url 'employees' %}"> Dashboard</a></li>
-                            <li class="menu-item {% if request.path == '/add_employee/' %} active {% else %} {% endif %}"><a href="{% url 'add_employee' %}"> Add Employee</a></li>
-                            <li class="menu-item {% if request.path == '/add_department/' %} active {% else %} {% endif %}"><a href="{% url 'add_department' %}"> Add Department </a></li>
+                            <li class="menu-item {% if request.path == '/departments/' %} active {% else %} {% endif %}"><a href="{% url 'departments' %}"> Departments </a></li>
                            
                         </ul>
                         <span class='submenu-opener'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
                           </svg></span>
                     </li>
-                    <div class="card-footer p-3">
-                        <a href="{% url 'logout' %}" class="btn btn-outline-gray bg-transparent w-100 py-1 rounded-1 text-dark fs-14 fw-medium"><i class="bi bi-box-arrow-right"></i> Logout</a>
-                    </div>
+                    
                     
                 </ul>
             </div>
@@ -188,107 +184,7 @@
 
 
                      {%endblock%}
-                    <!-- <div class="page-header d-flex align-items-center justify-content-between mr-bottom-30">
-                        <div class="left-part">
-                            <h2 class="text-dark">Dashboard</h2>
-                            <p class="text-gray mb-0">Lorem ipsum dolor sit amet </p>
-                        </div>
-                        <div class="right-part">
-                            <form class="search-form w-auto" action="search.php">
-                                <input type="text" name="search" class=" bg-white form-control" placeholder="Search">
-                                <button type="submit" class="btn"><img src="assets/img/svg/search.svg" alt=""></button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-xxl-3 col-sm-6">
-                            <div class="card border-0">
-                                <div class="card-body py-0 d-flex align-items-center gap-2 gap-lg-5 flex-wrap">
-                                    <div> 
-                                        <div id="chart-34"></div> 
-                                    </div> 
-                                    <div> 
-                                        <h2 class="fs-38">215</h2>
-                                        <h5 class="fw-semibold text-gray mb-0">New Emails</h5> 
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xxl-3 col-sm-6">
-                            <div class="card border-0">
-                                <div class="card-body py-0 d-flex align-items-center gap-2 gap-lg-5 flex-wrap">
-                                    <div> 
-                                        <div id="chart-35"></div> 
-                                    </div> 
-                                    <div> 
-                                        <h2 class="fs-38">84</h2>
-                                        <h5 class="fw-semibold text-gray mb-0">Unread Emails</h5> 
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xxl-3 col-sm-6">
-                            <div class="card border-0">
-                                <div class="card-body d-flex align-items-center gap-2 gap-lg-5 flex-wrap">
-                                    <div> 
-                                        <img src="assets/img/mail-notification.png" alt=""> 
-                                    </div> 
-                                    <div> 
-                                        <h2 class="fs-38">59</h2>
-                                        <h5 class="fw-semibold text-gray mb-0">Important Emails</h5> 
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xxl-3 col-sm-6">
-                            <div class="card border-0">
-                                <div class="card-body py-0 d-flex align-items-center gap-2 gap-lg-5 flex-wrap flex-xl-nowrap">
-                                    <div> 
-                                        <div id="chart-36"></div> 
-                                    </div>
-                                    <div class="d-flex align-items-center gap-3 flex-wrap d-xl-block"> 
-                                        <div class="mb-xl-4"> 
-                                            <h4 class="mb-0">2,841</h4>
-                                            <h5 class="fw-semibold text-gray mb-0">Promotional Emails</h5> 
-                                        </div>
-                                        <div> 
-                                            <h4 class="mb-0">1,456</h4>
-                                            <h5 class="fw-semibold text-gray mb-0">Spam Emails</h5> 
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="row">
-                        <div class="col-xxl-6 col-md-6">
-                            <div class="card border-0">
-                                <div class="card-body">
-                                    <img src="assets/img/envelope-shadow.png" alt="" class="position-absolute top-0 end-0 d-none d-sm-block">
-                                    <h1 class="fs-58 lh-60">8,642</h1>
-                                    <h5>Total emails that you have</h5> 
-                                    <p class="text-gray">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore</p>
-                                    <div class="btn-group gap-3 mt-4 flex-wrap">
-                                        <a href="email-compose.html" class="btn btn-primary rounded-2 ff-heading fs-18 fw-bold m-0"><i class="bi bi-plus me-1"></i> Compose Email</a>
-                                        <a href="inbox.html" class="btn border-0 rounded-2 shadow-sm ff-heading fs-18 fw-bold text-gray m-0"> Go to inbox</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        
-                    </div> -->
-
-
                     
-
-                    <!-- Modal Add Contact -->
                     
 
                 </div>

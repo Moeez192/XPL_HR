@@ -52,9 +52,7 @@
         </style>
     </head>
 
-
-    <body style="background-color: white;">
-        <!-- Preloader -->
+    <body class="bg-primary">
         <div id="preloader">
             <div class="preloader-inner">
                 <div class="spinner"></div>
@@ -64,21 +62,21 @@
         
         <div class="row">
             <div class="col-xl-7 col-lg-7 col-md-6">
-                <div class="d-none d-md-flex align-items-center justify-content-center" style="height: calc(100vh - 100px); width: 450px; align-items: center; margin-left: 230px;">
-                    <img src="{% static 'images/logo-progrc.png' %}" alt="img">
+                <div class="d-none d-md-flex align-items-center justify-content-center" style="height: calc(100vh - 100px);">
+                    <img src="{% static 'images/company.jpg' %}" alt="img" class="img-fluid">
                 </div>
             </div>
 
             <div class="col-xl-5 col-lg-5 col-md-6">
-                <div class="d-flex align-items-center justify-content-center vh-100 " style="background-color: #f05a28 !important;">
-                    <div class="card rounded-0 border-0 p-5 m-0 w-100" style="background-color: #f05a28 !important;">
+                <div class="d-flex align-items-center justify-content-center vh-100 bg-white">
+                    <div class="card rounded-0 border-0 p-5 m-0 w-100">
 
                         <div class="card-header border-0 p-0">
-                            <a href="#" class="w-100 d-inline-block mb-5 " style=" width: 250px !important;">
-                                <!-- <img src="{% static 'images/logo-progrc.png' %}" alt="img"> -->
+                            <a href="#" class="w-100 d-inline-block mb-5">
+                                <img src="{% static 'images/logo.svg' %}" alt="img">
                             </a>
-                            <h2 style="color: white;">Welcome back!</h2>
-                            <p class=" mt-4 mb-5" style="color: white;">Please login using your Email Account.</p>
+                            <h2>Welcome back!</h2>
+                            <p class="text-dark mt-4 mb-5">Please login using your account.</p>
                         </div>
 
                         <div class="card-body p-0">
@@ -109,7 +107,9 @@
                                     {% render_field form.password class="form-control" placeholder="Password" %}
                                 </div>
                             
-                                <button type="submit" class="btn  w-100 text-uppercase  rounded-2 lh-34 ff-heading fw-bold shadow" style="background-color: white; color: rgb(23, 23, 23);">Login</button>
+                                <button type="submit" class="btn btn-primary w-100 text-uppercase text-white rounded-2 lh-34 ff-heading fw-bold shadow" >Login</button>
+                                <p class="d-flex align-items-center justify-content-between mt-4 mb-4">Forgot your password? <a href="{% url 'forget_pwd' %}" class="text-primary fw-bold text-decoration-underline">Reset Here</a></p>
+
                             </form>
                             
                         </div>
@@ -118,7 +118,7 @@
             </div>
         </div>
 
-        
+
 
         <!-- Core JS -->
         <script src=" {% static 'js/jquery-3.6.0.min.js' %}"></script>
@@ -168,6 +168,12 @@
 
         <!-- Theme Custom JS -->
         <script src=" {% static 'js/theme.js' %}"></script>
+
+        
+
         
     </body>
+
+
+   
 </html>

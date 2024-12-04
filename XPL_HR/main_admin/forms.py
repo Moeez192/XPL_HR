@@ -33,7 +33,6 @@ class EmployeeForm(forms.ModelForm):
 
         widgets = {
             'password': forms.PasswordInput(),
-            'address' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
             'linkdln' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
             'x_twitter' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
             'source_of_hire' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
@@ -41,7 +40,7 @@ class EmployeeForm(forms.ModelForm):
             'permanent_address' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
             'skills' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
             'reason_for_exit' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
-            'dob': forms.DateInput(attrs={'type': 'date'}),
+            'dob': forms.DateInput(attrs={'type': 'date','required': 'required'}),
             'date_of_joining': forms.DateInput(attrs={'type': 'date'}),
             'contract_start_date': forms.DateInput(attrs={'type': 'date'}),
             'contract_end_date': forms.DateInput(attrs={'type': 'date'}),
