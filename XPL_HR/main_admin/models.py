@@ -58,7 +58,12 @@ class Employee(models.Model):
     password = models.CharField(max_length=255,default="Progrc@123",blank=True )
     phone = models.CharField(max_length=20)
     address = models.TextField()
-    nationality = models.CharField(max_length=100,choices=get_country_choices())
+    COUNTRIES = [
+        ('pakistan', 'Pakistan'),
+        ('uae', 'UAE'),
+        ('india', 'India'),
+    ]
+    nationality = models.CharField(max_length=100,choices=COUNTRIES)
 
     
     def save(self, *args, **kwargs):
@@ -526,7 +531,12 @@ class ClientInformation(models.Model):
 
     # Billing Address
     billing_address = models.TextField()
-    country_region = models.CharField(max_length=50,choices=get_country_choices())
+    COUNTRIES = [
+        ('pakistan', 'Pakistan'),
+        ('uae', 'UAE'),
+        ('india', 'India'),
+    ]
+    country_region = models.CharField(max_length=50,choices=COUNTRIES)
     address= models.TextField()
     city = models.CharField(max_length=50)
     state= models.CharField(max_length=50)
