@@ -38,16 +38,6 @@
         {% endfor %}
     <!-- </div> -->
 {% endif %}
-<div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Download Timesheet
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        {% for month in months %}
-            <a class="dropdown-item" href="{% url 'download_timesheet' month=month %}">{{ month }}</a>
-        {% endfor %}
-    </div>
-</div>
 
 <br>
 <!-- Table for Displaying only timesheets for approval here -->
@@ -92,11 +82,14 @@
     <br>
 {% endif %}   
 
-<br>
+
 
 <!-- Displaying all timesheets here -->
     <h3 class="text-center">All Timesheets for {{ employee.first_name }} {{ employee.last_name }}</h3>
     <!-- Scrollable Table -->
+    <div style="margin-bottom: 3px;">
+        <a href="{% url 'add_timesheet' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> TimeSheet</a>
+    </div>
     <div class="table-container">
         <table class="table table-hover" id="employeeTable">
             <thead class="table-primary">

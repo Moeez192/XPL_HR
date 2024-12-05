@@ -1,5 +1,5 @@
 from django import forms
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile, LeavePolicy, uploadDocType, BillingType
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile, LeavePolicy, uploadDocType, BillingType , ClientInformation
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 
@@ -40,7 +40,7 @@ class EmployeeForm(forms.ModelForm):
             'permanent_address' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
             'skills' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
             'reason_for_exit' : forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
-            'dob': forms.DateInput(attrs={'type': 'date','required': 'required'}),
+            'dob': forms.DateInput(attrs={'type': 'date','required':True}),
             'date_of_joining': forms.DateInput(attrs={'type': 'date'}),
             'contract_start_date': forms.DateInput(attrs={'type': 'date'}),
             'contract_end_date': forms.DateInput(attrs={'type': 'date'}),
@@ -51,11 +51,12 @@ class EmployeeForm(forms.ModelForm):
             'age' : forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
             'days_from_latest_entry' : forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
 
-        }
-    docs = forms.ModelChoiceField(queryset=uploadDocType.objects.all(), empty_label="Select Document")
+        } 
+        # docs = forms.ModelChoiceField(queryset=uploadDocType.objects.all(), empty_label="Select Document")
+
+    docs = forms.ModelChoiceField(queryset=uploadDocType.objects.all(),required=False)
     def clean_skills(self):
         skills = self.cleaned_data.get("skills", "")
-        # Optional validation for special characters, etc.
         return skills
 
 
@@ -213,6 +214,12 @@ class EmployeeUpdateForm(forms.ModelForm):
 
         return employee
     
+
+class ClientInformationForm(forms.ModelForm):
+    class Meta:
+        model = ClientInformation
+        fields = '__all__'
+
 
 
 class ApprovalHierarchyForm(forms.ModelForm):

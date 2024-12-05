@@ -1,0 +1,169 @@
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} Add Client {% endblock %}
+{% block content %}
+{% load widget_tweaks %}
+
+<h2 class="text-center mb-4">Add Client</h2>
+        
+<div class="card-body tabstyle-form-wizard-block p-0 pt-4">
+    <ul class="nav nav-tabs justify-content-between mb-3" id="pills-tab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" href="#step1" data-bs-toggle="tab" role="tab" aria-controls="step1" aria-expanded="true">Customer Information</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#step2" data-bs-toggle="tab" role="tab" aria-controls="step2" aria-expanded="false">Other Details</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#step3" data-bs-toggle="tab" role="tab" aria-controls="step3">Address</a>
+        </li>
+        <!-- <li class="nav-item">
+            <a class="nav-link" href="#step4" data-bs-toggle="tab" role="tab" aria-controls="step4">Bank Account Details</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#step5" data-bs-toggle="tab" role="tab" aria-controls="step5">Contact Details</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#step6" data-bs-toggle="tab" role="tab" aria-controls="step6">Travel History</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#step7" data-bs-toggle="tab" role="tab" aria-controls="step7">Attachments</a>
+        </li> -->
+    </ul>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="tab-content" id="main_form">
+            <!-- Basic Information -->
+            <div class="tab-pane fade show active" role="tabpanel" id="step1">
+                <div class="row mb-3">
+                    
+                    <div class="col-md-6">
+                        <label for="firstName" class="form-label">Customer Type</label>
+                        {% render_field form.customer_type class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="lastName" class="form-label">Company Name</label>
+                        {% render_field form.company_name placeholder="Company Name" class+="form-control" %}
+                    </div>
+                    
+                
+                    
+                    <div class="col-md-6">
+                        <label for="" class="form-label">Display Name</label>
+                        {% render_field form.display_name placeholder="Display Name" class+="form-control" %}
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="id_dob"  class="form-label">Email</label>
+                        {% render_field  form.email_address placeholder="Email" class+="form-control" %}
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="id_age" class="form-label">Customer Number</label>
+                        {% render_field form.customer_number placeholder="Customer Number" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="gender" class="form-label">Phone</label>
+                        {% render_field form.phone placeholder="Phone" class+="form-control" %}
+                    </div>
+                
+                  
+                </div>
+                
+            </div>
+            
+            <!-- Other Details -->
+            <div class="tab-pane fade" role="tabpanel" id="step2">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="employeeId" class="form-label">Tax Treatment</label>
+                        {% render_field form.tax_treatment placeholder="Taxt Treatment" class+="form-control"  %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="jobTitle" class="form-label">Place Of Supply</label>
+                        {% render_field form.place_of_supply placeholder="Place Of Supply" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="workLocation" class="form-label">Currency</label>
+                        {% render_field form.currency placeholder="Currency" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="department" class="form-label">Payment Terms</label>
+                        {% render_field form.payment_terms placeholder="Payment Terms" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="employeeRole" class="form-label">Opening Balance</label>
+                        {% render_field form.opening_balance class+="form-control" placeholder="Opening Balance" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="employeeRole" class="form-label">Enable Portal Access</label>
+                        {% render_field form.enable_portal_access class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="workLocation" class="form-label">Portal Language</label>
+                        {% render_field form.portal_language placeholder="Portal Language" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="workLocation" class="form-label">Documents</label>
+                        {% render_field form.documents placeholder="Documents" class+="form-control" %}
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- Billing Address -->
+            <div class="tab-pane fade" role="tabpanel" id="step3">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">Billing Address</label>
+                        {% render_field form.billing_address placeholder="Billing Address" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">Country/Region</label>
+                        {% render_field form.country_region placeholder="Country/Region" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label" >Address</label>
+                        {% render_field form.address placeholder="Address" class+="form-control"   %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">City</label>
+                        {% render_field form.city placeholder="City" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">State</label>
+                        {% render_field form.state placeholder="State" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label" >Zip Code</label>
+                        {% render_field form.zip_code placeholder="Zip Code" class+="form-control"   %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">Phone Number</label>
+                        {% render_field form.phone_number placeholder="Phone Number" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label" >Fax Number</label>
+                        {% render_field form.fax_number placeholder="Fax Number" class+="form-control"   %}
+                    </div>
+
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="{% url 'clients' %}" class="btn btn-secondary">Cancel</a>
+    
+                    </div>
+                </div>
+            </div>
+    </form>
+
+                </div>
+            </div>
+            
+               
+</div>
+
+
+
+{%endblock%}

@@ -161,49 +161,7 @@
         </table>
     </div>
 
-    <br>
-
-    <div class="table-container">
-        <h3 class="text-center">Department List</h3>
-        <br>
-        <table class="table table-hover" id="departmentTable">
-    <thead class="table-primary">
-        <tr>
-            <th>Department Name</th>
-            <th>Department Code</th>
-            <th>Department Head</th>
-            <th>Description</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for department in dep_list %}
-        <tr>
-            <td>{{ department.dep_name }}</td>
-            <td>{{ department.dep_code }}</td>
-            <td>{{ department.dep_head.first_name }} {{ department.dep_head.last_name }}</td>
-            <td>{{ department.dep_description }}</td>
-            <td>
-                <a href="{% url 'edit_department' department.id %}" class="btn btn-primary btn-sm"><i class="fas fa-pencil-alt"></i></a>
-                <form action="{% url 'delete_department' department.id %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this employee?');">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </form>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="6" class="text-center">No departments available.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-
-
-    </div>
+    
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {

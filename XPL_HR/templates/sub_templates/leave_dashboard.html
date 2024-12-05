@@ -38,6 +38,9 @@
         {% endfor %}
     <!-- </div> -->
 {% endif %}
+<div style="margin-bottom: 3px;">
+    <a href="{% url 'apply_leave' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> Leave</a>
+</div>
 {% if leave_applications %}
 <h3 class="text-center">Leave Requests</h3>
 <br>

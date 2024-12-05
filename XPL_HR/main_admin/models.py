@@ -55,7 +55,7 @@ class Employee(models.Model):
     
     email = models.EmailField(unique=True)
     last_login = models.DateTimeField(null=True, blank=True) 
-    password = models.CharField(max_length=255,default="pakistan",blank=True )
+    password = models.CharField(max_length=255,default="Progrc@123",blank=True )
     phone = models.CharField(max_length=20)
     address = models.TextField()
     nationality = models.CharField(max_length=100,choices=get_country_choices())
@@ -64,7 +64,7 @@ class Employee(models.Model):
     def save(self, *args, **kwargs):
         
         if not self.password:
-         self.password = make_password("pakistan")  
+         self.password = make_password("Progrc@123")  
         else:
         
          if not self.password.startswith('pbkdf2_'):
@@ -175,7 +175,7 @@ class Employee(models.Model):
     leave_policy = models.ForeignKey(LeavePolicy, on_delete=models.SET_NULL,null=True, related_name='employee_leave_policy')
     sap_certifications = models.TextField(null=True,blank=True)
     age = models.CharField(max_length=50,default='0')
-    docs = models.ForeignKey(uploadDocType, on_delete=models.SET_NULL,null=True, related_name='employee_docs_upload')
+    docs = models.ForeignKey(uploadDocType, on_delete=models.SET_NULL,null=True,blank=True, related_name='employee_docs_upload')
     billing_type = models.ForeignKey(BillingType, on_delete=models.SET_NULL,null=True,blank=True, related_name='billing_type_table')
     days_from_latest_entry=models.CharField(max_length=50,default='0')
     bank_country = models.CharField(max_length=100, choices=get_country_choices(), blank=True, null=True)
@@ -491,3 +491,46 @@ class DateRange(models.Model):
 
     def __str__(self):
         return f"{self.project.project_name}: {self.start_date} - {self.end_date}"
+    
+
+
+class ClientInformation(models.Model):
+    CUSTOMER_TYPE = [
+        ('business', 'Business'),
+        ('individual', 'Individual'),
+    ]
+    customer_type = models.CharField(max_length=50,choices=CUSTOMER_TYPE)
+    company_name = models.CharField(max_length=50)
+    display_name = models.CharField(max_length=50)
+    email_address = models.EmailField()
+    customer_number = models.TextField(max_length=20)
+    phone=models.IntegerField()
+    
+    #other Details
+    tax_treatment = models.CharField(max_length=50)
+    place_of_supply = models.CharField(max_length=50)
+    currency = models.CharField(max_length=50)
+    payment_terms = models.CharField(max_length=50)
+    opening_balance = models.IntegerField()
+    PORTAL_ACCESS = [
+        ('yes', 'Yes'),
+        ('no', 'No'),
+    ]
+    enable_portal_access = models.TextField(choices=PORTAL_ACCESS)
+    PORTAL_LANGUAGE = [
+        ('english', 'English'),
+        ('arabic', 'Arabic'),
+    ]
+    portal_language = models.CharField(max_length=50,choices=PORTAL_LANGUAGE)
+    documents = models.FileField(upload_to='client_documents/',null=True,blank=True)
+
+    # Billing Address
+    billing_address = models.TextField()
+    country_region = models.CharField(max_length=50,choices=get_country_choices())
+    address= models.TextField()
+    city = models.CharField(max_length=50)
+    state= models.CharField(max_length=50)
+    zip_code = models.IntegerField()
+    phone_number = models.IntegerField()
+    fax_number = models.IntegerField()
+    

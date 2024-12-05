@@ -1,15 +1,11 @@
 {% extends 'templates/navs.html' %}
 {%load static%}
-{% block title %} Leave {% endblock %}
+{% block title %} Clients {% endblock %}
 
 {% block content %}
-
-
 <link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
 
-
-    {% include "templates/sub_templates/project_dash.html" %}
-
+{% include "templates/sub_templates/clients_dash.html" %}
 
 
-{%endblock%}
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect , get_object_or_404
-from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm , ProjectFileForm, LeavePolicyForm, uploadDocTypeForm,BillingTypeForm
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange , ProjectFile , PasswordResetToken,LeavePolicy , uploadDocType , EmployeeDocument , BillingType
+from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm , ProjectFileForm, LeavePolicyForm, uploadDocTypeForm,BillingTypeForm,ClientInformationForm
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange , ProjectFile , PasswordResetToken,LeavePolicy , uploadDocType , EmployeeDocument , BillingType , ClientInformation
 from django.contrib import messages
 from django.core.mail import send_mail
 import uuid  
@@ -185,7 +185,8 @@ def edit_employee(request, employee_id):
         'existing_documents': existing_documents,
     })
 
-
+@login_required
+@no_cache
 def delete_employee_document(request, document_id):
     document = get_object_or_404(EmployeeDocument, id=document_id)
     employee_id = document.employee.id  
@@ -196,6 +197,13 @@ def delete_employee_document(request, document_id):
     messages.success(request, f"Document {document.doctype.doc_type} deleted successfully!")
     return redirect('edit_employee', employee_id=employee_id)
 
+@login_required
+@no_cache
+def clients(request):
+    clients=ClientInformation.objects.all()
+    return render(request, 'templates/clients.html',{
+        'clients': clients,
+    })
 
 @login_required
 @no_cache
@@ -407,6 +415,289 @@ def employees(request):
 
 
 
+@login_required
+@no_cache
+def leave_configuration(request):
+    leaves=Leaves.objects.all()
+    employee = Employee.objects.get(email=request.user.email)
+    leave_applications_to_approve = LeaveApplication.objects.none()
+    logged_in_user = LeaveApplication.objects.filter(employee=employee)
+
+    def get_hierarchy_for_role(employee, project=None):
+        # First, try to fetch project-specific hierarchy
+        if project:
+            hierarchy = Hierarchy.objects.filter(
+                project_name=project,
+                position=employee.position
+            ).order_by('order_number')
+            if hierarchy.exists():
+                return hierarchy
+
+        # Fall back to role-based hierarchy if no project-specific hierarchy exists
+        return Hierarchy.objects.filter(
+            position=employee.position,
+            project_name=None
+        ).order_by('order_number')
+
+    def advance_to_next_approver(leave_application, approvers):
+        # Identify the current approver in the list
+        current_index = approvers.index(leave_application.current_approver) if leave_application.current_approver in approvers else -1
+        next_index = current_index + 1
+
+        # Move to the next approver if available; otherwise, mark as approved
+        if next_index < len(approvers):
+            leave_application.current_approver = approvers[next_index]
+            leave_application.status = 'pending'
+        else:
+            leave_application.current_approver = None
+            leave_application.status = 'approved'
+        leave_application.save()
+
+    # Collect leave applications for approval
+    all_applications = LeaveApplication.objects.all()
+    for application in all_applications:
+        submitter = application.employee
+        project_assignment = Projects.objects.filter(team_members=submitter).first()
+        
+        # Fetch appropriate hierarchy
+        hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
+        approvers = [entry.approver for entry in hierarchy]
+
+        if employee in approvers:
+            leave_applications_to_approve |= LeaveApplication.objects.filter(id=application.id)
+
+    leave_form = LeaveForm()
+    leave_application_form = LeaveApplicationForm(employee=employee)
+
+    if request.method == 'POST':
+        if 'leave_form' in request.POST:
+                leave_form = LeaveForm(request.POST)
+                if leave_form.is_valid():
+                 leave_form.save()
+                 messages.success(request, 'Leave information has been successfully submitted!')
+                return redirect('leave')
+        if 'leave_application_form' in request.POST:
+            leave_application_form = LeaveApplicationForm(request.POST, employee=employee)
+            if leave_application_form.is_valid():
+                # Check if the employee is assigned to any project
+               projects = Projects.objects.filter(team_members=employee)
+                
+               hierarchy = None
+               for project in projects:
+                    # First, try finding hierarchy specific to the role and project
+                    hierarchy = Hierarchy.objects.filter(position=employee.position, project_name=project).order_by('order_number')
+                    if hierarchy.exists():
+                        break
+                
+                # If no project-specific hierarchy exists, check for a general role-based hierarchy
+               if not hierarchy or not hierarchy.exists():
+                    hierarchy = Hierarchy.objects.filter(position=employee.position, project_name__isnull=True).order_by('order_number')
+
+               if hierarchy.exists():
+                    # Proceed with saving the leave application if a hierarchy exists
+                    leave_application = leave_application_form.save(commit=False)
+                    leave_application.employee = employee
+
+                    # Set the first approver in the hierarchy
+                    leave_application.current_approver = hierarchy.first().approver
+                    leave_application.status = 'pending'
+                    leave_application.save()
+                    
+                    messages.success(request, 'Leave application has been successfully submitted!')
+               else:
+                    # If no hierarchy is found, show an error message and don't save the application
+                    messages.error(request, "No approval hierarchy exists for your role and project. Please contact HR for assistance.")
+                
+               return redirect('leave')
+            else:
+                error_message = ""
+                non_field_errors = leave_application_form.errors.get('__all__', [])
+                for error in non_field_errors:
+                        error_message += f"{error}" 
+                for field, errors in leave_application_form.errors.items():
+                        if field != '__all__':
+                            for error in errors:
+                                error_message += f"<strong>{field}</strong>: {error}<br>"
+    
+                messages.error(request,error_message)
+                
+                leave_application_form = LeaveApplicationForm(employee=employee)
+
+        elif 'status' in request.POST:
+            leave_application_id = request.POST.get('leave_application_id')
+            leave_application = LeaveApplication.objects.get(id=leave_application_id)
+
+            # Fetch submitter and hierarchy for the application
+            submitter = leave_application.employee
+            project_assignment = Projects.objects.filter(team_members=submitter).first()
+            hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
+            approvers = [entry.approver for entry in hierarchy]
+
+            if leave_application.current_approver == employee:
+                # If status is 'rejected', update and save immediately
+                if request.POST.get('status') == 'rejected':
+                    leave_application.status = 'rejected'
+                    leave_application.remarks = request.POST.get('remarks', '')
+                    leave_application.current_approver = None
+                    leave_application.save()
+                    messages.success(request, 'Leave application rejected.')
+                    return redirect('leave')
+
+                # Otherwise, advance to the next approver or approve fully
+                advance_to_next_approver(leave_application, approvers)
+                messages.success(request, 'Leave application status updated.')
+                return redirect('leave')
+
+    return render(request, 'templates/sub_templates/configure_leaves.html', {
+        'leave_form': leave_form,
+        'leave_application_form': leave_application_form,
+        'leave_applications': leave_applications_to_approve,
+        'logged_in_user': logged_in_user,
+        'all_leaves' : leaves,
+    })
+
+
+@login_required
+@no_cache
+def apply_leave(request):
+    leaves=Leaves.objects.all()
+    employee = Employee.objects.get(email=request.user.email)
+    leave_applications_to_approve = LeaveApplication.objects.none()
+    logged_in_user = LeaveApplication.objects.filter(employee=employee)
+
+    def get_hierarchy_for_role(employee, project=None):
+        # First, try to fetch project-specific hierarchy
+        if project:
+            hierarchy = Hierarchy.objects.filter(
+                project_name=project,
+                position=employee.position
+            ).order_by('order_number')
+            if hierarchy.exists():
+                return hierarchy
+
+        # Fall back to role-based hierarchy if no project-specific hierarchy exists
+        return Hierarchy.objects.filter(
+            position=employee.position,
+            project_name=None
+        ).order_by('order_number')
+
+    def advance_to_next_approver(leave_application, approvers):
+        # Identify the current approver in the list
+        current_index = approvers.index(leave_application.current_approver) if leave_application.current_approver in approvers else -1
+        next_index = current_index + 1
+
+        # Move to the next approver if available; otherwise, mark as approved
+        if next_index < len(approvers):
+            leave_application.current_approver = approvers[next_index]
+            leave_application.status = 'pending'
+        else:
+            leave_application.current_approver = None
+            leave_application.status = 'approved'
+        leave_application.save()
+
+    # Collect leave applications for approval
+    all_applications = LeaveApplication.objects.all()
+    for application in all_applications:
+        submitter = application.employee
+        project_assignment = Projects.objects.filter(team_members=submitter).first()
+        
+        # Fetch appropriate hierarchy
+        hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
+        approvers = [entry.approver for entry in hierarchy]
+
+        if employee in approvers:
+            leave_applications_to_approve |= LeaveApplication.objects.filter(id=application.id)
+
+    leave_form = LeaveForm()
+    leave_application_form = LeaveApplicationForm(employee=employee)
+
+    if request.method == 'POST':
+        if 'leave_form' in request.POST:
+                leave_form = LeaveForm(request.POST)
+                if leave_form.is_valid():
+                 leave_form.save()
+                 messages.success(request, 'Leave information has been successfully submitted!')
+                return redirect('leave')
+        if 'leave_application_form' in request.POST:
+            leave_application_form = LeaveApplicationForm(request.POST, employee=employee)
+            if leave_application_form.is_valid():
+                # Check if the employee is assigned to any project
+               projects = Projects.objects.filter(team_members=employee)
+                
+               hierarchy = None
+               for project in projects:
+                    # First, try finding hierarchy specific to the role and project
+                    hierarchy = Hierarchy.objects.filter(position=employee.position, project_name=project).order_by('order_number')
+                    if hierarchy.exists():
+                        break
+                
+                # If no project-specific hierarchy exists, check for a general role-based hierarchy
+               if not hierarchy or not hierarchy.exists():
+                    hierarchy = Hierarchy.objects.filter(position=employee.position, project_name__isnull=True).order_by('order_number')
+
+               if hierarchy.exists():
+                    # Proceed with saving the leave application if a hierarchy exists
+                    leave_application = leave_application_form.save(commit=False)
+                    leave_application.employee = employee
+
+                    # Set the first approver in the hierarchy
+                    leave_application.current_approver = hierarchy.first().approver
+                    leave_application.status = 'pending'
+                    leave_application.save()
+                    
+                    messages.success(request, 'Leave application has been successfully submitted!')
+               else:
+                    # If no hierarchy is found, show an error message and don't save the application
+                    messages.error(request, "No approval hierarchy exists for your role and project. Please contact HR for assistance.")
+                
+               return redirect('leave')
+            else:
+                error_message = ""
+                non_field_errors = leave_application_form.errors.get('__all__', [])
+                for error in non_field_errors:
+                        error_message += f"{error}" 
+                for field, errors in leave_application_form.errors.items():
+                        if field != '__all__':
+                            for error in errors:
+                                error_message += f"<strong>{field}</strong>: {error}<br>"
+    
+                messages.error(request,error_message)
+                
+                leave_application_form = LeaveApplicationForm(employee=employee)
+
+        elif 'status' in request.POST:
+            leave_application_id = request.POST.get('leave_application_id')
+            leave_application = LeaveApplication.objects.get(id=leave_application_id)
+
+            # Fetch submitter and hierarchy for the application
+            submitter = leave_application.employee
+            project_assignment = Projects.objects.filter(team_members=submitter).first()
+            hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
+            approvers = [entry.approver for entry in hierarchy]
+
+            if leave_application.current_approver == employee:
+                # If status is 'rejected', update and save immediately
+                if request.POST.get('status') == 'rejected':
+                    leave_application.status = 'rejected'
+                    leave_application.remarks = request.POST.get('remarks', '')
+                    leave_application.current_approver = None
+                    leave_application.save()
+                    messages.success(request, 'Leave application rejected.')
+                    return redirect('leave')
+
+                # Otherwise, advance to the next approver or approve fully
+                advance_to_next_approver(leave_application, approvers)
+                messages.success(request, 'Leave application status updated.')
+                return redirect('leave')
+
+    return render(request, 'templates/sub_templates/apply_leave.html', {
+        'leave_form': leave_form,
+        'leave_application_form': leave_application_form,
+        'leave_applications': leave_applications_to_approve,
+        'logged_in_user': logged_in_user,
+        'all_leaves' : leaves,
+    })
+
 
 @login_required
 @no_cache
@@ -611,6 +902,48 @@ def projects(request):
 
 @login_required
 @no_cache
+def add_project(request):
+    supervisors = Employee.objects.filter(is_supervisor='yes')
+    employees = Employee.objects.all()
+    if request.method == 'POST':
+        form = ProjectForm(request.POST , request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Project Added Successfuly')
+            return redirect('projects')
+        else:
+            print(form.errors)
+    else:
+        form = ProjectForm()
+    return render(request,'templates/sub_templates/project_configs.html', {
+        'form' : form,
+        'projects' : projects,
+        'supervisors': supervisors,
+        'employees' : employees
+        })
+
+
+
+@login_required
+@no_cache
+def add_client(request):
+    if request.method == 'POST':
+        form = ClientInformationForm(request.POST , request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Client Added Successfuly')
+            return redirect('clients')
+        else:
+            print(form.errors)
+    else:
+        form = ClientInformationForm()
+    return render(request,'templates/sub_templates/add_client.html', {
+        'form' : form,
+        })
+
+
+@login_required
+@no_cache
 @require_POST
 def project_delete_view(request, pk):
     project = get_object_or_404(Projects, pk=pk)
@@ -749,6 +1082,560 @@ def files(request):
     })
 
 
+@login_required
+@no_cache
+def timesheet_date_range(request):
+    employee = Employee.objects.get(email=request.user.email)
+    all_ranges = DateRange.objects.all()
+    timesheets = (
+        Timesheet.objects.filter(employee=employee)
+        .values('timesheet_group_id', 'project__project_name', 'status', 'reject_reason')
+        .annotate(start_date=Min('date'), end_date=Max('date'))
+        .order_by('-start_date')
+    )
+    pending_approval_timesheets = (
+        Timesheet.objects.filter(
+            status='pending',
+            current_approver=employee  # Check if the employee is the current approver
+        )
+        .values('timesheet_group_id', 'project__project_name', 'employee__first_name')
+        .annotate(start_date=Min('date'), end_date=Max('date'))
+        .order_by('-start_date')
+    )
+    # projects = Projects.objects.filter(team_members=employee)
+    projects = Projects.objects.filter(
+        Q(team_members=employee) | Q(project_manager=employee)
+        ).distinct()
+    months = [month_name[i] for i in range(1, 13)]
+    today = datetime.today().strftime('%Y-%m-%d')
+
+    # Initialize the form for date range
+    range_form = PeriodForm()
+
+    # Initialize an empty dictionary to hold the date ranges for each project
+    project_date_ranges = {}
+
+    # # Fetch date ranges for all projects
+    # for project in projects:
+    #     try:
+    #         # Fetch the DateRange for the project
+    #         date_range = DateRange.objects.get(project=project)
+    #         project_date_ranges[project.id] = {
+    #             'start_date': date_range.start_date.strftime('%Y-%m-%d'),
+    #             'end_date': date_range.end_date.strftime('%Y-%m-%d'),
+    #         }
+    #     except DateRange.DoesNotExist:
+    #         project_date_ranges[project.id] = None  # No date range for this project
+    # Initialize the dictionary that will hold the project date ranges
+    
+
+# Loop through each project
+    for project in projects:
+        print(f"Processing Project ID: {project.id}")  # Debug print
+
+        # Fetch all date ranges associated with the project
+        date_ranges = DateRange.objects.filter(project=project)
+        
+        if not date_ranges:
+            print(f"No date ranges found for Project ID: {project.id}")  # Debug print
+            continue
+
+        # Initialize an empty list to hold month ranges for each project
+        month_ranges = []
+        
+        for date_range in date_ranges:
+            print(f"Processing DateRange: {date_range}")  # Debug print
+
+            # Extract the month from start_date and end_date
+            start_month = date_range.start_date.strftime('%B')
+            start_year = date_range.start_date.year
+            end_month = date_range.end_date.strftime('%B')
+            end_year = date_range.end_date.year
+            
+            # Combine month and year for better identification
+            if start_month == end_month and start_year == end_year:
+                month_ranges.append({
+                    'month': f"{start_month} {start_year}",
+                    'start_date': date_range.start_date.strftime('%Y-%m-%d'),
+                    'end_date': date_range.end_date.strftime('%Y-%m-%d'),
+                })
+            else:
+                month_ranges.append({
+                    'month': f"{start_month} {start_year} - {end_month} {end_year}",
+                    'start_date': date_range.start_date.strftime('%Y-%m-%d'),
+                    'end_date': date_range.end_date.strftime('%Y-%m-%d'),
+                })
+
+        # If month_ranges is not empty, add it to project_date_ranges
+        if month_ranges:
+            project_date_ranges[project.id] = month_ranges
+        else:
+            print(f"No month ranges for Project ID: {project.id}")  # Debug print
+
+    # Print the final project_date_ranges for debugging
+    print(f"Project Date Ranges: {project_date_ranges}")
+
+    
+    
+
+    # Handle form submissions
+    if request.method == 'POST':
+        if 'range_form_submit' in request.POST:
+            range_form = PeriodForm(request.POST)
+            if range_form.is_valid():
+                # Get the start and end dates, and project from the form
+                start_date = range_form.cleaned_data['start_date']
+                end_date = range_form.cleaned_data['end_date']
+                project = range_form.cleaned_data['project']
+                month = range_form.cleaned_data['month']
+                year = range_form.cleaned_data['year']
+
+                # Check for existing date ranges for the same project within the specified range
+                overlapping_ranges = DateRange.objects.filter(
+                    project=project,
+                    end_date__gte=start_date,
+                    start_date__lte=end_date,
+                )
+
+                if overlapping_ranges.exists():
+                    messages.error(request, 'Date range overlaps with an existing range for this project.')
+                else:
+                        date_range = range_form.save(commit=False)
+                        date_range.employee = employee  # Optional: associate with employee
+                        date_range.save()
+                        messages.success(request, 'New date range set successfully!')
+                    # Check if an active range exists for the project
+                    # last_date_range = DateRange.objects.filter(project=project).order_by('-end_date').first()
+                    
+                    # if last_date_range and last_date_range.end_date >= timezone.now().date():
+                    #     messages.error(request, 'Cannot add a new date range until the current one ends.')
+                    # else:
+                    #     # Check if a range already exists for the project
+                    #     existing_range = DateRange.objects.filter(project=project).first()
+                        
+                    #     if existing_range:
+                    #         # Update the existing range with new dates
+                    #         existing_range.start_date = start_date
+                    #         existing_range.end_date = end_date
+                    #         existing_range.save()
+                    #         messages.success(request, 'Date range updated successfully!')
+                    #     else:
+                    #         # Create a new date range
+                    #         date_range = range_form.save(commit=False)
+                    #         date_range.employee = employee  # Optional: associate with employee
+                    #         date_range.save()
+                    #         messages.success(request, 'New date range set successfully!')
+                        
+                        return redirect('timesheet')
+            else:
+                messages.error(request, 'Invalid date range. Please try again.')
+
+        
+        
+        if 'action' in request.POST:
+
+            action = request.POST.get('action')
+            date_from = request.POST.get('date_from')
+            date_to = request.POST.get('date_to')
+            project_id = request.POST.get('project_id')
+
+            if not date_from or not date_to:
+                messages.error(request, 'Please provide a valid date range.')
+                return redirect('timesheet')
+
+            try:
+                project = Projects.objects.get(id=project_id)
+            except Projects.DoesNotExist:
+                messages.error(request, 'The selected project does not exist.')
+                return redirect('timesheet')
+
+            # Parse the date range
+            start_date = datetime.strptime(date_from, '%Y-%m-%d')
+            end_date = datetime.strptime(date_to, '%Y-%m-%d')
+
+            # Generate a unique timesheet group ID for this range
+            timesheet_group_id = str(uuid.uuid4())
+
+            current_date = start_date
+            missing_fields = False  # Flag to check if any required field is missing
+
+            while current_date <= end_date:
+                date_str = current_date.strftime('%Y-%m-%d')
+                day_of_week = current_date.weekday()  # 5 = Saturday, 6 = Sunday
+
+                # For weekdays, check for required fields
+                if day_of_week not in [5, 6]:  # Not Saturday or Sunday
+                    task_description = request.POST.get(f'task_description_{date_str}', '').strip()
+                    location = request.POST.get(f'location_{date_str}', '').strip()
+
+
+                current_date += timedelta(days=1)
+
+            # If any required fields are missing, prevent form submission
+            if missing_fields:
+                return redirect('timesheet')
+
+            # If all required fields are present, proceed with save or submit action
+            if action == 'save':
+                current_date = start_date
+                duplicate_found = False  # Flag to track if any duplicate is found
+
+                while current_date <= end_date:
+                    date_str = current_date.strftime('%Y-%m-%d')
+                    day_of_week = current_date.weekday()
+
+                    # Check if a timesheet already exists for this date and project
+                    existing_timesheet = Timesheet.objects.filter(
+                        employee=employee,
+                        project=project,
+                        date=date_str
+                    ).first()
+
+                    if existing_timesheet:
+                        print(f"Timesheet already exists for {employee} on {date_str} for project {project}. Skipping.")
+                        if not duplicate_found:
+                            messages.error(request,'A duplicate timesheet already exists for the project')
+                            duplicate_found = True  # Mark that we've found a duplicate
+                        current_date += timedelta(days=1)
+                        continue  # Skip saving for this date
+
+                    print(f"Saving timesheet for {employee} on {date_str} for project {project}")
+
+                    task_description = request.POST.get(f'task_description_{date_str}', '').strip()
+                    location = request.POST.get(f'location_{date_str}', '').strip()
+                    notes = request.POST.get(f'notes_{date_str}', '').strip()
+                    time_in_hrs=request.POST.get(f'time_in_hrs_{date_str}', '').strip()
+
+                    # Save or update the timesheet
+                    timesheet, created = Timesheet.objects.get_or_create(
+                        employee=employee,
+                        project=project,
+                        date=date_str,
+                        defaults={
+                            'task_description': task_description,
+                            'location': location,
+                            'notes': notes,
+                            'time_in_hrs':time_in_hrs,
+                            'status': 'saved',
+                            'is_editable': True,
+                            'timesheet_group_id': timesheet_group_id,
+                        }
+                    )
+                    if not created:
+                        # If timesheet already exists, update it
+                        timesheet.task_description = task_description
+                        timesheet.location = location
+                        timesheet.time_in_hrs=time_in_hrs
+                        timesheet.notes = notes
+                        timesheet.is_editable = True
+                        timesheet.status = 'saved'
+                        timesheet.timesheet_group_id = timesheet_group_id
+                        timesheet.save()
+
+                    current_date += timedelta(days=1)
+
+                # If a duplicate was found, do not redirect to 'timesheet'
+                if duplicate_found:
+                    return redirect('timesheet')
+
+                messages.success(request, 'Timesheet saved successfully!')
+                return redirect('timesheet')
+
+
+
+
+    context = {
+        'projects': projects,
+        'timesheets': timesheets,
+        'employee': employee,
+        'today': today,
+        'months': months,
+        'pending_approval_timesheets': pending_approval_timesheets, 
+        'all_ranges':all_ranges,
+        'range_form': range_form,
+        'project_date_ranges': json.dumps(project_date_ranges),  
+    }
+
+    return render(request, 'templates/sub_templates/set_timesheet_date_range.html', context)
+
+
+
+
+@login_required
+@no_cache
+def add_timesheet(request):
+    employee = Employee.objects.get(email=request.user.email)
+    all_ranges = DateRange.objects.all()
+    timesheets = (
+        Timesheet.objects.filter(employee=employee)
+        .values('timesheet_group_id', 'project__project_name', 'status', 'reject_reason')
+        .annotate(start_date=Min('date'), end_date=Max('date'))
+        .order_by('-start_date')
+    )
+    pending_approval_timesheets = (
+        Timesheet.objects.filter(
+            status='pending',
+            current_approver=employee  # Check if the employee is the current approver
+        )
+        .values('timesheet_group_id', 'project__project_name', 'employee__first_name')
+        .annotate(start_date=Min('date'), end_date=Max('date'))
+        .order_by('-start_date')
+    )
+    # projects = Projects.objects.filter(team_members=employee)
+    projects = Projects.objects.filter(
+        Q(team_members=employee) | Q(project_manager=employee)
+        ).distinct()
+    months = [month_name[i] for i in range(1, 13)]
+    today = datetime.today().strftime('%Y-%m-%d')
+
+    # Initialize the form for date range
+    range_form = PeriodForm()
+
+    # Initialize an empty dictionary to hold the date ranges for each project
+    project_date_ranges = {}
+
+    # # Fetch date ranges for all projects
+    # for project in projects:
+    #     try:
+    #         # Fetch the DateRange for the project
+    #         date_range = DateRange.objects.get(project=project)
+    #         project_date_ranges[project.id] = {
+    #             'start_date': date_range.start_date.strftime('%Y-%m-%d'),
+    #             'end_date': date_range.end_date.strftime('%Y-%m-%d'),
+    #         }
+    #     except DateRange.DoesNotExist:
+    #         project_date_ranges[project.id] = None  # No date range for this project
+    # Initialize the dictionary that will hold the project date ranges
+    
+
+# Loop through each project
+    for project in projects:
+        print(f"Processing Project ID: {project.id}")  # Debug print
+
+        # Fetch all date ranges associated with the project
+        date_ranges = DateRange.objects.filter(project=project)
+        
+        if not date_ranges:
+            print(f"No date ranges found for Project ID: {project.id}")  # Debug print
+            continue
+
+        # Initialize an empty list to hold month ranges for each project
+        month_ranges = []
+        
+        for date_range in date_ranges:
+            print(f"Processing DateRange: {date_range}")  # Debug print
+
+            # Extract the month from start_date and end_date
+            start_month = date_range.start_date.strftime('%B')
+            start_year = date_range.start_date.year
+            end_month = date_range.end_date.strftime('%B')
+            end_year = date_range.end_date.year
+            
+            # Combine month and year for better identification
+            if start_month == end_month and start_year == end_year:
+                month_ranges.append({
+                    'month': f"{start_month} {start_year}",
+                    'start_date': date_range.start_date.strftime('%Y-%m-%d'),
+                    'end_date': date_range.end_date.strftime('%Y-%m-%d'),
+                })
+            else:
+                month_ranges.append({
+                    'month': f"{start_month} {start_year} - {end_month} {end_year}",
+                    'start_date': date_range.start_date.strftime('%Y-%m-%d'),
+                    'end_date': date_range.end_date.strftime('%Y-%m-%d'),
+                })
+
+        # If month_ranges is not empty, add it to project_date_ranges
+        if month_ranges:
+            project_date_ranges[project.id] = month_ranges
+        else:
+            print(f"No month ranges for Project ID: {project.id}")  # Debug print
+
+    # Print the final project_date_ranges for debugging
+    print(f"Project Date Ranges: {project_date_ranges}")
+
+    
+    
+
+    # Handle form submissions
+    if request.method == 'POST':
+        if 'range_form_submit' in request.POST:
+            range_form = PeriodForm(request.POST)
+            if range_form.is_valid():
+                # Get the start and end dates, and project from the form
+                start_date = range_form.cleaned_data['start_date']
+                end_date = range_form.cleaned_data['end_date']
+                project = range_form.cleaned_data['project']
+                month = range_form.cleaned_data['month']
+                year = range_form.cleaned_data['year']
+
+                # Check for existing date ranges for the same project within the specified range
+                overlapping_ranges = DateRange.objects.filter(
+                    project=project,
+                    end_date__gte=start_date,
+                    start_date__lte=end_date,
+                )
+
+                if overlapping_ranges.exists():
+                    messages.error(request, 'Date range overlaps with an existing range for this project.')
+                else:
+                        date_range = range_form.save(commit=False)
+                        date_range.employee = employee  # Optional: associate with employee
+                        date_range.save()
+                        messages.success(request, 'New date range set successfully!')
+                    # Check if an active range exists for the project
+                    # last_date_range = DateRange.objects.filter(project=project).order_by('-end_date').first()
+                    
+                    # if last_date_range and last_date_range.end_date >= timezone.now().date():
+                    #     messages.error(request, 'Cannot add a new date range until the current one ends.')
+                    # else:
+                    #     # Check if a range already exists for the project
+                    #     existing_range = DateRange.objects.filter(project=project).first()
+                        
+                    #     if existing_range:
+                    #         # Update the existing range with new dates
+                    #         existing_range.start_date = start_date
+                    #         existing_range.end_date = end_date
+                    #         existing_range.save()
+                    #         messages.success(request, 'Date range updated successfully!')
+                    #     else:
+                    #         # Create a new date range
+                    #         date_range = range_form.save(commit=False)
+                    #         date_range.employee = employee  # Optional: associate with employee
+                    #         date_range.save()
+                    #         messages.success(request, 'New date range set successfully!')
+                        
+                        return redirect('timesheet')
+            else:
+                messages.error(request, 'Invalid date range. Please try again.')
+
+        
+        
+        if 'action' in request.POST:
+
+            action = request.POST.get('action')
+            date_from = request.POST.get('date_from')
+            date_to = request.POST.get('date_to')
+            project_id = request.POST.get('project_id')
+
+            if not date_from or not date_to:
+                messages.error(request, 'Please provide a valid date range.')
+                return redirect('timesheet')
+
+            try:
+                project = Projects.objects.get(id=project_id)
+            except Projects.DoesNotExist:
+                messages.error(request, 'The selected project does not exist.')
+                return redirect('timesheet')
+
+            # Parse the date range
+            start_date = datetime.strptime(date_from, '%Y-%m-%d')
+            end_date = datetime.strptime(date_to, '%Y-%m-%d')
+
+            # Generate a unique timesheet group ID for this range
+            timesheet_group_id = str(uuid.uuid4())
+
+            current_date = start_date
+            missing_fields = False  # Flag to check if any required field is missing
+
+            while current_date <= end_date:
+                date_str = current_date.strftime('%Y-%m-%d')
+                day_of_week = current_date.weekday()  # 5 = Saturday, 6 = Sunday
+
+                # For weekdays, check for required fields
+                if day_of_week not in [5, 6]:  # Not Saturday or Sunday
+                    task_description = request.POST.get(f'task_description_{date_str}', '').strip()
+                    location = request.POST.get(f'location_{date_str}', '').strip()
+
+
+                current_date += timedelta(days=1)
+
+            # If any required fields are missing, prevent form submission
+            if missing_fields:
+                return redirect('timesheet')
+
+            # If all required fields are present, proceed with save or submit action
+            if action == 'save':
+                current_date = start_date
+                duplicate_found = False  # Flag to track if any duplicate is found
+
+                while current_date <= end_date:
+                    date_str = current_date.strftime('%Y-%m-%d')
+                    day_of_week = current_date.weekday()
+
+                    # Check if a timesheet already exists for this date and project
+                    existing_timesheet = Timesheet.objects.filter(
+                        employee=employee,
+                        project=project,
+                        date=date_str
+                    ).first()
+
+                    if existing_timesheet:
+                        print(f"Timesheet already exists for {employee} on {date_str} for project {project}. Skipping.")
+                        if not duplicate_found:
+                            messages.error(request,'A duplicate timesheet already exists for the project')
+                            duplicate_found = True  # Mark that we've found a duplicate
+                        current_date += timedelta(days=1)
+                        continue  # Skip saving for this date
+
+                    print(f"Saving timesheet for {employee} on {date_str} for project {project}")
+
+                    task_description = request.POST.get(f'task_description_{date_str}', '').strip()
+                    location = request.POST.get(f'location_{date_str}', '').strip()
+                    notes = request.POST.get(f'notes_{date_str}', '').strip()
+                    time_in_hrs=request.POST.get(f'time_in_hrs_{date_str}', '').strip()
+
+                    # Save or update the timesheet
+                    timesheet, created = Timesheet.objects.get_or_create(
+                        employee=employee,
+                        project=project,
+                        date=date_str,
+                        defaults={
+                            'task_description': task_description,
+                            'location': location,
+                            'notes': notes,
+                            'time_in_hrs':time_in_hrs,
+                            'status': 'saved',
+                            'is_editable': True,
+                            'timesheet_group_id': timesheet_group_id,
+                        }
+                    )
+                    if not created:
+                        # If timesheet already exists, update it
+                        timesheet.task_description = task_description
+                        timesheet.location = location
+                        timesheet.time_in_hrs=time_in_hrs
+                        timesheet.notes = notes
+                        timesheet.is_editable = True
+                        timesheet.status = 'saved'
+                        timesheet.timesheet_group_id = timesheet_group_id
+                        timesheet.save()
+
+                    current_date += timedelta(days=1)
+
+                # If a duplicate was found, do not redirect to 'timesheet'
+                if duplicate_found:
+                    return redirect('timesheet')
+
+                messages.success(request, 'Timesheet saved successfully!')
+                return redirect('timesheet')
+
+
+
+
+    context = {
+        'projects': projects,
+        'timesheets': timesheets,
+        'employee': employee,
+        'today': today,
+        'months': months,
+        'pending_approval_timesheets': pending_approval_timesheets, 
+        'all_ranges':all_ranges,
+        'range_form': range_form,
+        'project_date_ranges': json.dumps(project_date_ranges),  
+    }
+
+    return render(request, 'templates/sub_templates/add_timesheet.html', context)
 
 @login_required
 @no_cache

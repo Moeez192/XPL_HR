@@ -1,6 +1,8 @@
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} Apply Leave {% endblock %}
+{% block content %}
 {% load widget_tweaks %}
-
-
 <div class="containe mt-5">
     <div class="scrollable-container">
         
@@ -32,7 +34,10 @@
             {% render_field leave_application_form.reason class+="form-control" %}
         </div>
     
-        <button type="submit" name="leave_application_form" class="btn btn-primary">Submit Leave Application</button>
+        <button type="submit" name="leave_application_form" class="btn btn-primary text-center">Save</button>
     </form>
     </div>
 </div>
+
+
+{% endblock %}

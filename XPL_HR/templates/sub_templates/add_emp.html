@@ -61,8 +61,8 @@
                             </div>
                             
                             <div class="col-md-6">
-                                <label for="id_dob" class="form-label">Date of Birth</label>
-                                {% render_field form.dob placeholder="Date Of Birth" class+="form-control" %}
+                                <label for="id_dob"  class="form-label">Date of Birth</label>
+                                {% render_field  form.dob placeholder="Date Of Birth" class+="form-control" %}
                             </div>
                             
                             <div class="col-md-6">
@@ -376,7 +376,9 @@
             
                         <!-- Submit Button -->
                         <div class="text-center">
-                            <button type="submit" name="employee_submit" class="btn btn-primary">Add Employee</button>
+                            <button type="submit" name="employee_submit" class="btn btn-primary">Save</button>
+                            <a href="{% url 'employees' %}" class="btn btn-secondary">Cancel</a>
+
                         </div>
                     </div>
                 </div>
@@ -385,7 +387,20 @@
 
 
 
-
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.querySelector('form'); // Replace with the specific form selector if needed
+                const dobField = document.getElementById('id_dob');
+        
+                form.addEventListener('submit', function (event) {
+                    if (!dobField.value) {
+                        event.preventDefault(); // Prevent form submission
+                        alert('Please fill in your Date of Birth!');
+                    }
+                });
+            });
+        </script>
+        
 
 <!-- dynamic Field Creater -->
 <script type="text/javascript">
@@ -532,6 +547,7 @@
             // If the document type is already added, create again
             createFileInputField(selectedDocType);
         }
+        this.value = ""
     });
 </script>
 

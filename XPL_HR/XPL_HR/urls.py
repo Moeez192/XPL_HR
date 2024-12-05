@@ -58,6 +58,13 @@ urlpatterns = [
     path('project/<int:file_id>/', views.delete_project_file, name='delete_project_file'),
     path('employee/document/delete/<int:document_id>/', views.delete_employee_document, name='delete_employee_document'),
     path('departments/',views.department, name='departments'),
+    path('clients/',views.clients, name='clients'),
+    path('add_project/',views.add_project, name='add_project'),
+    path('add_timesheet/',views.add_timesheet, name='add_timesheet'),
+    path('timesheet_date_range/',views.timesheet_date_range, name='timesheet_date_range'),
+    path('apply_leave/',views.apply_leave, name='apply_leave'),
+    path('leave_configuration/',views.leave_configuration, name='leave_configuration'),
+    path('add_client/',views.add_client, name='add_client'),
 
 
 

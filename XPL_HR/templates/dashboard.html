@@ -28,95 +28,113 @@
                             <div class="col-xxl-12 col-md-9">
                                 <div class="card border-0">
                                     <div class="card-body">
-                                        <div class="text-center">
+                                        <!-- <div class="text-center"> -->
                                             <div class="info-section">
                                                 <div class="container ">
+                                                    <h5>Basic Information</h5>
+
                                                     <div class="row align-items-start">
-                                                    <div class="col-md-3">
-                                                        <h6>Office Location</h6>
-                                                        <p>{{ user.work_location }}</p>
-                                                        <h6>Time Zone</h6>
-                                                        <p>(GMT+03:00)</p>
-                                                    </div>
-                                                    <div class="col">
-                                                        <h6>Department</h6>
-                                                        <p>{{ user.department }}</p>
-                                                        <h6>Email</h6>
-                                                        <p>{{ user.email }}</p>
-                                                    </div>
-                                                    <div class="col">
-                                                        <h6>Shift</h6>
-                                                        <p>{{ user.employment_type }}</p>
-                                                    </div>
-                                                    </div>
-                                                </div>
-                                                    
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xxl-12 col-md-9">
-                                <div class="card border-0">
-                                    <div class="card-body">
-                                        <div class="text-center">
-                                            <div class="info-section">
-                                                <div class="container ">
-                                                    <div class="row align-items-start">
-                                                        <div class="row">
-                                                            <div class="col-md-4">
-                                                                <div class="d-flex align-items-center">
-                                                                    <span class="icon">&#128100;</span>
-                                                                    <span>Business Unit: {{ user.business_unit }}</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <div class="d-flex align-items-center">
-                                                                    <span class="icon">&#128101;</span>
-                                                                    <span>Division: Consulting Services</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <div class="d-flex align-items-center">
-                                                                    <span class="icon">&#128102;</span>
-                                                                    <span>Department: {{ user.department }}</span>
-                                                                </div>
-                                                            </div>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <p><strong>Name:</strong> {{ user.first_name }} {{user.last_name}}</p>
+                                                            <p><strong>Nick Name:</strong> {{ user.nick_name }}</p>
+                                                            <p><strong>Date Of Birth:</strong> {{ user.dob }}</p>
+                                                            <p><strong>Age:</strong> {{ user.age }}</p>
+                                                            <p><strong>Gender:</strong> {{ user.gender }}</p>
+                                                            
                                                         </div>
+                                                        <div class="col">
+                                                            <p><strong>Skills:</strong> {{ user.skills }}</p>
+                                                            <p><strong>Marital Status:</strong> {{ user.marital_status }}</p>
+                                                            <p><strong>Nationality:</strong> {{ user.nationality }}</p>
+                                                            <p><strong>Linkdln:</strong> {{ user.linkdln }}</p>
+                                                            <p><strong>X/Twitter:</strong> {{ user.x_twitter }}</p>
+                                            
+                                                        </div>
+                                
+                                                    </div>
+                                                    </div>
                                                 </div>
                                                     
                                             </div>
-                                        </div>
+                                        <!-- </div> -->
                                     </div>
                                 </div>
                             </div>
                             <div class="col-xxl-12 col-md-9">
                                 <div class="card border-0">
                                     <div class="card-body">
-                                        <div >
+                                        <!-- <div class="text-center"> -->
                                             <div class="info-section">
                                                 <div class="container ">
+                                                    <h5>Work Information</h5>
+
                                                     <div class="row align-items-start">
                                                         <div class="row">
-                                                            <div class="col-md-6">
-                                                                <p><strong>Business Unit:</strong> {{ user.business_unit }}</p>
+                                                            <div class="col">
+                                                                <p><strong>Employee ID:</strong> {{ user.employee_id }} </p>
+                                                                <p><strong>Job Title:</strong> {{ user.job_title }}</p>
+                                                                <p><strong>Position:</strong> {{ user.position }}</p>
                                                                 <p><strong>Department:</strong> {{ user.department }}</p>
-                                                                <p><strong>Rate Basis:</strong> {{ user.rate_basis }}</p>
-                                                                <p><strong>Onsite Rate:</strong> {{ user.onsite_salary }}</p>
-                                                                <p><strong>Location:</strong> {{ user.work_location }}</p>
-                                                                <p><strong>Designation:</strong> {{ user.position}}</p>
-                                                                <p><strong>Streams:</strong> Consulting - Functional - Business Process</p>
-                                                                <p><strong>WPS Profile:</strong> {{ user.wps_profile }}</p>
+                                                                <p><strong>Business Unit:</strong> {{ user.business_unit }}</p>
                                                             </div>
-                                                            <div class="col-md-6">
-                                                                <p><strong>Zoho Role:</strong> Admin</p>
-                                                                <p><strong>Division:</strong> Consulting Services</p>
-                                                                <p><strong>Employment Type:</strong> {{ user.employment_type }}</p>
-                                                                <p><strong>Remote Rate:</strong> {{ user.remote_salary }}</p>
-                                                                <p><strong>Billing Type:</strong> {{ user.billing_type }}</p>
-                                                                <p><strong>Employee Status:</strong> {{ user.employee_status }}</p>
-                                                                <p><strong>Leaves Policy:</strong> {{ user.leave_policy }}</p>
-                                                                <p><strong>Timesheet Required:</strong> {{ user.timesheet_required }}</p>
+                                                            <div class="col">
+                                                                <p><strong>Role:</strong> {{ user.employee_role }}</p>
+                                                                <p><strong>Reporting manager:</strong> {{ user.reporting_manager }}</p>
+                                                                <p><strong>Work Location:</strong> {{ user.work_location }}</p>
+                                                                <p><strong>Remote Rate(Daily):</strong> {{ user.remote_salary }}$</p>
+                                                                <p><strong>Onsite Rate(Daily):</strong> {{ user.onsite_salary }}$</p>
+                                                                
+                                                            </div>
+                                                            <div class="col">
+                                                                <p><strong>Rate Basis:</strong> {{ user.rate_basis }}</p>
+                                                                <p><strong>Contract Start Date:</strong> {{ user.contract_start_date }}</p>
+                                                                <p><strong>Contract End Date:</strong> {{ user.contract_end_date }}</p>
+                                                                <p><strong>Date of Joining:</strong> {{ user.date_of_joining }}</p>
+                                                                <p><strong>Employment Type:</strong> {{ user.employement_type }}</p>
+                                                            </div>
+                                                            <div class="col">
+                                                                <p><strong>Status:</strong> {{ user.employee_status }}</p>
+                                                                <p><strong>Leave policy:</strong> {{ user.leave_policy }}</p>
+                                                                <p><strong>WPS Profile:</strong> {{ user.wps_profile }}</p>
+                                                                <p><strong>MOL Id:</strong> {{ user.mol_id }}</p>
+                                                                <p><strong>Source Of Hire:</strong> {{ user.source_of_hire }}</p>
+                                                                
+                                                            </div>
+                                                            <div class="col">
+                                                                <p><strong>TimeSheet Required:</strong> {{ user.timesheet_required }}</p>
+                                                                <p><strong>SAP Certifications:</strong> {{ user.sap_certifications }}</p>
+                                                                <p><strong>Total Expirence:</strong> {{ user.total_expirence }}</p>
+                                                                <p><strong>Is Supervisor:</strong> {{ user.is_supervisor }}</p>
+                                                                
+                                                            </div>
+                                                            
+                                                        </div>
+                                                </div>
+                                                    
+                                            </div>
+                                        <!-- </div> -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xxl-12 col-md-9">
+                                <div class="card border-0">
+                                    <div class="card-body">
+                                        <div >
+                                            <div class="info-section">
+                                                <div class="container ">
+                                                    <h5>Seperation Information</h5>
+
+                                                    <div class="row align-items-start">
+                                                        <div class="row">
+                                                            <div class="col">
+                                                                <p><strong>Date Of Exit:</strong> {{ user.date_of_exit }}</p>
+                                                            </div>
+                                                            <div class="col"> 
+                                                                <p><strong>Reason For Exit:</strong> {{ user.reason_for_exit }}</p>
+                                                            </div>
+                                                            <div class="col">
+                                                                <p><strong>Can Join Again:</strong> {{ user.can_join_again }}</p>
                                                             </div>
                                                         </div>
                                                 </div>
@@ -132,16 +150,22 @@
                                         <div >
                                             <div class="info-section">
                                                 <div class="container ">
+                                                    <h5>Bank Account Details</h5>
+
                                                     <div class="row align-items-start">
                                                         <div class="row">
-                                                            <div class="col-md-6">
-                                                                <p><strong>Date of Birth</strong> {{ user.dob }}</p>
-                                                                <p><strong>Age</strong> {{ user.age }}</p>
-                                                                <p><strong>Gender</strong> Male</p>
-                                                                <p><strong>Marital Status:</strong> {{ user.marital_status }}</p>
+                                                            <div class="col">
+                                                                <p><strong>Bank Name:</strong> {{ user.bank_account }}</p>
+                                                                <p><strong>Bank Account Country:</strong> {{ user.bank_country }}</p>
+                                                                <p><strong>Account Type:</strong> {{ user.account_type }}</p>
+                                                                <p><strong>Account Number:</strong> {{ user.account_number }}</p>
+                                                
                                                             </div>
-                                                            <div class="col-md-6">
-                                                                <p><strong>Ask me about/ Expertise</strong>{{ user.skills }} </p>
+                                                            <div class="col">
+                                                                <p><strong>IBAN Number:</strong> {{ user.iban_number }}</p>
+                                                                <p><strong>Routing Code:</strong> {{ user.routing_code }}</p>
+                                                                <p><strong>Swift Code:</strong> {{ user.swift_code }}</p>
+                                                                <p><strong>IFSC Code:</strong> {{ user.ifsc_code }}</p>                                                
                                                             </div>
                                                         </div>
                                                 </div>
@@ -151,7 +175,76 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-xxl-12 col-md-9">
+                                <div class="card border-0">
+                                    <div class="card-body">
+                                        <!-- <div class="text-center"> -->
+                                            <div class="info-section">
+                                                <div class="container ">
+                                                    <h5>Contact Details</h5>
+
+                                                    <div class="row align-items-start">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <p><strong>Email:</strong> {{ user.email }}</p>
+                                                            <p><strong>Work Phone:</strong> {{ user.phone }}</p>
+                                                            <p><strong>Personel Phone:</strong> {{ user.personel_phone }}</p>
+                                                            <p><strong>Present Address:</strong> {{ user.address }}</p>
+                                                            <p><strong>Permanent Address:</strong> {{ user.permanent_address }}</p>
+                                                            
+                                                        </div>
+                                                        <div class="col">
+                                                            <p><strong>Emergency Contact Name:</strong> {{ user.emergency_name }}</p>
+                                                            <p><strong>Relation With Emergency Contact:</strong> {{ user.emergency_relation }}</p>
+                                                            <p><strong>Emergency Contact Number:</strong> {{ user.emergency_phone }}</p>
+                            
+                                            
+                                                        </div>
+                                
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                                    
+                                            </div>
+                                        <!-- </div> -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xxl-12 col-md-9">
+                                <div class="card border-0">
+                                    <div class="card-body">
+                                        <!-- <div class="text-center"> -->
+                                            <div class="info-section">
+                                                <div class="container ">
+                                                    <h5>Travel History</h5>
+
+                                                    <div class="row align-items-start">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <p><strong>First Entry Into Country:</strong> {{ user.first_entry_in_country }}</p>
+                                                            <p><strong>Latest Exit From Country:</strong> {{ user.latest_exit_from_country }}</p>
+                                                            
+                                                            
+                                                        </div>
+                                                        <div class="col">
+                                                            <p><strong>Latest Entry Into Country</strong> {{ user.latest_entry_in_country }}</p>
+                                                            <p><strong>Days From Latest Entry:</strong> {{ user.days_from_latest_entry }}</p>
+                            
+                                            
+                                                        </div>
+                                
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                                    
+                                            </div>
+                                        <!-- </div> -->
+                                    </div>
+                                </div>
+                            </div>
+                            
                         </div>
+                        
                         
 
 
