@@ -1,7 +1,8 @@
 from django import forms
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile, LeavePolicy, uploadDocType, BillingType , ClientInformation
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile, LeavePolicy, uploadDocType, BillingType , ClientInformation , PaymentTerms
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
+import random
 
 
 
@@ -26,7 +27,7 @@ class EmployeeForm(forms.ModelForm):
         # fields = ['first_name', 'last_name', 'dob', 'gender', 'email', 'password', 'phone', 'address', 
         #           'nationality', 'employee_id', 'job_title', 'department', 'employment_type',
         #           'date_of_joining', 'employee_status', 'work_location', 'bonus', 'bank_account',
-        #           'emergency_name', 'emergency_relation', 'emergency_phone','is_supervisor','employee_role','last_login','onsite_salary','remote_salary','account_number','iban_number','work_location','position','rate_basis','nick_name','business_unit','mol_id','source_of_hire','contract_start_date','contract_end_date','marital_status','linkdln','x_twitter','personel_phone','permanent_address','date_of_exit','reason_for_exit','can_join_again','account_type','account_type','swift_code','ifsc_code','routing_code','first_entry_in_country','latest_entry_in_country','latest_exit_from_country','total_expirence','leave_policy','sap_certifications','docs','age','days_from_latest_entry','billing_type','bank_country','wps_profile','skills']  
+        #           'emergency_name', 'emergency_relation', 'emergency_phone','employee_role','last_login','onsite_salary','remote_salary','account_number','iban_number','work_location','position','rate_basis','nick_name','business_unit','mol_id','source_of_hire','contract_start_date','contract_end_date','marital_status','linkdln','x_twitter','personel_phone','permanent_address','date_of_exit','reason_for_exit','can_join_again','account_type','account_type','swift_code','ifsc_code','routing_code','first_entry_in_country','latest_entry_in_country','latest_exit_from_country','total_expirence','leave_policy','sap_certifications','docs','age','days_from_latest_entry','billing_type','bank_country','wps_profile','skills']  
         fields = '__all__'
         
         
@@ -69,7 +70,7 @@ class DepForm(forms.ModelForm):
 class LeaveForm(forms.ModelForm):
     class Meta:
         model = Leaves
-        fields = ['leave_name','leave_days_allowed','max_leaves_per_month','is_paid','auto_approval']
+        fields = ['leave_name','leave_days_allowed','max_leaves_per_month','is_paid']
 
 
 class LoginForm(forms.Form):
@@ -79,12 +80,12 @@ class LoginForm(forms.Form):
 
 class ProjectForm(forms.ModelForm):
      project_manager = forms.ModelChoiceField(
-        queryset=Employee.objects.filter(is_supervisor='yes'),
+        queryset=Employee.objects.all(),  # Query for project managers
         empty_label="Select Project Manager",  # Optional: placeholder text
         widget=forms.Select(attrs={'class': 'form-control'})
     )
      team_members = forms.ModelMultipleChoiceField(
-        queryset=Employee.objects.filter(is_supervisor='no'),  # Query for team members
+        queryset=Employee.objects.all(),  # Query for team members
         widget=forms.SelectMultiple(attrs={'class': 'form-control', 'multiple': 'multiple'})  # Enable multiple selection
     )
      
@@ -100,9 +101,10 @@ class ProjectForm(forms.ModelForm):
 class LeaveApplicationForm(forms.ModelForm):
     class Meta:
         model = LeaveApplication
-        fields = ['leave_type', 'start_date', 'end_date', 'reason','remarks']
+        fields = ['leave_type', 'start_date', 'end_date', 'reason','remarks','resource_replacement_email_id']
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'resource_replacement_email_id':forms.EmailInput(attrs={'class': 'form-control','type':'email'}),
             'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'reason': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
@@ -220,6 +222,26 @@ class ClientInformationForm(forms.ModelForm):
         model = ClientInformation
         fields = '__all__'
 
+        widgets = {
+            'customer_id': forms.TextInput(attrs={'readonly': 'readonly','class': 'form-control',}),
+            'customer_type': forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only generate ID for new instances
+        if not self.instance.pk:  
+            while True:
+                # Generate a unique 4-digit ID
+                customer_id = str(random.randint(1000, 9999))
+                if not ClientInformation.objects.filter(customer_id=customer_id).exists():
+                    self.fields['customer_id'].initial = customer_id
+                    break
+
+
+class PaymentTermsForm(forms.ModelForm):
+    class Meta:
+        model = PaymentTerms
+        fields = '__all__'
 
 
 class ApprovalHierarchyForm(forms.ModelForm):

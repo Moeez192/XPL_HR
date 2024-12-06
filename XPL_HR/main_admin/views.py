@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect , get_object_or_404
-from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm , ProjectFileForm, LeavePolicyForm, uploadDocTypeForm,BillingTypeForm,ClientInformationForm
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange , ProjectFile , PasswordResetToken,LeavePolicy , uploadDocType , EmployeeDocument , BillingType , ClientInformation
+from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm , ProjectFileForm, LeavePolicyForm, uploadDocTypeForm,BillingTypeForm,ClientInformationForm , PaymentTermsForm
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange , ProjectFile , PasswordResetToken,LeavePolicy , uploadDocType , EmployeeDocument , BillingType , ClientInformation , PaymentTerms
 from django.contrib import messages
 from django.core.mail import send_mail
 import uuid  
@@ -871,7 +871,7 @@ def delete_leave(request, leave_id):
 @login_required
 @no_cache
 def projects(request):
-    supervisors = Employee.objects.filter(is_supervisor='yes')
+    supervisors = Employee.objects.all()
     projects = Projects.objects.all()
     ongoing_projects = projects.count()
     completed_projects = Projects.objects.filter(status='complete').count()
@@ -903,7 +903,7 @@ def projects(request):
 @login_required
 @no_cache
 def add_project(request):
-    supervisors = Employee.objects.filter(is_supervisor='yes')
+    supervisors = Employee.objects.all()
     employees = Employee.objects.all()
     if request.method == 'POST':
         form = ProjectForm(request.POST , request.FILES)
@@ -2443,8 +2443,36 @@ def setting(request):
         'projects': projects,
     })
 
+@login_required
+@no_cache
+def add_payment_terms(request):
+    payment_terms_form = PaymentTermsForm(request.POST)
+    if request.method == 'POST':
+        if payment_terms_form.is_valid():
+            payment_terms_form.save()
+            messages.success(request, 'Payment Terms saved successfully!')
+            return redirect('payment_terms')
+        else:
+            errors = payment_terms_form.non_field_errors()
+        for error in errors:
+                    messages.error(request, error)
+    else:
+        payment_terms_form = PaymentTermsForm()
+    return render(request, 'templates/sub_templates/add_payment_terms.html', {
+        'payment_terms_form': payment_terms_form,
+    })
 
+@login_required
+@no_cache
+def payment_terms(request):
+    payment_terms = PaymentTerms.objects.all()
+    return render(request, 'templates/payment_terms.html', {
+        'payment_terms': payment_terms,
+    })
 
-
-
+def payment_term_delete_view(request, pk):
+    payment_term = get_object_or_404(PaymentTerms, pk=pk)
+    payment_term.delete()
+    messages.success(request, "Payment Term Deleted Successfully")
+    return redirect('payment_terms') 
 

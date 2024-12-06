@@ -73,9 +73,11 @@
         <table class="table table-hover" id="employeeTable">
             <thead class="table-primary">
                 <tr>
+                    <th scope="col">Client Id</th>
+                    <th scope="col">Client Type</th>
                     <th scope="col">Name</th>
                     <th scope="col">Company Name</th>
-                    <th scope="col">Customer Number</th>
+                    <th scope="col">Client Number</th>
                     <th scope="col">Phone Number</th>
                     <th scope="col">Country</th>
                     <th scope="col">Actions</th>
@@ -84,6 +86,8 @@
             <tbody>
                 {% for client in clients %}
                 <tr>
+                    <td>{{ client.customer_id }}</td>
+                    <td>{{ client.customer_type }}</td>
                     <td>{{ client.display_name }}</td>
                     <td>{{ client.company_name }}</td>
                     <td>{{ client.customer_number }}</td>
@@ -106,7 +110,7 @@
                 </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center">No Clients Yet!</td>
+                        <td colspan="6" class="text-center">No Clients Yet!</td>
                     </tr>
                 {% endfor %}
                 

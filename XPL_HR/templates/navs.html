@@ -158,7 +158,7 @@
                         <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
                       </svg></span> <span class="nav-text">Employee</span></a> 
                         <ul class="sub-menu">
-                            <li class="menu-item {% if request.path == '/employees/' %} active {% else %} {% endif %}"><a href="{% url 'employees' %}"> Dashboard</a></li>
+                            <li class="menu-item {% if request.path == '/employees/' %} active {% else %} {% endif %}"><a href="{% url 'employees' %}"> List Employee</a></li>
                             <li class="menu-item {% if request.path == '/departments/' %} active {% else %} {% endif %}"><a href="{% url 'departments' %}"> Departments </a></li>
                            
                         </ul>
@@ -172,7 +172,7 @@
                     <li class="menu-item menu-item-has-children"><a href="#"> 
                         <span class="nav-icon flex-shrink-0"><i class="fa fa-table" aria-hidden="true"></i></span> <span class="nav-text">Timesheet</span></a> 
                         <ul class="sub-menu">
-                            <li class="menu-item {% if request.path == '/timesheet/' %} active {% else %} {% endif %}"><a href="{% url 'timesheet' %}"> Timesheet</a></li>         
+                            <li class="menu-item {% if request.path == '/timesheet/' %} active {% else %} {% endif %}"><a href="{% url 'timesheet' %}"> Add TimeSheet</a></li>         
                             <li class="menu-item {% if request.path == '/timesheet_date_range/' %} active {% else %} {% endif %}"><a href="{% url 'timesheet_date_range' %}"> Timesheet Date Range</a></li>                    
                         </ul>
                         <span class='submenu-opener'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
@@ -186,7 +186,7 @@
                             <span class="nav-icon flex-shrink-0"><i class="fa fa-bar-chart" aria-hidden="true"></i>
                             </span> <span class="nav-text">Projects</span></a> 
                             <ul class="sub-menu">
-                                <li class="menu-item {% if request.path == '/projects/' %} active {% else %} {% endif %}"><a href="{% url 'projects' %}"> Projects</a></li>                           
+                                <li class="menu-item {% if request.path == '/projects/' %} active {% else %} {% endif %}"><a href="{% url 'projects' %}">List Projects</a></li>                           
                             </ul>
                             <span class='submenu-opener'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
@@ -198,7 +198,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="24px" fill="black"><path d="M662-60 520-202l56-56 85 85 170-170 56 57L662-60ZM296-280l-56-56 64-64-64-64 56-56 64 64 64-64 56 56-64 64 64 64-56 56-64-64-64 64ZM200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v254l-80 81v-175H200v400h250l79 80H200Zm0-560h560v-80H200v80Zm0 0v-80 80Z"/></svg>
                         </span> <span class="nav-text">Leave</span></a> 
                         <ul class="sub-menu">
-                            <li class="menu-item {% if request.path == '/leave/' %} active {% else %} {% endif %}"><a href="{% url 'leave' %}"> Leaves</a></li>  
+                            <li class="menu-item {% if request.path == '/leave/' %} active {% else %} {% endif %}"><a href="{% url 'leave' %}">List Leaves</a></li>  
                             <li class="menu-item {% if request.path == '/leave_configuration/' %} active {% else %} {% endif %}"><a href="{% url 'leave_configuration' %}"> Leave Configuration</a></li>                         
                        
                         </ul>
@@ -213,7 +213,10 @@
                         <span class="nav-icon flex-shrink-0"><i class="fa fa-user-plus" aria-hidden="true"></i>
                         </span> <span class="nav-text">Client</span></a> 
                         <ul class="sub-menu">
-                            <li class="menu-item {% if request.path == '/clients/' %} active {% else %} {% endif %}"><a href="{% url 'clients' %}"> Clients</a></li>                           
+                            <li class="menu-item {% if request.path == '/payment_terms/' %} active {% else %} {% endif %}"><a href="{% url 'payment_terms' %}">Payment Terms</a></li> 
+                            <li class="menu-item {% if request.path == '/clients/' %} active {% else %} {% endif %}"><a href="{% url 'clients' %}"> List Clients</a></li> 
+                                                      
+                          
                         </ul>
                         <span class='submenu-opener'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>

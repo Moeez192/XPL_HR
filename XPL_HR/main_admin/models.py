@@ -9,16 +9,39 @@ import os, json
 
 
 def get_country_choices():
-    
     try:
-        file_path = "static/countries.json"
+        # Construct the file path
+        file_path = os.path.join(settings.STATIC_ROOT, 'countries.json')
+
+        # Open and load the JSON file
         with open(file_path, "r") as file:
             data = json.load(file)
-            return [(country["code"], country["name"]) for country in data]
+
+        # Extract and return the list of tuples (code, name)
+        return [(country["code"], country["name"]) for country in data]
+
     except Exception as e:
+        # Handle and log any exceptions
         print(f"Error reading country data: {e}")
         return []
+    
 
+def get_currency_choices():
+    try:
+        # Construct the file path for the currencies JSON file
+        file_path = os.path.join(settings.STATIC_ROOT, 'currencies.json')
+
+        # Open and load the JSON file
+        with open(file_path, "r") as file:
+            data = json.load(file)
+
+        # Extract and return the list of tuples (code, name)
+        return [(currency["cc"], currency["name"]) for currency in data]
+
+    except Exception as e:
+        # Handle and log any exceptions
+        print(f"Error reading currency data: {e}")
+        return []
 
 
 class LeavePolicy(models.Model):
@@ -58,12 +81,7 @@ class Employee(models.Model):
     password = models.CharField(max_length=255,default="Progrc@123",blank=True )
     phone = models.CharField(max_length=20)
     address = models.TextField()
-    COUNTRIES = [
-        ('pakistan', 'Pakistan'),
-        ('uae', 'UAE'),
-        ('india', 'India'),
-    ]
-    nationality = models.CharField(max_length=100,choices=COUNTRIES)
+    nationality = models.CharField(max_length=100,choices=get_country_choices())
 
     
     def save(self, *args, **kwargs):
@@ -115,12 +133,12 @@ class Employee(models.Model):
     
     employee_status = models.CharField(max_length=20, choices=EMPLOYEE_STATUS_CHOICES)
     
-    IS_SUPERVISOR = [
-        ('yes', 'Yes'),
-        ('no', 'No'),
-        ]
+    # IS_SUPERVISOR = [
+    #     ('yes', 'Yes'),
+    #     ('no', 'No'),
+    #     ]
     
-    is_supervisor = models.CharField(max_length=20, choices=IS_SUPERVISOR)
+    # is_supervisor = models.CharField(max_length=20, choices=IS_SUPERVISOR)
    
     
     # salary = models.PositiveIntegerField()
@@ -276,15 +294,10 @@ class Leaves(models.Model):
         ('yes', 'Yes'),
         ('no', 'No'),
     ]
-    AUTO_APPROVAL = [
-        ('yes', 'Yes'),
-        ('no', 'No'),
-    ]
     leave_name = models.CharField(max_length=20)
     leave_days_allowed = models.PositiveIntegerField()  
     max_leaves_per_month = models.PositiveIntegerField()  
     is_paid = models.CharField(max_length=4,choices=IS_PAID)
-    auto_approval = models.CharField(max_length=4,choices=AUTO_APPROVAL)
 
     def __str__(self):
         return self.leave_name
@@ -331,6 +344,7 @@ class Projects(models.Model):
 class LeaveApplication(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)  # Link to the Employee model
     leave_type = models.ForeignKey(Leaves, on_delete=models.CASCADE)
+    resource_replacement_email_id = models.EmailField()
     start_date = models.DateField()
     end_date = models.DateField()
     remarks = models.TextField(blank=True, null=True)
@@ -497,31 +511,34 @@ class DateRange(models.Model):
     def __str__(self):
         return f"{self.project.project_name}: {self.start_date} - {self.end_date}"
     
-
+class PaymentTerms(models.Model):
+    name = models.CharField(max_length=50)
+    days = models.IntegerField()
+    def __str__(self):
+        return f"{self.name} - {self.days} days"
 
 class ClientInformation(models.Model):
+    customer_id = models.CharField(max_length=10)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    client_email = models.EmailField()
     CUSTOMER_TYPE = [
-        ('business', 'Business'),
-        ('individual', 'Individual'),
+        ('Business', 'Business'),
+        ('Individual', 'Individual'),
     ]
-    customer_type = models.CharField(max_length=50,choices=CUSTOMER_TYPE)
+    customer_type = models.CharField(max_length=50,choices=CUSTOMER_TYPE,blank=False,null=False,default='business')
     company_name = models.CharField(max_length=50)
     display_name = models.CharField(max_length=50)
     email_address = models.EmailField()
-    customer_number = models.TextField(max_length=20)
+    customer_number = models.PositiveIntegerField(max_length=20)
     phone=models.IntegerField()
     
     #other Details
     tax_treatment = models.CharField(max_length=50)
     place_of_supply = models.CharField(max_length=50)
-    currency = models.CharField(max_length=50)
-    payment_terms = models.CharField(max_length=50)
-    opening_balance = models.IntegerField()
-    PORTAL_ACCESS = [
-        ('yes', 'Yes'),
-        ('no', 'No'),
-    ]
-    enable_portal_access = models.TextField(choices=PORTAL_ACCESS)
+
+    currency = models.CharField(max_length=50,choices=get_currency_choices())
+    payment_terms = models.ForeignKey(PaymentTerms,on_delete=models.SET_NULL,null=True,blank=True)
     PORTAL_LANGUAGE = [
         ('english', 'English'),
         ('arabic', 'Arabic'),
@@ -531,16 +548,21 @@ class ClientInformation(models.Model):
 
     # Billing Address
     billing_address = models.TextField()
-    COUNTRIES = [
-        ('pakistan', 'Pakistan'),
-        ('uae', 'UAE'),
-        ('india', 'India'),
+    INDUSTRY = [
+        ('IT', 'IT'),
+        ('Software', 'Software'),
     ]
-    country_region = models.CharField(max_length=50,choices=COUNTRIES)
+    industry=models.CharField(max_length=50,choices=INDUSTRY,default='IT')
+    country_region = models.CharField(max_length=50,choices=get_country_choices())
     address= models.TextField()
     city = models.CharField(max_length=50)
     state= models.CharField(max_length=50)
     zip_code = models.IntegerField()
     phone_number = models.IntegerField()
     fax_number = models.IntegerField()
+
+
+
+
+
     

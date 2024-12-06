@@ -65,6 +65,9 @@ urlpatterns = [
     path('apply_leave/',views.apply_leave, name='apply_leave'),
     path('leave_configuration/',views.leave_configuration, name='leave_configuration'),
     path('add_client/',views.add_client, name='add_client'),
+    path('payment_terms/',views.payment_terms, name='payment_terms'),
+    path('add_payment_terms/',views.add_payment_terms, name='add_payment_terms'),
+    path('payment_term_delete/<int:pk>/', views.payment_term_delete_view, name='payment_term_delete'),
 
 
 

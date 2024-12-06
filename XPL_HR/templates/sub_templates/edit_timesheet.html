@@ -135,21 +135,8 @@
             tbody.appendChild(newRow);
         }
         </script> -->
-<script>
-        document.querySelector('form').addEventListener('submit', function(event) {
-            const timeFields = document.querySelectorAll('textarea[name^="time_in_hrs_"]');
-            const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
         
-            timeFields.forEach(field => {
-                if (field.value && !timeRegex.test(field.value)) {
-                    event.preventDefault();
-                    alert(`Invalid time format: ${field.value}. Please use HH:mm.`);
-                    field.focus();
-                }
-            });
-        });
-        
-    </script>   
+        </div>
 </div>
 </div>
 <!-- ${isWeekend ? 'readonly' : ''} -->
@@ -166,8 +153,45 @@
     }
 </style> -->
 
+{%endblock%}
+
+{% block scripts %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    console.log("Script loaded and DOM fully parsed."); // Debugging log
+
+    // Select all relevant textarea elements
+    const timeFields = document.querySelectorAll('textarea[name^="time_in_hrs_"]');
+
+    if (!timeFields.length) {
+        console.error("No time input fields found! Check your selector.");
+        return;
+    }
+    console.log("Time input fields found:", timeFields);
+
+    // Attach an input event listener to each textarea
+    timeFields.forEach((timeInput) => {
+        timeInput.addEventListener("input", function () {
+            const timeValue = this.value;
+
+            // Regular expression for HH:mm format
+            const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+
+            // Validate the input format
+            if (!timeRegex.test(timeValue)) {
+                this.setCustomValidity("Please enter a valid time in HH:mm format.");
+                this.reportValidity(); // Show the error message
+            } else {
+                this.setCustomValidity(""); // Clear the error if valid
+            }
+        });
+    });
+});
 
 
 
+
+</script>  
 
 {%endblock%}
