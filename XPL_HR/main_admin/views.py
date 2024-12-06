@@ -341,7 +341,7 @@ def department(request):
 def employees(request):
      # Handle employee form
     total_employees = Employee.objects.count()
-    total_supervisors = Employee.objects.filter(is_supervisor='yes').count()
+    # total_supervisors = Employee.objects.filter(is_supervisor='yes').count()
     department_list = Department.objects.all()
     department_form = DepForm(request.POST)
     total_departments = Department.objects.count()
@@ -408,7 +408,7 @@ def employees(request):
         'total_employees': total_employees,
         'total_departments': total_departments,
         'dep_list': department_list,
-        'total_supervisors':total_supervisors,
+        # 'total_supervisors':total_supervisors,
         'employee_list': employee_list,
         'dep_form': department_form,
     })
