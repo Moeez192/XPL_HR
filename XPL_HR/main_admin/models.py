@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 import uuid , requests
+from datetime import datetime
 from django.utils.timezone import now
 import os, json
 
@@ -24,7 +25,10 @@ def get_country_choices():
         # Handle and log any exceptions
         print(f"Error reading country data: {e}")
         return []
-    
+
+def generate_year_choices():
+    current_year = datetime.now().year
+    return [(year, str(year)) for year in range(current_year - 5, current_year + 51)]   
 
 def get_currency_choices():
     try:
@@ -303,10 +307,94 @@ class Leaves(models.Model):
         return self.leave_name
     
 
+   
+class PaymentTerms(models.Model):
+    name = models.CharField(max_length=50)
+    days = models.IntegerField()
+    def __str__(self):
+        return f"{self.name} - {self.days} days"
+
+class ClientInformation(models.Model):
+    customer_id = models.CharField(max_length=10)
+    CUSTOMER_TYPE = [
+        ('Business', 'Business'),
+        ('Individual', 'Individual'),
+    ]
+    customer_type = models.CharField(max_length=50,choices=CUSTOMER_TYPE,blank=False,null=False,default='business')
+    company_name = models.CharField(max_length=50)
+    display_name = models.CharField(max_length=50)
+    email_address = models.EmailField()
+    customer_number = models.PositiveIntegerField(max_length=20)
+    phone=models.IntegerField()
+    
+    #other Details
+    tax_treatment = models.CharField(max_length=50)
+    place_of_supply = models.CharField(max_length=50)
+
+    currency = models.CharField(max_length=50,choices=get_currency_choices())
+    payment_terms = models.ForeignKey(PaymentTerms,on_delete=models.SET_NULL,null=True,blank=True)
+    PORTAL_LANGUAGE = [
+        ('english', 'English'),
+        ('arabic', 'Arabic'),
+    ]
+    portal_language = models.CharField(max_length=50,choices=PORTAL_LANGUAGE)
+    documents = models.FileField(upload_to='client_documents/',null=True,blank=True)
+
+    # Billing Address
+    billing_address = models.TextField()
+    INDUSTRY = [
+        ('IT', 'IT'),
+        ('Software', 'Software'),
+    ]
+    industry=models.CharField(max_length=50,choices=INDUSTRY,default='IT')
+    country_region = models.CharField(max_length=50,choices=get_country_choices())
+    address= models.TextField()
+    city = models.CharField(max_length=50)
+    state= models.CharField(max_length=50)
+    zip_code = models.IntegerField()
+    phone_number = models.IntegerField()
+    fax_number = models.IntegerField()
+
+    # client Calendar settings
+    WEEKEND=[
+        ('Friday/Saturday','Friday/Saturday'),
+        ('Saturday/Sunday','Saturday/Sunday'),
+    ]
+    YEARS=[
+        ('2022','2022'),
+        ('2023','2023'),
+        ('2024','2024'),
+        ('2025','2025'),
+        ('2026','2026'),
+        ('2027','2027')
+    ]
+    year=models.CharField(max_length=4,choices=YEARS,default='2024')
+    weekend=models.CharField(max_length=50,choices=WEEKEND,default='Saturday/Sunday')
+
+    def __str__(self):
+        return f"{self.company_name}"
+
+class ClientLeave(models.Model):
+    client = models.ForeignKey(ClientInformation, related_name="client_leaves", on_delete=models.CASCADE)
+    client_leave_type = models.CharField(max_length=100)
+    client_leave_date = models.DateField()
+
+    def __str__(self):
+        return f"{self.leave_type} on {self.leave_date}"
+
+class XPL_ClientContact(models.Model):
+    client = models.ForeignKey(ClientInformation, on_delete=models.CASCADE, related_name='client_contacts')
+    full_name = models.CharField(max_length=100)
+    client_email = models.EmailField()
+    client_position = models.CharField(max_length=100)
+    client_contact_number = models.CharField(max_length=20)
+
+    def __str__(self):
+            return f"{self.full_name}"
+
 class Projects(models.Model):
     project_name = models.CharField(max_length=30)
-    client_name = models.CharField(max_length=20)
-    project_description = models.CharField(max_length=256)
+    project_description = models.TextField()
     start_date = models.DateField()
     deadline = models.DateField()
     requirement_file = models.FileField(upload_to='projects/')
@@ -330,6 +418,19 @@ class Projects(models.Model):
     ]
     status=models.CharField(max_length=20,choices=STATUS)
 
+    # new Fields
+    client_manager=models.ForeignKey(XPL_ClientContact,on_delete=models.SET_NULL,null=True,blank=True,related_name='client_manager')
+    project_sponsor=models.ForeignKey(Employee,on_delete=models.SET_NULL,null=True,blank=True,related_name='project_sponsor')
+    timesheet_approver=models.ForeignKey(Employee,on_delete=models.SET_NULL,null=True,blank=True,related_name='timesheet_approver')
+    client_name=models.ForeignKey(ClientInformation,on_delete=models.CASCADE,null=True,blank=True,related_name='client_name')
+    BILLING_METHOD={
+        ('Time & Material','Time & Material'),
+        ('Fixed Price','Fixed Price'),
+    }
+    billing_method=models.CharField(max_length=20,choices=BILLING_METHOD,default='Fixed Price')
+    project_budget=models.PositiveIntegerField()
+    project_location=models.CharField(max_length=256)
+
     def remaining_days(self):
         if self.deadline and self.start_date:
             total_days = (self.deadline - self.start_date).days
@@ -340,6 +441,17 @@ class Projects(models.Model):
     def __str__(self):
             return self.project_name
 
+
+class XPL_EmployeeBilling(models.Model):
+    project = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name='employee_billings')
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='project_assignments')
+    BILLING_TYPE = [
+        ('E1', 'E1'),
+        ('E2', 'E2'),
+        ('A1', 'A1'),
+        ('C1', 'C1'),
+    ]
+    billing_type = models.CharField(max_length=50, choices=BILLING_TYPE)
 
 class LeaveApplication(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)  # Link to the Employee model
@@ -510,57 +622,7 @@ class DateRange(models.Model):
 
     def __str__(self):
         return f"{self.project.project_name}: {self.start_date} - {self.end_date}"
-    
-class PaymentTerms(models.Model):
-    name = models.CharField(max_length=50)
-    days = models.IntegerField()
-    def __str__(self):
-        return f"{self.name} - {self.days} days"
-
-class ClientInformation(models.Model):
-    customer_id = models.CharField(max_length=10)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    client_email = models.EmailField()
-    CUSTOMER_TYPE = [
-        ('Business', 'Business'),
-        ('Individual', 'Individual'),
-    ]
-    customer_type = models.CharField(max_length=50,choices=CUSTOMER_TYPE,blank=False,null=False,default='business')
-    company_name = models.CharField(max_length=50)
-    display_name = models.CharField(max_length=50)
-    email_address = models.EmailField()
-    customer_number = models.PositiveIntegerField(max_length=20)
-    phone=models.IntegerField()
-    
-    #other Details
-    tax_treatment = models.CharField(max_length=50)
-    place_of_supply = models.CharField(max_length=50)
-
-    currency = models.CharField(max_length=50,choices=get_currency_choices())
-    payment_terms = models.ForeignKey(PaymentTerms,on_delete=models.SET_NULL,null=True,blank=True)
-    PORTAL_LANGUAGE = [
-        ('english', 'English'),
-        ('arabic', 'Arabic'),
-    ]
-    portal_language = models.CharField(max_length=50,choices=PORTAL_LANGUAGE)
-    documents = models.FileField(upload_to='client_documents/',null=True,blank=True)
-
-    # Billing Address
-    billing_address = models.TextField()
-    INDUSTRY = [
-        ('IT', 'IT'),
-        ('Software', 'Software'),
-    ]
-    industry=models.CharField(max_length=50,choices=INDUSTRY,default='IT')
-    country_region = models.CharField(max_length=50,choices=get_country_choices())
-    address= models.TextField()
-    city = models.CharField(max_length=50)
-    state= models.CharField(max_length=50)
-    zip_code = models.IntegerField()
-    phone_number = models.IntegerField()
-    fax_number = models.IntegerField()
-
+ 
 
 
 

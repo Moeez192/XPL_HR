@@ -127,7 +127,6 @@
 {% endblock %}
 
 <div class="containe-fluid mt-5">
-    <div class="scrollable-container">
         <!-- <div class="container"> -->
             <h2 class="text-center mb-4">Project Cofiguration</h2>
             <form method="POST" enctype="multipart/form-data">
@@ -136,89 +135,108 @@
                 <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="projectName" class="form-label">Project Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-project-diagram form-icon"></i></span>
+                    
                         {% render_field form.project_name placeholder="Project Name" class+="form-control" %}
-                    </div>
                 </div>
                 <!-- Client Name -->
                 <div class="col-md-6">
                     <label for="clientName" class="form-label">Client Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
-                        {% render_field form.client_name placeholder="Client Name" class+="form-control" %}
-                    </div>
+                    {% render_field form.client_name placeholder="Client Name" class="form-control" id="client_name" %}
                 </div>
+                <div class="col-md-6">
+                    <label for="clientManager" class="form-label">Client Manager</label>
+                    {% render_field form.client_manager placeholder="Client Manager" class="form-control" id="client_manager" %}
                 </div>
-    
-                
-    
-                <!-- Project Description -->
-                <div class="mb-3">
+                <div class="col-md-6">
+                    <label for="clientName" class="form-label">Project Sponser</label>
+                    
+                        {% render_field form.project_sponsor placeholder="Project Sponser" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="clientName" class="form-label">Timesheet Approver</label>
+                   
+                        {% render_field form.timesheet_approver class+="form-control" %}
+                </div>
+                <div class="col-md-6">
                     <label for="projectDescription" class="form-label">Project Description</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                    
                         {% render_field form.project_description placeholder="Project Description" class+="form-control" %}
-                    </div>
                 </div>
-
-                <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="projectDescription" class="form-label">Project Budget</label>
+                    
+                        {% render_field form.project_budget placeholder="Project Budget" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="projectDescription" class="form-label">Project Location</label>
+                    
+                        {% render_field form.project_location placeholder="Project Location" class+="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label for="projectDescription" class="form-label">Billing Method</label>
+                    
+                        {% render_field form.billing_method  class+="form-control" %}
+                </div>
+               
                 <!-- Start Date -->
                 <div class="col-md-6">
                     <label for="startDate" class="form-label">Start Date</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-calendar-day form-icon"></i></span>
+                   
                         {% render_field form.start_date  class+="form-control" %}
-                    </div>
                 </div>
                 <div class="col-md-6">
                     <label for="projectDeadline" class="form-label">Deadline</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-calendar-alt form-icon"></i></span>
+                    
                         {% render_field form.deadline  class+="form-control" %}
-                    </div>
                 </div>
-                </div>
-
-                <div class="row mb-3">
+                
     
                 <!-- Requirement File Upload -->
                 <div class="col-md-6">
                     <label for="requirementFile" class="form-label">Requirement File</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-file-upload form-icon"></i></span>
+                    
                         {% render_field form.requirement_file  class+="form-control" %}
-                    </div>
                 </div>
     
                 <!-- Project Manager with Modal Trigger -->
                 <div class="col-md-6">
                     <label for="projectManager" class="form-label">Project Manager</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user form-icon"></i></span>
+                   
                     {% render_field form.project_manager class+="form-control" %}
-                    </div>
                 </div>
-                </div>
-
-                <div class="row mb-3">
                 <!-- Team Members with Modal Trigger -->
-                    <div class="col-md-6">
-                        <label for="teamMembers" class="form-label">Team Members</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-users form-icon"></i></span>
-                            {% render_field form.team_members class+="form-control" %}
-                        </div>
+                <div class="col-md-6">
+                    <br>
+                    <label for="projectManager" class="form-label">Team Members</label>
+
+                <div id="team-members-section" class="scrollable-container">
+                    <div class="team-member-row d-flex mb-2">
+                        <select name="team_members[]" class="form-select me-2" required>
+                            <option value="">Team Member</option>
+                            {% for employee in employees %}
+                            <option value="{{ employee.id }}">{{ employee.first_name }} {{ employee.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <select name="billing_types[]" class="form-select" required>
+                            <option value=""> Billing Type</option>
+                            {% for value, label in XPL_EmployeeBilling.BILLING_TYPE %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="btn  btn-sm btn-danger remove-team-member-btn ms-2" onclick="removeTeamMember(this)"><i class="fas fa-trash"></i></button>
                     </div>
-                    
+                </div>
+                
+                <button type="button" id="add-team-member-btn" class="btn btn-sm btn-secondary mt-2"><i class="fas fa-plus"></i></button>
+                </div>
+                
     
                     <!-- Timesheet Required -->
                     <div class="col-md-6">
                         <label class="form-label">Is Time Sheet Required?</label>
                         {% render_field form.is_timesheet_required  class+="form-control" %}
                     </div>
-                </div>
-                <div class="row mb-3">
+                
                 <!-- Project Priority -->
                 <div class="col-md-6">
                     <label for="projectPriority" class="form-label">Priority</label>
@@ -232,40 +250,113 @@
                 </div>
                 </div>
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="{% url 'projects' %}" class="btn btn-secondary">Cancel</a>
+
             </form>
+            <br>
         </div>
     
         
     
-        <!-- Modal for Team Members Selection -->
-        <div class="modal fade" id="teamMemberModal" tabindex="-1" aria-labelledby="teamMemberModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="teamMemberModalLabel">Select Team Members</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="text" id="memberSearch" class="form-control mb-3" placeholder="Search team members...">
-                        <div id="employeeList">
-                            {% for employee in form.team_members.field.queryset %}
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="{{ employee.pk }}" id="employee{{ employee.pk }}" {% if employee.pk in form.team_members.value %}checked{% endif %}>
-                                <label class="form-check-label" for="employee{{ employee.pk }}">{{ employee }}</label>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="saveEmployees">Save Selected</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+       
     </div>
 </div>
 
 
+<script>
+    // Ensure the client manager dropdown is empty on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        var clientManagerSelect = document.getElementById('client_manager');
+        clientManagerSelect.innerHTML = '<option value="">-- Select Client Manager --</option>';
+    });
+    
+    // Event listener for when the client name is selected
+    document.getElementById('client_name').addEventListener('change', function() {
+        var clientId = this.value;
+        var clientManagerSelect = document.getElementById('client_manager');
+    
+        // Clear the client manager dropdown before adding new options
+        clientManagerSelect.innerHTML = '<option value="">-- Select Client Manager --</option>';
+    
+        if (clientId) {
+            // Send AJAX request to fetch the client contacts (managers) for the selected client
+            fetch(`/get-client-contacts/${clientId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Check if there are contacts for this client
+                    if (data.contacts && data.contacts.length > 0) {
+                        // Populate the client manager dropdown with options
+                        data.contacts.forEach(contact => {
+                            var option = document.createElement('option');
+                            option.value = contact.id;
+                            option.textContent = contact.full_name;
+                            clientManagerSelect.appendChild(option);
+                        });
+                    } else {
+                        // If no contacts, show a message or leave it empty
+                        var option = document.createElement('option');
+                        option.textContent = 'No Client Managers Available';
+                        clientManagerSelect.appendChild(option);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching client contacts:', error);
+                });
+        } else {
+            // If no client is selected, reset the client manager dropdown to default
+            clientManagerSelect.innerHTML = '<option value="">-- Select Client Manager --</option>';
+        }
+    });
+    </script>
+
+    <script>
+     document.getElementById('add-team-member-btn').addEventListener('click', function () {
+    const teamMembersSection = document.getElementById('team-members-section');
+    const newTeamMemberRow = `
+        <div class="team-member-row d-flex mb-2">
+            <select name="team_members[]" class="form-select me-2" required>
+                <option value=""> Team Member</option>
+                {% for employee in employees %}
+                <option value="{{ employee.id }}">{{ employee.first_name }} {{ employee.last_name }}</option>
+                {% endfor %}
+            </select>
+             <select name="billing_types[]" class="form-select" required>
+                            <option value=""> Billing Type</option>
+                            {% for value, label in XPL_EmployeeBilling.BILLING_TYPE %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                                    <button type="button" class="btn btn-sm btn-danger remove-team-member-btn ms-2" onclick="removeTeamMember(this)"><i class="fas fa-trash"></i></button>
+        </div>
+    `;
+    teamMembersSection.insertAdjacentHTML('beforeend', newTeamMemberRow);
+});
+ // Remove Team Member Function
+ function removeTeamMember(button) {
+        // Find the parent row of the remove button and remove it
+        var row = button.closest('.team-member-row');
+        row.remove();
+    }
+
+
+
+    </script>
+<style>
+    /* Make the team members section scrollable */
+    .scrollable-container {
+        max-height: 120px; /* Adjust the height as needed */
+        overflow-y: auto;
+        /* border: 1px solid #ddd; Optional: Add border for better visibility */
+        padding: 10px;
+    }
+
+    /* Remove button styling */
+    .remove-team-member-btn {
+        background-color: red;
+        color: white;
+        font-size: 14px;
+        padding: 5px;
+    }
+</style>
 {%endblock%}

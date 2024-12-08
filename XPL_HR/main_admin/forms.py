@@ -1,5 +1,6 @@
-from django import forms
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile, LeavePolicy, uploadDocType, BillingType , ClientInformation , PaymentTerms
+from django import forms 
+from django.forms import modelformset_factory
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile, LeavePolicy, uploadDocType, BillingType , ClientInformation , PaymentTerms, ClientLeave, XPL_ClientContact , XPL_EmployeeBilling
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 import random
@@ -80,22 +81,42 @@ class LoginForm(forms.Form):
 
 class ProjectForm(forms.ModelForm):
      project_manager = forms.ModelChoiceField(
-        queryset=Employee.objects.all(),  # Query for project managers
-        empty_label="Select Project Manager",  # Optional: placeholder text
+        queryset=Employee.objects.all(), 
+        empty_label="Select Project Manager",  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+     client_manager = forms.ModelChoiceField(queryset=XPL_ClientContact.objects.all(), empty_label="Select a Client Manager")
+     project_sponsor = forms.ModelChoiceField(
+        queryset=Employee.objects.all(),  
+        empty_label="Select Project Sponser",  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+     timesheet_approver = forms.ModelChoiceField(
+        queryset=Employee.objects.all(),  
+        empty_label="Select Timesheet Approver",  
         widget=forms.Select(attrs={'class': 'form-control'})
     )
      team_members = forms.ModelMultipleChoiceField(
-        queryset=Employee.objects.all(),  # Query for team members
-        widget=forms.SelectMultiple(attrs={'class': 'form-control', 'multiple': 'multiple'})  # Enable multiple selection
+        queryset=Employee.objects.all(),  
+        widget=forms.SelectMultiple(attrs={'class': 'form-control', 'multiple': 'multiple'}),
+        required=False  
     )
+     billing_type = forms.ChoiceField(
+        choices=XPL_EmployeeBilling.BILLING_TYPE,  # Referencing the model's choices
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False
+    )
+     project_description = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}))
      
      class Meta:
         model = Projects
-        fields=['project_name','client_name','project_description','start_date','deadline','requirement_file','project_manager','team_members','is_timesheet_required','priority','status']
+        fields='__all__'
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'deadline': forms.DateInput(attrs={'type': 'date'}),
         }
+    
+
        
 
 class LeaveApplicationForm(forms.ModelForm):
@@ -294,4 +315,46 @@ class PeriodForm(forms.ModelForm):
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+
+class ClientLeaveForm(forms.ModelForm):
+     class Meta:
+            model = ClientLeave
+            fields = '__all__'
+            widgets = {
+            'client_leave_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+            exclude = ['client']  # Exclude the client field
+
+
+        # Create a formset for Leave model
+ClientLeaveFormSet = modelformset_factory(
+    ClientLeave,
+    form=ClientLeaveForm,
+    extra=1,  # number of empty forms initially shown
+    can_delete=True  # Allow deletion of leave records
+)
+
+
+class XPL_ClientContactForm(forms.ModelForm):
+    class Meta:
+        model = XPL_ClientContact
+        fields = '__all__'
+        widgets = {
+            'contact_email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'contact_phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'contact_type': forms.Select(attrs={'class': 'form-select'}),
+        }
+        exclude = ['client']  # Exclude the client field
+
+
+
+class XPL_EmployeeBillingForm(forms.ModelForm):
+    class Meta:
+        model = XPL_EmployeeBilling
+        fields = ['employee', 'billing_type']
+        widgets = {
+            'employee': forms.Select(attrs={'class': 'form-select'}),
+            'billing_type': forms.Select(attrs={'class': 'form-select'}),
         }

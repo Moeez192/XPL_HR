@@ -172,8 +172,24 @@
                     <li class="menu-item menu-item-has-children"><a href="#"> 
                         <span class="nav-icon flex-shrink-0"><i class="fa fa-table" aria-hidden="true"></i></span> <span class="nav-text">Timesheet</span></a> 
                         <ul class="sub-menu">
-                            <li class="menu-item {% if request.path == '/timesheet/' %} active {% else %} {% endif %}"><a href="{% url 'timesheet' %}"> Add TimeSheet</a></li>         
-                            <li class="menu-item {% if request.path == '/timesheet_date_range/' %} active {% else %} {% endif %}"><a href="{% url 'timesheet_date_range' %}"> Timesheet Date Range</a></li>                    
+                            <li class="menu-item {% if request.path == '/timesheet/' %} active {% else %} {% endif %}"><a href="{% url 'timesheet' %}"> Add TimeSheet</a></li>                      
+                        </ul>
+                        <span class='submenu-opener'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+                          </svg></span>
+                    </li>
+
+
+                     <!-- Client -->
+
+                     <li class="menu-item menu-item-has-children"><a href="#"> 
+                        <span class="nav-icon flex-shrink-0"><i class="fa fa-user-plus" aria-hidden="true"></i>
+                        </span> <span class="nav-text">Client</span></a> 
+                        <ul class="sub-menu">
+                            <li class="menu-item {% if request.path == '/payment_terms/' %} active {% else %} {% endif %}"><a href="{% url 'payment_terms' %}">Payment Terms</a></li> 
+                            <li class="menu-item {% if request.path == '/clients/' %} active {% else %} {% endif %}"><a href="{% url 'clients' %}"> List Clients</a></li> 
+                                                      
+                          
                         </ul>
                         <span class='submenu-opener'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
@@ -207,21 +223,7 @@
                           </svg></span>
                     </li>
 
-                    <!-- Client -->
-
-                    <li class="menu-item menu-item-has-children"><a href="#"> 
-                        <span class="nav-icon flex-shrink-0"><i class="fa fa-user-plus" aria-hidden="true"></i>
-                        </span> <span class="nav-text">Client</span></a> 
-                        <ul class="sub-menu">
-                            <li class="menu-item {% if request.path == '/payment_terms/' %} active {% else %} {% endif %}"><a href="{% url 'payment_terms' %}">Payment Terms</a></li> 
-                            <li class="menu-item {% if request.path == '/clients/' %} active {% else %} {% endif %}"><a href="{% url 'clients' %}"> List Clients</a></li> 
-                                                      
-                          
-                        </ul>
-                        <span class='submenu-opener'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
-                          </svg></span>
-                    </li>
+                   
                     
                     
                 </ul>

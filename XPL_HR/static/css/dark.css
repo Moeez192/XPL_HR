@@ -5,14 +5,14 @@
  * Copyright 2011-2022 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
-@import url("../../node_modules/bootstrap-icons/font/bootstrap-icons.css");
-@import url("../../plugins/select2/css/select2.min.css");
-@import url("../../plugins/datatables/css/jquery.dataTables.min.css");
-@import url("../../plugins/fullcalendar/fullcalendar.css");
-@import url("../../plugins/dropzone/dropzone.min.css");
-@import url("../../plugins/dropzone/dropzone_custom.css");
-@import url("../../plugins/jquery_ui/style.css");
-@import url("../../plugins/prism/prism.css");
+@import url("{% static 'node_modules/bootstrap-icons/font/bootstrap-icons.css' %}");
+@import url("{% static 'plugins/select2/css/select2.min.css' %}");
+@import url("{% static 'plugins/datatables/css/jquery.dataTables.min.css' %}");
+@import url("{% static 'plugins/fullcalendar/fullcalendar.css' %}");
+@import url("{% static 'plugins/dropzone/dropzone.min.css' %}");
+@import url("{% static 'plugins/dropzone/dropzone_custom.css' %}");
+@import url("{% static 'plugins/jquery_ui/style.css' %}");
+@import url("{% static 'plugins/prism/prism.css' %}");
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@600;700&family=Open+Sans:wght@400;600;700&display=swap");
 :root {
   --kleon-primary: #924AEF;

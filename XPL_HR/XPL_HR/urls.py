@@ -68,6 +68,9 @@ urlpatterns = [
     path('payment_terms/',views.payment_terms, name='payment_terms'),
     path('add_payment_terms/',views.add_payment_terms, name='add_payment_terms'),
     path('payment_term_delete/<int:pk>/', views.payment_term_delete_view, name='payment_term_delete'),
+    path('edit_client/<int:client_id>/', views.edit_client, name='edit_client'),
+    path('delete_client/<int:client_id>/', views.delete_client, name='delete_client'),
+    path('get-client-contacts/<int:client_id>/', views.get_client_contacts, name='get_client_contacts'),
 
 
 

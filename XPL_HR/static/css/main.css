@@ -5,20 +5,20 @@
  * Copyright 2011-2022 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
-@import url("../font-icons/bootstrap-icons/font/bootstrap-icons.css");
-@import url("../../plugins/select2/css/select2.min.css");
-@import url("../../plugins/datatables/css/jquery.dataTables.min.css");
-@import url("../../plugins/fullcalendar/fullcalendar.css");
-@import url("../../plugins/flatpickr/flatpickr.css");
-@import url("../../plugins/dropzone/dropzone.min.css");
-@import url("../../plugins/dropzone/dropzone_custom.css");
-@import url("../../plugins/jquery_ui/style.css");
-@import url("../../plugins/jquery-jvectormap/jquery-jvectormap-2.0.5.css");
-@import url("../../plugins/kanban/jkanban.css");
-@import url("../../plugins/kanban/jkanban-custom.css");
-@import url("../../plugins/sweetalert/sweetalert2.css");
-@import url("../../plugins/toastr/toastr.css");
-@import url("../../plugins/prism/prism.css");
+@import url("{% static 'font-icons/bootstrap-icons/font/bootstrap-icons.css' %}");
+@import url("{% static 'plugins/select2/css/select2.min.css' %}");
+@import url("{% static 'plugins/datatables/css/jquery.dataTables.min.css' %}");
+@import url("{% static 'plugins/fullcalendar/fullcalendar.css' %}");
+@import url("{% static 'plugins/flatpickr/flatpickr.css' %}");
+@import url("{% static 'plugins/dropzone/dropzone.min.css' %}");
+@import url("{% static 'plugins/dropzone/dropzone_custom.css' %}");
+@import url("{% static 'plugins/jquery_ui/style.css' %}");
+@import url("{% static 'plugins/jquery-jvectormap/jquery-jvectormap-2.0.5.css' %}");
+@import url("{% static 'plugins/kanban/jkanban.css' %}");
+@import url("{% static 'plugins/kanban/jkanban-custom.css' %}");
+@import url("{% static 'plugins/sweetalert/sweetalert2.css' %}");
+@import url("{% static 'plugins/toastr/toastr.css' %}");
+@import url("{% static 'plugins/prism/prism.css' %}");
 @import url("https://fonts.googleapis.com/css2?family=Public Sans:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap");
 :root {
   --kleon-primary: #924AEF;

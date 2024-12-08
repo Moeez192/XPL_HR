@@ -4,114 +4,179 @@
 
 
 {% block content %}
-<div class="header-image"> </div>
-<div class="container-fluid mt-6">
+
+<div class="containe-fluid mt-5">
     <div class="scrollable-container">
-     <h2 class="text-center mb-4">Edit Project:  {{ project.project_name }} </h2>
-     <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <!-- Project Name -->
-        <div class="row mb-3">
-        <div class="col-md-6">
-            <label for="projectName" class="form-label">Project Name</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-project-diagram form-icon"></i></span>
-                {% render_field form.project_name placeholder="Project Name" class+="form-control" %}
-            </div>
-        </div>
-        <!-- Client Name -->
-        <div class="col-md-6">
-            <label for="clientName" class="form-label">Client Name</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
-                {% render_field form.client_name placeholder="Client Name" class+="form-control" %}
-            </div>
-        </div>
-        </div>
+        <!-- <div class="container"> -->
+            <h2 class="text-center mb-4">Project Cofiguration</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- Project Name -->
+                <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="projectName" class="form-label">Project Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-project-diagram form-icon"></i></span>
+                        {% render_field form.project_name placeholder="Project Name" class+="form-control" %}
+                    </div>
+                </div>
+                <!-- Client Name -->
+                <div class="col-md-6">
+                    <label for="clientName" class="form-label">Client Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
+                        {% render_field form.client_name placeholder="Client Name" class+="form-control" %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="clientName" class="form-label">Client Manager</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
+                        {% render_field form.client_manager placeholder="Client Manager" class+="form-control" %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="clientName" class="form-label">Project Sponser</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
+                        {% render_field form.project_sponsor placeholder="Project Sponser" class+="form-control" %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="clientName" class="form-label">Timesheet Approver</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
+                        {% render_field form.timesheet_approver class+="form-control" %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="projectDescription" class="form-label">Project Description</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                        {% render_field form.project_description placeholder="Project Description" class+="form-control" %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="projectDescription" class="form-label">Project Budget</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                        {% render_field form.project_budget placeholder="Project Budget" class+="form-control" %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="projectDescription" class="form-label">Project Location</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                        {% render_field form.project_location placeholder="Project Location" class+="form-control" %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="projectDescription" class="form-label">Billing Method</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                        {% render_field form.billing_method  class+="form-control" %}
+                    </div>
+                </div>
+               
+                <!-- Start Date -->
+                <div class="col-md-6">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-day form-icon"></i></span>
+                        {% render_field form.start_date  class+="form-control" %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="projectDeadline" class="form-label">Deadline</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt form-icon"></i></span>
+                        {% render_field form.deadline  class+="form-control" %}
+                    </div>
+                </div>
+                
+    
+                <!-- Requirement File Upload -->
+                <div class="col-md-6">
+                    <label for="requirementFile" class="form-label">Requirement File</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-file-upload form-icon"></i></span>
+                        {% render_field form.requirement_file  class+="form-control" %}
+                    </div>
+                </div>
+    
+                <!-- Project Manager with Modal Trigger -->
+                <div class="col-md-6">
+                    <label for="projectManager" class="form-label">Project Manager</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user form-icon"></i></span>
+                    {% render_field form.project_manager class+="form-control" %}
+                    </div>
+                </div>
+                
+                <!-- Team Members with Modal Trigger -->
+                    <div class="col-md-6">
+                        <label for="teamMembers" class="form-label">Team Members</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-users form-icon"></i></span>
+                            {% render_field form.team_members class+="form-control" %}
+                        </div>
+                    </div>
+                    
+    
+                    <!-- Timesheet Required -->
+                    <div class="col-md-6">
+                        <label class="form-label">Is Time Sheet Required?</label>
+                        {% render_field form.is_timesheet_required  class+="form-control" %}
+                    </div>
+                
+                <!-- Project Priority -->
+                <div class="col-md-6">
+                    <label for="projectPriority" class="form-label">Priority</label>
+                    {% render_field form.priority  class+="form-control" %}
+                </div>
+    
+                <!-- Project Status -->
+                <div class="col-md-6">
+                    <label for="projectStatus" class="form-label">Status</label>
+                    {% render_field form.status  class+="form-control" %}
+                </div>
+                </div>
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="{% url 'projects' %}" class="btn btn-secondary">Cancel</a>
 
+            </form>
+            <br>
+        </div>
+    
         
-
-        <!-- Project Description -->
-        <div class="mb-3">
-            <label for="projectDescription" class="form-label">Project Description</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
-                {% render_field form.project_description placeholder="Project Description" class+="form-control" %}
-            </div>
-        </div>
-
-        <div class="row mb-3">
-        <!-- Start Date -->
-        <div class="col-md-6">
-            <label for="startDate" class="form-label">Start Date</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-calendar-day form-icon"></i></span>
-                {% render_field form.start_date  class+="form-control" %}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <label for="projectDeadline" class="form-label">Deadline</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-calendar-alt form-icon"></i></span>
-                {% render_field form.deadline  class+="form-control" %}
-            </div>
-        </div>
-        </div>
-
-        <div class="row mb-3">
-
-        <!-- Requirement File Upload -->
-        <div class="col-md-6">
-            <label for="requirementFile" class="form-label">Requirement File</label>
-            <!-- <div class="input-group"> -->
-                <!-- <span class="input-group-text"><i class="fas fa-file-upload form-icon"></i></span> -->
-                {% render_field form.requirement_file  class+="form-control" %}
-            <!-- </div> -->
-        </div>
-
-        <!-- Project Manager with Modal Trigger -->
-        <div class="col-md-6">
-            <label for="projectManager" class="form-label">Project Manager</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-user form-icon"></i></span>
-            {% render_field form.project_manager class+="form-control" %}
-            </div>
-        </div>
-        </div>
-
-        <div class="row mb-3">
-        <!-- Team Members with Modal Trigger -->
-            <div class="col-md-6">
-                <label for="teamMembers" class="form-label">Team Members</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-users form-icon"></i></span>
-                    {% render_field form.team_members class+="form-control" %}
+    
+        <!-- Modal for Team Members Selection -->
+        <div class="modal fade" id="teamMemberModal" tabindex="-1" aria-labelledby="teamMemberModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="teamMemberModalLabel">Select Team Members</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" id="memberSearch" class="form-control mb-3" placeholder="Search team members...">
+                        <div id="employeeList">
+                            {% for employee in form.team_members.field.queryset %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ employee.pk }}" id="employee{{ employee.pk }}" {% if employee.pk in form.team_members.value %}checked{% endif %}>
+                                <label class="form-check-label" for="employee{{ employee.pk }}">{{ employee }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveEmployees">Save Selected</button>
+                    </div>
                 </div>
             </div>
-            
-
-            <!-- Timesheet Required -->
-            <div class="col-md-6">
-                <label class="form-label">Is Time Sheet Required?</label>
-                {% render_field form.is_timesheet_required  class+="form-control" %}
-            </div>
         </div>
-        <div class="row mb-3">
-        <!-- Project Priority -->
-        <div class="col-md-6">
-            <label for="projectPriority" class="form-label">Priority</label>
-            {% render_field form.priority  class+="form-control" %}
-        </div>
-
-        <!-- Project Status -->
-        <div class="col-md-6">
-            <label for="projectStatus" class="form-label">Status</label>
-            {% render_field form.status  class+="form-control" %}
-        </div>
-        </div>
-        <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
     </div>
 </div>
 {%endblock%}

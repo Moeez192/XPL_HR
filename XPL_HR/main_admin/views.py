@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect , get_object_or_404
-from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm , ProjectFileForm, LeavePolicyForm, uploadDocTypeForm,BillingTypeForm,ClientInformationForm , PaymentTermsForm
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange , ProjectFile , PasswordResetToken,LeavePolicy , uploadDocType , EmployeeDocument , BillingType , ClientInformation , PaymentTerms
+from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm , ProjectFileForm, LeavePolicyForm, uploadDocTypeForm,BillingTypeForm,ClientInformationForm , PaymentTermsForm, ClientLeaveFormSet , ClientLeaveForm, XPL_ClientContactForm ,XPL_EmployeeBillingForm
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange , ProjectFile , PasswordResetToken,LeavePolicy , uploadDocType , EmployeeDocument , BillingType , ClientInformation , PaymentTerms,ClientLeave,XPL_ClientContact , XPL_EmployeeBilling
 from django.contrib import messages
 from django.core.mail import send_mail
 import uuid  
@@ -900,27 +900,132 @@ def projects(request):
         'employees' : employees
         })
 
+
+
+
+
+# @login_required
+# @no_cache
+# def add_project(request):
+#     supervisors = Employee.objects.all()
+#     employees = Employee.objects.all()
+
+#     if request.method == 'POST':
+#         form = ProjectForm(request.POST, request.FILES)
+
+#         if form.is_valid():
+#             project_instance = form.save(commit=False)
+
+#             client_manager = form.cleaned_data.get('client_manager')
+
+#             if client_manager:
+#                 project_instance.client_manager = client_manager  # This assigns the object, which is valid
+
+#             project_instance.save()
+
+#             messages.success(request, 'Project Added Successfully')
+#             return redirect('projects')
+#         else:
+#             print(form.errors)
+#     else:
+#         form = ProjectForm()
+
+#     return render(request, 'templates/sub_templates/project_configs.html', {
+#         'form': form,
+#         'supervisors': supervisors,
+#         'employees': employees
+#     })
 @login_required
 @no_cache
 def add_project(request):
     supervisors = Employee.objects.all()
     employees = Employee.objects.all()
+
     if request.method == 'POST':
-        form = ProjectForm(request.POST , request.FILES)
+        form = ProjectForm(request.POST, request.FILES)
+
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Project Added Successfuly')
+            # Save the project instance without committing it yet
+            project_instance = form.save(commit=False)
+
+            # Assign client_manager if provided
+            client_manager = form.cleaned_data.get('client_manager')
+            if client_manager:
+                project_instance.client_manager = client_manager
+
+            # Save the project instance
+            project_instance.save()
+
+            # Process team_members and billing_types
+            team_members = request.POST.getlist('team_members[]')
+            billing_types = request.POST.getlist('billing_types[]')
+
+            # Save team members in XPL_EmployeeBilling
+            if len(team_members) == len(billing_types):
+                for employee_id, billing_type in zip(team_members, billing_types):
+                    XPL_EmployeeBilling.objects.create(
+                        project=project_instance,
+                        employee_id=employee_id,
+                        billing_type=billing_type
+                    )
+
+                # Now, save the team members in the project itself
+                # Update the project with the selected team members
+                project_instance.team_members.set(team_members)  # This links the employees to the project
+
+            messages.success(request, 'Project Added Successfully')
             return redirect('projects')
         else:
-            print(form.errors)
+            # Ensure previously selected team members remain in the form
+            team_members_ids = request.POST.getlist('team_members[]')
+            form.fields['team_members'].initial = team_members_ids
+            print(form.errors)  # Debugging to display errors
     else:
         form = ProjectForm()
-    return render(request,'templates/sub_templates/project_configs.html', {
-        'form' : form,
-        'projects' : projects,
+
+    return render(request, 'templates/sub_templates/project_configs.html', {
+        'form': form,
         'supervisors': supervisors,
-        'employees' : employees
-        })
+        'employees': employees,
+        'XPL_EmployeeBilling': XPL_EmployeeBilling  # Pass the model to template to render choices
+    })
+
+
+
+
+
+
+from django.http import JsonResponse
+def get_client_contacts(request, client_id):
+    try:
+        # Assuming you pass the client_id to filter the client contacts
+        client_contacts = XPL_ClientContact.objects.filter(client_id=client_id)
+        contacts_data = [{'id': contact.id, 'full_name': contact.full_name} for contact in client_contacts]
+        return JsonResponse({'contacts': contacts_data})
+    except XPL_ClientContact.DoesNotExist:
+        return JsonResponse({'contacts': []})
+
+# @login_required
+# @no_cache
+# def add_project(request):
+#     supervisors = Employee.objects.all()
+#     employees = Employee.objects.all()
+#     if request.method == 'POST':
+#         form = ProjectForm(request.POST , request.FILES)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, 'Project Added Successfuly')
+#             return redirect('projects')
+#         else:
+#             print(form.errors)
+#     else:
+#         form = ProjectForm()
+#     return render(request,'templates/sub_templates/project_configs.html', {
+#         'form' : form,
+#         'projects' : projects,
+#         'supervisors': supervisors,
+#         'employees' : employees
+#         })
 
 
 
@@ -928,18 +1033,112 @@ def add_project(request):
 @no_cache
 def add_client(request):
     if request.method == 'POST':
-        form = ClientInformationForm(request.POST , request.FILES)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Client Added Successfuly')
+        print(request.POST)
+        client_form = ClientInformationForm(request.POST, request.FILES)
+        
+        # Dynamically collect leave forms
+        leave_forms = []
+        leave_count = int(request.POST.get('leave_count', 0))  # Number of leave forms
+        print(leave_count)
+
+        for i in range(leave_count):
+            leave_form = ClientLeaveForm(request.POST, prefix=f'leave_{i}')
+            print(leave_form)
+            leave_forms.append(leave_form)
+
+        # Dynamically collect client contact forms
+        contact_forms = []
+        contact_count = int(request.POST.get('contact_count', 0))  # Number of contact forms
+        print(contact_count)
+
+        for i in range(contact_count):
+            contact_form = XPL_ClientContactForm(request.POST, prefix=f'contact_{i}')
+            print(contact_form)
+            contact_forms.append(contact_form)
+
+        # Check if client form, all leave forms, and all contact forms are valid
+        if (
+            client_form.is_valid()
+            and all(leave_form.is_valid() for leave_form in leave_forms)
+            and all(contact_form.is_valid() for contact_form in contact_forms)
+        ):
+            # Save the client
+            client = client_form.save()
+
+            # Save each leave form and link it to the client
+            for leave_form in leave_forms:
+                leave = leave_form.save(commit=False)
+                leave.client = client  # Associate the leave form with the client
+                leave.save()
+
+            # Save each contact form and link it to the client
+            for contact_form in contact_forms:
+                contact = contact_form.save(commit=False)
+                contact.client = client  # Associate the contact form with the client
+                contact.save()
+
+            messages.success(request, 'Client, Leave Types, and Contacts Added Successfully')
             return redirect('clients')
         else:
-            print(form.errors)
+            # Debugging errors to check what's going wrong
+            print(client_form.errors)
+            for leave_form in leave_forms:
+                print(leave_form.errors)
+            for contact_form in contact_forms:
+                print(contact_form.errors)
     else:
-        form = ClientInformationForm()
-    return render(request,'templates/sub_templates/add_client.html', {
-        'form' : form,
-        })
+        client_form = ClientInformationForm()
+        leave_forms = [ClientLeaveForm(prefix='leave_0')]  # Start with one empty leave form
+        contact_forms = [XPL_ClientContactForm(prefix='contact_0')]  # Start with one empty contact form
+
+    return render(request, 'templates/sub_templates/add_client.html', {
+        'form': client_form,
+        'leave_forms': leave_forms,
+        'contact_forms': contact_forms,
+    })
+
+
+
+@login_required
+@no_cache
+def edit_client(request, client_id):
+    # Retrieve the client object or return 404 if not found
+    client = get_object_or_404(ClientInformation, id=client_id)
+
+    if request.method == 'POST':
+        # Pass the instance to the form for updating
+        form = ClientInformationForm(request.POST, request.FILES, instance=client)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Client updated successfully!')
+            return redirect('clients')
+        else:
+            print(form.errors)  # Debugging purposes
+    else:
+        # Pre-fill the form with the client's data
+        form = ClientInformationForm(instance=client)
+
+    return render(request, 'templates/sub_templates/edit_client.html', {
+        'form': form,
+        'client': client,
+    })
+
+
+@login_required
+@no_cache
+def delete_client(request, client_id):
+    # Retrieve the client object or return 404 if not found
+    client = get_object_or_404(ClientInformation, id=client_id)
+
+    if request.method == "POST":
+        # Delete the client and display a success message
+        client.delete()
+        messages.success(request, "Client deleted successfully!")
+        return redirect('clients')  # Redirect to the client list page
+
+    return render(request, 'templates/sub_templates/delete_client.html', {
+        'client': client  # Pass client details for confirmation
+    })
 
 
 @login_required
@@ -951,16 +1150,61 @@ def project_delete_view(request, pk):
     messages.success(request,"Project Deleted Successfully!")
     return redirect('projects')
 
+# @login_required
+# @no_cache
+# def project_edit_view(request, pk):
+#     project = get_object_or_404(Projects, pk=pk)
+
+#     if request.method == 'POST':
+#         form = ProjectForm(request.POST, request.FILES ,instance=project )
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request,"Project Eddited Successfully!")
+#             return redirect('projects')  # Replace with your project list view name
+#     else:
+#         form = ProjectForm(instance=project)
+
+#     context = {
+#         'form': form,
+#         'project': project,
+#     }
+#     return render(request, 'templates/sub_templates/edit_project.html', context)  
 @login_required
 @no_cache
 def project_edit_view(request, pk):
     project = get_object_or_404(Projects, pk=pk)
+    
+    # Fetch existing billing information for the project
+    existing_billing_data = XPL_EmployeeBilling.objects.filter(project=project)
+    existing_team_members = [entry.employee.id for entry in existing_billing_data]
+    existing_billing_types = [entry.billing_type for entry in existing_billing_data]
 
     if request.method == 'POST':
-        form = ProjectForm(request.POST, request.FILES ,instance=project )
+        form = ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
-            form.save()
-            messages.success(request,"Project Eddited Successfully!")
+            project_instance = form.save()
+
+            # Get the selected team members and their corresponding billing types
+            team_members = request.POST.getlist('team_members[]')
+            billing_types = request.POST.getlist('billing_types[]')
+
+            # Save the team members and billing types in XPL_EmployeeBilling
+            if len(team_members) == len(billing_types):
+                # First, delete existing billing records for the project
+                XPL_EmployeeBilling.objects.filter(project=project_instance).delete()
+
+                # Save new team members and their billing types
+                for employee_id, billing_type in zip(team_members, billing_types):
+                    XPL_EmployeeBilling.objects.create(
+                        project=project_instance,
+                        employee_id=employee_id,
+                        billing_type=billing_type
+                    )
+
+                # Save the team members in the project itself
+                project_instance.team_members.set(team_members)
+
+            messages.success(request, "Project Edited Successfully!")
             return redirect('projects')  # Replace with your project list view name
     else:
         form = ProjectForm(instance=project)
@@ -968,8 +1212,12 @@ def project_edit_view(request, pk):
     context = {
         'form': form,
         'project': project,
+        'existing_team_members': existing_team_members,
+        'existing_billing_types': existing_billing_types,
     }
-    return render(request, 'templates/sub_templates/edit_project.html', context)  
+    return render(request, 'templates/sub_templates/edit_project.html', context)
+
+
 
 @login_required
 @no_cache 
@@ -1018,7 +1266,8 @@ def delete_project_file(request, file_id):
     return redirect('project_detail', pk=project_file.project.id)
 
 
-
+@login_required
+@no_cache
 def forget_pwd(request):
 
     if request.method == 'POST':
@@ -2470,6 +2719,11 @@ def payment_terms(request):
         'payment_terms': payment_terms,
     })
 
+
+
+
+@login_required
+@no_cache
 def payment_term_delete_view(request, pk):
     payment_term = get_object_or_404(PaymentTerms, pk=pk)
     payment_term.delete()
