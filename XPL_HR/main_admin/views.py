@@ -1610,11 +1610,12 @@ def timesheet_date_range(request):
 
 
 
+
+
 @login_required
 @no_cache
 def add_timesheet(request):
     employee = Employee.objects.get(email=request.user.email)
-    all_ranges = DateRange.objects.all()
     timesheets = (
         Timesheet.objects.filter(employee=employee)
         .values('timesheet_group_id', 'project__project_name', 'status', 'reject_reason')
@@ -1624,144 +1625,20 @@ def add_timesheet(request):
     pending_approval_timesheets = (
         Timesheet.objects.filter(
             status='pending',
-            current_approver=employee  # Check if the employee is the current approver
+            current_approver=employee
         )
         .values('timesheet_group_id', 'project__project_name', 'employee__first_name')
         .annotate(start_date=Min('date'), end_date=Max('date'))
         .order_by('-start_date')
     )
-    # projects = Projects.objects.filter(team_members=employee)
     projects = Projects.objects.filter(
         Q(team_members=employee) | Q(project_manager=employee)
-        ).distinct()
+    ).distinct()
     months = [month_name[i] for i in range(1, 13)]
     today = datetime.today().strftime('%Y-%m-%d')
 
-    # Initialize the form for date range
-    range_form = PeriodForm()
-
-    # Initialize an empty dictionary to hold the date ranges for each project
-    project_date_ranges = {}
-
-    # # Fetch date ranges for all projects
-    # for project in projects:
-    #     try:
-    #         # Fetch the DateRange for the project
-    #         date_range = DateRange.objects.get(project=project)
-    #         project_date_ranges[project.id] = {
-    #             'start_date': date_range.start_date.strftime('%Y-%m-%d'),
-    #             'end_date': date_range.end_date.strftime('%Y-%m-%d'),
-    #         }
-    #     except DateRange.DoesNotExist:
-    #         project_date_ranges[project.id] = None  # No date range for this project
-    # Initialize the dictionary that will hold the project date ranges
-    
-
-# Loop through each project
-    for project in projects:
-        print(f"Processing Project ID: {project.id}")  # Debug print
-
-        # Fetch all date ranges associated with the project
-        date_ranges = DateRange.objects.filter(project=project)
-        
-        if not date_ranges:
-            print(f"No date ranges found for Project ID: {project.id}")  # Debug print
-            continue
-
-        # Initialize an empty list to hold month ranges for each project
-        month_ranges = []
-        
-        for date_range in date_ranges:
-            print(f"Processing DateRange: {date_range}")  # Debug print
-
-            # Extract the month from start_date and end_date
-            start_month = date_range.start_date.strftime('%B')
-            start_year = date_range.start_date.year
-            end_month = date_range.end_date.strftime('%B')
-            end_year = date_range.end_date.year
-            
-            # Combine month and year for better identification
-            if start_month == end_month and start_year == end_year:
-                month_ranges.append({
-                    'month': f"{start_month} {start_year}",
-                    'start_date': date_range.start_date.strftime('%Y-%m-%d'),
-                    'end_date': date_range.end_date.strftime('%Y-%m-%d'),
-                })
-            else:
-                month_ranges.append({
-                    'month': f"{start_month} {start_year} - {end_month} {end_year}",
-                    'start_date': date_range.start_date.strftime('%Y-%m-%d'),
-                    'end_date': date_range.end_date.strftime('%Y-%m-%d'),
-                })
-
-        # If month_ranges is not empty, add it to project_date_ranges
-        if month_ranges:
-            project_date_ranges[project.id] = month_ranges
-        else:
-            print(f"No month ranges for Project ID: {project.id}")  # Debug print
-
-    # Print the final project_date_ranges for debugging
-    print(f"Project Date Ranges: {project_date_ranges}")
-
-    
-    
-
-    # Handle form submissions
     if request.method == 'POST':
-        if 'range_form_submit' in request.POST:
-            range_form = PeriodForm(request.POST)
-            if range_form.is_valid():
-                # Get the start and end dates, and project from the form
-                start_date = range_form.cleaned_data['start_date']
-                end_date = range_form.cleaned_data['end_date']
-                project = range_form.cleaned_data['project']
-                month = range_form.cleaned_data['month']
-                year = range_form.cleaned_data['year']
-
-                # Check for existing date ranges for the same project within the specified range
-                overlapping_ranges = DateRange.objects.filter(
-                    project=project,
-                    end_date__gte=start_date,
-                    start_date__lte=end_date,
-                )
-
-                if overlapping_ranges.exists():
-                    messages.error(request, 'Date range overlaps with an existing range for this project.')
-                else:
-                        date_range = range_form.save(commit=False)
-                        date_range.employee = employee  # Optional: associate with employee
-                        date_range.save()
-                        messages.success(request, 'New date range set successfully!')
-                    # Check if an active range exists for the project
-                    # last_date_range = DateRange.objects.filter(project=project).order_by('-end_date').first()
-                    
-                    # if last_date_range and last_date_range.end_date >= timezone.now().date():
-                    #     messages.error(request, 'Cannot add a new date range until the current one ends.')
-                    # else:
-                    #     # Check if a range already exists for the project
-                    #     existing_range = DateRange.objects.filter(project=project).first()
-                        
-                    #     if existing_range:
-                    #         # Update the existing range with new dates
-                    #         existing_range.start_date = start_date
-                    #         existing_range.end_date = end_date
-                    #         existing_range.save()
-                    #         messages.success(request, 'Date range updated successfully!')
-                    #     else:
-                    #         # Create a new date range
-                    #         date_range = range_form.save(commit=False)
-                    #         date_range.employee = employee  # Optional: associate with employee
-                    #         date_range.save()
-                    #         messages.success(request, 'New date range set successfully!')
-                        
-                        return redirect('timesheet')
-            else:
-                messages.error(request, 'Invalid date range. Please try again.')
-
-        
-        
         if 'action' in request.POST:
-
             action = request.POST.get('action')
             date_from = request.POST.get('date_from')
             date_to = request.POST.get('date_to')
@@ -1781,38 +1658,19 @@ def add_timesheet(request):
             start_date = datetime.strptime(date_from, '%Y-%m-%d')
             end_date = datetime.strptime(date_to, '%Y-%m-%d')
 
-            # Generate a unique timesheet group ID for this range
             timesheet_group_id = str(uuid.uuid4())
-
             current_date = start_date
-            missing_fields = False  # Flag to check if any required field is missing
+            duplicate_found = False
 
             while current_date <= end_date:
                 date_str = current_date.strftime('%Y-%m-%d')
-                day_of_week = current_date.weekday()  # 5 = Saturday, 6 = Sunday
 
-                # For weekdays, check for required fields
-                if day_of_week not in [5, 6]:  # Not Saturday or Sunday
-                    task_description = request.POST.get(f'task_description_{date_str}', '').strip()
-                    location = request.POST.get(f'location_{date_str}', '').strip()
+                task_description = request.POST.get(f'task_description_{date_str}', '').strip()
+                location = request.POST.get(f'location_{date_str}', '').strip()
+                notes = request.POST.get(f'notes_{date_str}', '').strip()
+                time_in_hrs = request.POST.get(f'time_in_hrs_{date_str}', '').strip()
 
-
-                current_date += timedelta(days=1)
-
-            # If any required fields are missing, prevent form submission
-            if missing_fields:
-                return redirect('timesheet')
-
-            # If all required fields are present, proceed with save or submit action
-            if action == 'save':
-                current_date = start_date
-                duplicate_found = False  # Flag to track if any duplicate is found
-
-                while current_date <= end_date:
-                    date_str = current_date.strftime('%Y-%m-%d')
-                    day_of_week = current_date.weekday()
-
-                    # Check if a timesheet already exists for this date and project
+                if action == 'save':
                     existing_timesheet = Timesheet.objects.filter(
                         employee=employee,
                         project=project,
@@ -1820,21 +1678,10 @@ def add_timesheet(request):
                     ).first()
 
                     if existing_timesheet:
-                        print(f"Timesheet already exists for {employee} on {date_str} for project {project}. Skipping.")
-                        if not duplicate_found:
-                            messages.error(request,'A duplicate timesheet already exists for the project')
-                            duplicate_found = True  # Mark that we've found a duplicate
+                        duplicate_found = True
                         current_date += timedelta(days=1)
-                        continue  # Skip saving for this date
+                        continue
 
-                    print(f"Saving timesheet for {employee} on {date_str} for project {project}")
-
-                    task_description = request.POST.get(f'task_description_{date_str}', '').strip()
-                    location = request.POST.get(f'location_{date_str}', '').strip()
-                    notes = request.POST.get(f'notes_{date_str}', '').strip()
-                    time_in_hrs=request.POST.get(f'time_in_hrs_{date_str}', '').strip()
-
-                    # Save or update the timesheet
                     timesheet, created = Timesheet.objects.get_or_create(
                         employee=employee,
                         project=project,
@@ -1843,34 +1690,30 @@ def add_timesheet(request):
                             'task_description': task_description,
                             'location': location,
                             'notes': notes,
-                            'time_in_hrs':time_in_hrs,
+                            'time_in_hrs': time_in_hrs,
                             'status': 'saved',
                             'is_editable': True,
                             'timesheet_group_id': timesheet_group_id,
                         }
                     )
                     if not created:
-                        # If timesheet already exists, update it
                         timesheet.task_description = task_description
                         timesheet.location = location
-                        timesheet.time_in_hrs=time_in_hrs
+                        timesheet.time_in_hrs = time_in_hrs
                         timesheet.notes = notes
                         timesheet.is_editable = True
                         timesheet.status = 'saved'
                         timesheet.timesheet_group_id = timesheet_group_id
                         timesheet.save()
 
-                    current_date += timedelta(days=1)
+                current_date += timedelta(days=1)
 
-                # If a duplicate was found, do not redirect to 'timesheet'
-                if duplicate_found:
-                    return redirect('timesheet')
-
+            if duplicate_found:
+                messages.error(request, 'Duplicate timesheets detected. Some entries were skipped.')
+            else:
                 messages.success(request, 'Timesheet saved successfully!')
-                return redirect('timesheet')
 
-
-
+            return redirect('timesheet')
 
     context = {
         'projects': projects,
@@ -1878,13 +1721,34 @@ def add_timesheet(request):
         'employee': employee,
         'today': today,
         'months': months,
-        'pending_approval_timesheets': pending_approval_timesheets, 
-        'all_ranges':all_ranges,
-        'range_form': range_form,
-        'project_date_ranges': json.dumps(project_date_ranges),  
+        'pending_approval_timesheets': pending_approval_timesheets,
     }
 
     return render(request, 'templates/sub_templates/add_timesheet.html', context)
+
+
+
+def get_project_details(request, project_id):
+    try:
+        project = Projects.objects.get(id=project_id)
+        client = project.client_name  # Assuming client is related to the project
+        
+        # Fetch leave days from ClientLeaveDays model
+        client_leave_days = list(ClientLeave.objects.filter(client=client).values_list('client_leave_date', flat=True))
+        
+        # Fetch weekends from the client
+        client_weekends = client.weekend.split('/')  # Example: 'Saturday/Sunday'
+
+        return JsonResponse({
+            'status': 'success',
+            'leave_days': client_leave_days,
+            'weekends': client_weekends,
+        })
+    except Projects.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Project not found.'}, status=404)
+
+
+
 
 @login_required
 @no_cache
@@ -2216,44 +2080,23 @@ def accept_timesheet(request, timesheet_group_id):
     timesheet = timesheet_group.first()
     project_name = timesheet.project
     submitting_employee = timesheet.employee
-    employee_role = submitting_employee.position
 
-    approval_hierarchy = Hierarchy.objects.filter(
-        approval_type='timesheet',
-        project_name=project_name,
-        position=employee_role,
-    ).order_by('order_number')  
+    # Get the approver directly from the project
+    timesheet_approver = timesheet.project.timesheet_approver
 
-    if not approval_hierarchy.exists():
-        messages.error(request, 'No approval hierarchy found for this project.')
+    if timesheet_approver != current_employee:
+        messages.error(request, 'You are not authorized to approve this timesheet.')
         return redirect('timesheet')
 
     # Determine the action (accept or reject) from the POST request
     action = request.POST.get('action')
-   
-    current_approver_index = approval_hierarchy.filter(approver_id=current_employee.id).first()
-    final_approver = approval_hierarchy.last()
 
     if action == 'accept':
-        if current_approver_index:
-            if current_employee.id == final_approver.approver_id:
-                timesheet_group.update(status='accepted', current_approver_id=None)
-                messages.success(request, 'Timesheet accepted successfully!')
-            else:
-                # Mark as pending for final approval
-                timesheet_group.update(status='pending', current_approver_id=current_employee.id)
-                messages.success(request, 'Timesheet marked as approved and is pending final approval.')
-
-                # Update the current approver to the next in the hierarchy
-                next_approver = approval_hierarchy.filter(order_number__gt=current_approver_index.order_number).first()
-                if next_approver:
-                    timesheet_group.update(current_approver_id=next_approver.approver_id)
-        else:
-            messages.error(request, 'You are not authorized to approve this timesheet.')
+        timesheet_group.update(status='accepted', current_approver_id=None)
+        messages.success(request, 'Timesheet accepted successfully!')
 
     elif action == 'reject':
         reject_reason = request.POST.get('reject_reason', '').strip()
-        print(f"Reject Reason: {reject_reason}")  # Debugging line
         if reject_reason:  # Check if reject_reason is not empty
             timesheet_group.update(status='rejected', reject_reason=reject_reason, current_approver_id=None)
             messages.success(request, f'Timesheet Rejected due to reason: {reject_reason}')
@@ -2261,7 +2104,6 @@ def accept_timesheet(request, timesheet_group_id):
             messages.error(request, 'Rejection reason is required.')
 
     return redirect('timesheet')
-
 
 
 
@@ -2287,39 +2129,35 @@ def delete_timesheet(request, timesheet_group_id):
 
 
 @login_required
+@no_cache
 def submit_timesheet(request, timesheet_group_id):
     if request.method == 'POST':
         timesheets = Timesheet.objects.filter(timesheet_group_id=timesheet_group_id)
         employee = Employee.objects.get(email=request.user.email)
-        employee_role=employee.position
-
 
         if not timesheets.exists():
             messages.error(request, "No timesheets found for this group.")
             return redirect('some_view_name')
 
-        project_name = timesheets.first().project  
-        hierarchy = Hierarchy.objects.filter(
-            approval_type='timesheet',
-            project_name=project_name,
-            position=employee_role,
-        ).order_by('order_number')
+        project_name = timesheets.first().project
+        project = Projects.objects.get(project_name=project_name)
 
-        if hierarchy.exists():
-            first_approver = hierarchy.first()
+        # Retrieve the timesheet approver from the project
+        timesheet_approver = project.timesheet_approver
+
+        if timesheet_approver:
+            # Update timesheets status to pending and set the current approver
             timesheets.update(
                 status='pending',
-                current_approver=first_approver.approver,
+                current_approver=timesheet_approver,
             )
-
             messages.success(request, 'Timesheet group submitted for approval!')
         else:
-            messages.error(request, "No approval hierarchy exists for this project's timesheet group. Please contact HR for assistance.")
+            messages.error(request, "No timesheet approver found for this project's timesheet group. Please contact HR for assistance.")
 
         return redirect('timesheet')  
 
     return render(request, 'templates/timesheet.html')  
-
 
 
 @login_required

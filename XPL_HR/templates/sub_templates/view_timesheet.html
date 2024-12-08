@@ -38,8 +38,13 @@
             <td>{{ timesheet.project.project_name  }}</td>
             <td>{{ timesheet.date }}</td>
             <td>{{ timesheet.task_description }}</td>
-            <td>{{ timesheet.location }}</td>
-            <td>{{ timesheet.time_in_hrs }}</td>
+            <td>
+                {% if timesheet.location %}
+                    {{ timesheet.location }}
+                {% else %}
+                    Holiday
+                {% endif %}
+            </td>            <td>{{ timesheet.time_in_hrs }}</td>
             <td>{{ timesheet.notes }}</td>
             <td>{{ timesheet.status }}</td>
         </tr>

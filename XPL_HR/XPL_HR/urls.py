@@ -71,6 +71,7 @@ urlpatterns = [
     path('edit_client/<int:client_id>/', views.edit_client, name='edit_client'),
     path('delete_client/<int:client_id>/', views.delete_client, name='delete_client'),
     path('get-client-contacts/<int:client_id>/', views.get_client_contacts, name='get_client_contacts'),
+    path('api/project/<int:project_id>/', views.get_project_details, name='get_project_details'),
 
 
 

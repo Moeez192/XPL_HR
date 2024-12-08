@@ -25,13 +25,7 @@
                         {% endfor %}
                     </select>
                  </div>
-                 <!-- <div class="form-group">
-                    <label for="month-select">Month</label>
-                    <select id="month-select" class="form-control">
-                        <option value="">Select a Month</option>
-                    </select>
-                </div> -->
-            
+                 
 
                 <div class="mt-3">
                     <label><strong>Date Range:</strong></label>
@@ -66,320 +60,169 @@
  </div> 
 
 
-
-
-
-
-
-
-
-
- <!-- <script>
-    document.getElementById("project_id").addEventListener("change", generateMonthOptions);
-    document.getElementById("month-select").addEventListener("change", generateFields);
-
-    function generateMonthOptions() {
-        const projectId = document.getElementById("project_id").value;
-        console.log('Selected Project ID:', projectId); // Debugging log
-
-        // Fetch the project date ranges (months and corresponding date ranges)
-        const projectDateRanges = JSON.parse('{{ project_date_ranges|escapejs }}');
-        const projectRanges = projectDateRanges[projectId];
-
-        console.log('Project Date Ranges:', projectRanges); // Debugging log
-
-        if (!projectRanges) {
-            document.getElementById("month-select").innerHTML = "<option>No months available</option>";
-            document.getElementById("timesheet-entries").innerHTML = "";
-            document.getElementById("date_from").value = "";
-            document.getElementById("date_to").value = "";
-            return;
-        }
-
-        // Clear and populate the month dropdown
-        let monthOptions = '<option value="">Select a Month</option>';
-        projectRanges.forEach((range, index) => {
-            // Format the month option with both month name and date range
-            const formattedRange = `${new Date(range.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} - ${new Date(range.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`;
-            monthOptions += `<option value="${index}">${formattedRange}</option>`;
-        });
-        document.getElementById("month-select").innerHTML = monthOptions;
-    }
-
-    function generateFields() {
-        const projectId = document.getElementById("project_id").value;
-        const monthIndex = document.getElementById("month-select").value;
-
-        // Fetch the date range from the global project date ranges object
-        const projectDateRanges = JSON.parse('{{ project_date_ranges|escapejs }}');
-        const projectRanges = projectDateRanges[projectId];
-
-        if (!projectRanges || monthIndex === "") {
-            // If no valid project is selected or no month is selected, clear the container and exit
-            document.getElementById("timesheet-entries").innerHTML = "";
-            document.getElementById("date_from").value = "";
-            document.getElementById("date_to").value = "";
-            return;
-        }
-
-        const projectRange = projectRanges[monthIndex];
-        
-        // Parse the start_date and end_date from the project range
-        const startDate = new Date(projectRange.start_date);
-        const endDate = new Date(projectRange.end_date);
-        
-        // Populate the date range fields
-        document.getElementById("date_from").value = startDate.toISOString().split("T")[0]; // Setting date_from
-        document.getElementById("date_to").value = endDate.toISOString().split("T")[0];   // Setting date_to
-        
-        const timesheetContainer = document.getElementById("timesheet-entries");
-        timesheetContainer.innerHTML = "";  // Clear previous fields
-
-        let currentDate = new Date(startDate);
-        while (currentDate <= endDate) {
-            const dayOfWeek = currentDate.getDay(); // 0 for Sunday, 6 for Saturday
-            const dateStr = currentDate.toISOString().split("T")[0];
-
-            // Create table row
-            const row = document.createElement("tr");
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                row.classList.add("weekend"); // Highlight weekends
-            }
-
-            // Date Cell
-            const dateCell = document.createElement("td");
-            dateCell.textContent = dateStr;
-            row.appendChild(dateCell);
-
-            // Task Description Cell
-            const taskCell = document.createElement("td");
-            const taskInput = document.createElement("textarea");
-            taskInput.name = `task_description_${dateStr}`;
-            taskInput.className = "form-control";  
-            taskInput.placeholder = "Task description";
-            // taskInput.required = true;
-            if (dayOfWeek === 0 || dayOfWeek === 6) taskInput.required = false;
-            taskCell.appendChild(taskInput);
-            row.appendChild(taskCell);
-
-            // Location Cell
-            const locationCell = document.createElement("td");
-            const locationSelect = document.createElement("select");
-            locationSelect.name = `location_${dateStr}`;
-            locationSelect.className = "form-control";  
-            locationSelect.required = true;
-            ["onsite", "holiday", "remote"].forEach(loc => {
-                const option = document.createElement("option");
-                option.value = loc;
-                option.textContent = loc.charAt(0).toUpperCase() + loc.slice(1);
-                locationSelect.appendChild(option);
-            });
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                locationSelect.value = "holiday";
-                locationSelect.disabled = true; // Disable for weekends
-                // Create a hidden input to store the value 'holiday'
-                const hiddenInput = document.createElement("input");
-                hiddenInput.type = "hidden";
-                hiddenInput.name = `location_${dateStr}`;
-                hiddenInput.value = "holiday";
-                locationCell.appendChild(hiddenInput); // Append hidden input
-            } else {
-                locationSelect.disabled = false; // Enable for weekdays
-            }
-            locationCell.appendChild(locationSelect);
-            row.appendChild(locationCell);
-
-
-            // Time in Hours Cell
-            const timeCell = document.createElement("td");
-            const timeInput = document.createElement("input");
-            timeInput.type = "text";  // Use text type for custom validation
-            timeInput.name = `time_in_hrs_${dateStr}`;
-            timeInput.className = "form-control";
-            timeInput.placeholder = "HH:mm";  // Display placeholder
-            timeInput.required = false; // Make the field mandatory
-            timeCell.appendChild(timeInput);
-            row.appendChild(timeCell);
-
-            // Add input validation
-            timeInput.addEventListener("input", function () {
-                const timeValue = this.value;
-
-                // Regular expression for HH:mm format
-                const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-                
-                // Check if the input matches the HH:mm format
-                if (!timeRegex.test(timeValue)) {
-                    this.setCustomValidity("Please enter a valid time in HH:mm format.");
-                } else {
-                    this.setCustomValidity(""); // Clear the error if valid
-                }
-            });
-
-
-
-            // Notes Cell
-            const notesCell = document.createElement("td");
-            const notesInput = document.createElement("textarea");
-            notesInput.name = `notes_${dateStr}`;
-            notesInput.className = "form-control";  
-            notesInput.placeholder = "Notes";
-            // notesInput.required = true;
-            if (dayOfWeek === 0 || dayOfWeek === 6) notesInput.required = false;
-            notesCell.appendChild(notesInput);
-            row.appendChild(notesCell);
-
-            // Append the row to the timesheet container
-            timesheetContainer.appendChild(row);
-
-            // Increment currentDate to the next day
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-    }
-</script>  -->
 <script>
-    document.getElementById("project_id").addEventListener("change", generateFields);
-    document.getElementById("date_from").addEventListener("change", generateFields);
-    document.getElementById("date_to").addEventListener("change", generateFields);
+document.getElementById('project_id').addEventListener('change', function () {
+    const projectId = this.value;
+    const dateFromInput = document.getElementById('date_from');
+    const dateToInput = document.getElementById('date_to');
+    const timesheetEntries = document.getElementById('timesheet-entries');
 
-    function generateFields() {
-        const projectId = document.getElementById("project_id").value;
+    timesheetEntries.innerHTML = '';
 
-        // Get the manually selected start and end dates
-        const startDateInput = document.getElementById("date_from").value;
-        const endDateInput = document.getElementById("date_to").value;
+    if (projectId) {
+        fetch(`/api/project/${projectId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const { leave_days, weekends } = data;
 
-        // If start and end dates are not selected, return early
-        if (!startDateInput || !endDateInput || !projectId) {
-            document.getElementById("timesheet-entries").innerHTML = "";
-            return;
-        }
+                    console.log('Leave Days:', leave_days);
+                    console.log('Weekends:', weekends);
 
-        const startDate = new Date(startDateInput);
-        const endDate = new Date(endDateInput);
+                    dateFromInput.addEventListener('change', updateTimesheetTable);
+                    dateToInput.addEventListener('change', updateTimesheetTable);
 
-        // Check if the selected "end date" is earlier than the "start date"
-        if (endDate < startDate) {
-            alert("End date cannot be earlier than start date.");
-            document.getElementById("date_to").value = ""; // Reset the "end date" field
-            return;
-        }
+                    function updateTimesheetTable() {
+                        const dateFrom = new Date(dateFromInput.value);
+                        const dateTo = new Date(dateToInput.value);
 
-        // Check if the "end date" is in the next month or next year compared to "start date"
-        const startYear = startDate.getFullYear(); // Get the year of the start date
-        const startMonth = startDate.getMonth();  // Get the month of the start date
-        const endYear = endDate.getFullYear();    // Get the year of the end date
-        const endMonth = endDate.getMonth();      // Get the month of the end date
 
-        // Ensure the "end date" is in the same month or year as the "start date"
-        if (endYear > startYear || (endYear === startYear && endMonth > startMonth)) {
-            alert("End date cannot be in the next month or year compared to the start date.");
-            document.getElementById("date_to").value = ""; // Reset the "end date" field
-            return;
-        }
+                        if (dateFrom && dateTo && dateFrom > dateTo) {
+                            alert("End date cannot be earlier than start date.");
+                            return;
+                        }
+                        const startDateInput = document.getElementById("date_from").value;
+                        const endDateInput = document.getElementById("date_to").value;
+                        const startDate = new Date(startDateInput);
+                        const endDate = new Date(endDateInput);
 
-        // Clear the timesheet entries container
-        const timesheetContainer = document.getElementById("timesheet-entries");
-        timesheetContainer.innerHTML = "";
+                        const startYear = startDate.getFullYear(); 
+                        const startMonth = startDate.getMonth();  
+                        const endYear = endDate.getFullYear();    
+                        const endMonth = endDate.getMonth();      
+                        
+                        if (endYear > startYear || (endYear === startYear && endMonth > startMonth)) {
+                            alert("End date cannot be in the next month or year compared to the start date.");
+                            return;
+                        }
+                        
 
-        let currentDate = new Date(startDate);
-        while (currentDate <= endDate) {
-            const dayOfWeek = currentDate.getDay(); // 0 for Sunday, 6 for Saturday
-            const dateStr = currentDate.toISOString().split("T")[0];
+                        if (dateFrom && dateTo && dateFrom <= dateTo) {
+                            timesheetEntries.innerHTML = ''; 
 
-            // Create table row
-            const row = document.createElement("tr");
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                row.classList.add("weekend"); // Highlight weekends
-            }
+                            let currentDate = dateFrom;
+                            while (currentDate <= dateTo) {
+                                const dateStr = currentDate.toISOString().split('T')[0];
+                                const dayOfWeek = currentDate.getDay(); 
 
-            // Date Cell
-            const dateCell = document.createElement("td");
-            dateCell.textContent = dateStr;
-            row.appendChild(dateCell);
+                                const isLeaveDay = leave_days.includes(dateStr);
+                                const isWeekend = weekends.includes(currentDate.toLocaleString('en-US', { weekday: 'long' }));
 
-            // Task Description Cell
-            const taskCell = document.createElement("td");
-            const taskInput = document.createElement("textarea");
-            taskInput.name = `task_description_${dateStr}`;
-            taskInput.className = "form-control";  
-            taskInput.placeholder = "Task description";
-            if (dayOfWeek === 0 || dayOfWeek === 6) taskInput.required = false;
-            taskCell.appendChild(taskInput);
-            row.appendChild(taskCell);
+                                const row = document.createElement("tr");
+                                let rowClass = '';
 
-            // Location Cell
-            const locationCell = document.createElement("td");
-            const locationSelect = document.createElement("select");
-            locationSelect.name = `location_${dateStr}`;
-            locationSelect.className = "form-control";  
-            locationSelect.required = true;
-            ["onsite", "remote","holiday"].forEach(loc => {
-                const option = document.createElement("option");
-                option.value = loc;
-                option.textContent = loc.charAt(0).toUpperCase() + loc.slice(1);
-                locationSelect.appendChild(option);
-            });
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                locationSelect.value = "holiday";
-                locationSelect.disabled = true; // Disable for weekends
-                // Create a hidden input to store the value 'holiday'
-                const hiddenInput = document.createElement("input");
-                hiddenInput.type = "hidden";
-                hiddenInput.name = `location_${dateStr}`;
-                hiddenInput.value = "holiday";
-                locationCell.appendChild(hiddenInput); // Append hidden input
-            } else {
-                locationSelect.disabled = false; // Enable for weekdays
-            }
-            locationCell.appendChild(locationSelect);
-            row.appendChild(locationCell);
+                                if (isLeaveDay) {
+                                    rowClass = 'table-danger'; 
+                                } else if (isWeekend) {
+                                    rowClass = 'table-danger'; 
+                                }
 
-            // Time in Hours Cell
-            const timeCell = document.createElement("td");
-            const timeInput = document.createElement("input");
-            timeInput.type = "text";  // Use text type for custom validation
-            timeInput.name = `time_in_hrs_${dateStr}`;
-            timeInput.className = "form-control";
-            timeInput.placeholder = "HH:mm";  // Display placeholder
-            timeInput.required = false; // Make the field mandatory
-            timeCell.appendChild(timeInput);
-            row.appendChild(timeCell);
+                                if (rowClass) {
+                                    row.classList.add(rowClass);
+                                }
 
-            // Add input validation
-            timeInput.addEventListener("input", function () {
-                const timeValue = this.value;
+                                const dateCell = document.createElement("td");
+                                dateCell.textContent = dateStr;
+                                row.appendChild(dateCell);
 
-                // Regular expression for HH:mm format
-                const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-                
-                // Check if the input matches the HH:mm format
-                if (!timeRegex.test(timeValue)) {
-                    this.setCustomValidity("Please enter a valid time in HH:mm format.");
+                                const taskCell = document.createElement("td");
+                                const taskInput = document.createElement("textarea");
+                                taskInput.name = `task_description_${dateStr}`;
+                                taskInput.className = "form-control";
+                                taskInput.placeholder = "Task description";
+                                if (isWeekend || isLeaveDay) taskInput.required = false; 
+                                taskCell.appendChild(taskInput);
+                                row.appendChild(taskCell);
+
+                                 const locationCell = document.createElement("td");
+                                const locationSelect = document.createElement("select");
+                                locationSelect.name = `location_${dateStr}`;
+                                locationSelect.className = "form-control";
+                                locationSelect.required = true;
+
+                                ["onsite", "remote"].forEach(loc => {
+                                    const option = document.createElement("option");
+                                    option.value = loc;
+                                    option.textContent = loc.charAt(0).toUpperCase() + loc.slice(1);
+                                    locationSelect.appendChild(option);
+                                });
+
+                                if (isWeekend || isLeaveDay) {
+                                    locationSelect.value = "holiday";
+                                    locationSelect.disabled = true; 
+                                    const holidayOption = document.createElement("option");
+                                    holidayOption.value = "holiday";
+                                    holidayOption.textContent = "Holiday";
+                                    holidayOption.selected = true; 
+                                    locationSelect.appendChild(holidayOption); 
+                                } else {
+                                    locationSelect.disabled = false; 
+                                }
+                                locationCell.appendChild(locationSelect);
+                                row.appendChild(locationCell);
+
+                                const timeCell = document.createElement("td");
+                                const timeInput = document.createElement("input");
+                                timeInput.type = "text";  
+                                timeInput.name = `time_in_hrs_${dateStr}`;
+                                timeInput.className = "form-control";
+                                timeInput.placeholder = "HH:mm";  
+                                timeInput.required = false; 
+                                timeCell.appendChild(timeInput);
+                                row.appendChild(timeCell);
+
+                                timeInput.addEventListener("input", function () {
+                                    const timeValue = this.value;
+
+                                    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+                                    
+                                    if (!timeRegex.test(timeValue)) {
+                                        this.setCustomValidity("Please enter a valid time in HH:mm format.");
+                                    } else {
+                                        this.setCustomValidity(""); 
+                                    }
+                                });
+
+                                const notesCell = document.createElement("td");
+                                const notesInput = document.createElement("textarea");
+                                notesInput.name = `notes_${dateStr}`;
+                                notesInput.className = "form-control";
+                                notesInput.placeholder = "Notes";
+                                if (isWeekend || isLeaveDay) notesInput.required = false; 
+                                notesCell.appendChild(notesInput);
+                                row.appendChild(notesCell);
+
+                                timesheetEntries.appendChild(row);
+
+                                currentDate.setDate(currentDate.getDate() + 1);
+                            }
+                        }
+                    }
+
+                    if (dateFromInput.value && dateToInput.value) {
+                        updateTimesheetTable();
+                    }
                 } else {
-                    this.setCustomValidity(""); // Clear the error if valid
+                    alert('Failed to fetch project details.');
                 }
+            })
+            .catch(error => {
+                console.error('Error fetching project details:', error);
             });
-
-            // Notes Cell
-            const notesCell = document.createElement("td");
-            const notesInput = document.createElement("textarea");
-            notesInput.name = `notes_${dateStr}`;
-            notesInput.className = "form-control";  
-            notesInput.placeholder = "Notes";
-            if (dayOfWeek === 0 || dayOfWeek === 6) notesInput.required = false;
-            notesCell.appendChild(notesInput);
-            row.appendChild(notesCell);
-
-            // Append the row to the timesheet container
-            timesheetContainer.appendChild(row);
-
-            // Increment currentDate to the next day
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
     }
-</script>
+});
 
+</script>
 
 
 

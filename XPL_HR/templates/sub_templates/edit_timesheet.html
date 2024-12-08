@@ -4,7 +4,6 @@
 
 
 {% block content %}
-<div class="header-image"> </div>
 <div class="container-fluid mt-6">
     <div class="scrollable-container">
         <h2 class="text-center mb-4">Edit Timesheet for {{ project }} Project</h2>
@@ -35,9 +34,9 @@
                         <th>Notes</th>
                     </tr>
                 </thead>
-                <tbody id="timesheetBody">
+                <tbody id="timesheetBody" >
                     {% for timesheet in timesheets %}
-                    <tr data-timesheet-id="{{ timesheet.id }}">
+                    <tr data-timesheet-id="{{ timesheet.id }}" {% if timesheet.location == "" or timesheet.location == null %} style="background-color: #ffdbdd;"{% endif %}>
                         <!-- Date Display -->
                         <td>
                             <label>{{ timesheet.date|date:"Y-m-d" }}</label>
@@ -52,20 +51,29 @@
                         </td>
                         
         
-                        <td>
+                        <td >
                             <select name="location_{{ timesheet.date|date:"Y-m-d" }}" class="form-control" 
-                                    {% if timesheet.date.weekday == 5 or timesheet.date.weekday == 6 %}disabled{% endif %}>
-                                <option value="onsite" {% if timesheet.location == "onsite" %}selected{% endif %}>Onsite</option>
-                                <option value="remote" {% if timesheet.location == "remote" %}selected{% endif %}>Remote</option>
-                                <option value="holiday" {% if timesheet.location == "holiday" %}selected{% endif %}>Holiday</option>
-                            </select>
+                            {% if timesheet.location == "" or timesheet.location == null %}disabled {% endif %}>
+                        {% if timesheet.location == "" or timesheet.location == null %}
+                            <option value="holiday" selected>Holiday</option>
+                        {% else %}
+                            <option value="onsite" {% if timesheet.location == "onsite" %}selected{% endif %}>Onsite</option>
+                            <option value="remote" {% if timesheet.location == "remote" %}selected{% endif %}>Remote</option>
+                        {% endif %}
+                    </select>
+                    
+
+
                         </td>
                         <td>
-                            <textarea class="form-control" 
-                                      name="time_in_hrs_{{ timesheet.date|date:"Y-m-d" }}" 
-                                      placeholder="HH:mm"
-                                      
-                                      >{{ timesheet.time_in_hrs }}</textarea>
+                            <input type="text" 
+       name="time_in_hrs_{{ timesheet.date|date:'Y-m-d' }}" 
+       class="form-control" 
+       placeholder="HH:mm" 
+       value="{{ timesheet.time_in_hrs }}" 
+       pattern="([01]?[0-9]|2[0-3]):([0-5][0-9])" 
+       title="Please enter a valid time in HH:mm format (e.g., 12:30, 23:59)">
+
                         </td>
         
                         <td>
@@ -80,118 +88,34 @@
             </table>
             
             <div class="text-end mt-3">
-                <!-- <button type="button" class="btn btn-secondary" onclick="addNewRow()">Add New Row</button> -->
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         </form>
         
-        <!-- <script>
-        function addNewRow() {
-            const tbody = document.getElementById('timesheetBody');
-            const newRow = document.createElement('tr');
-        
-            // Determine the date for the new row
-            const lastRow = tbody.lastElementChild;
-            let newDate = new Date();
-        
-            if (lastRow) {
-                // Get the last date from the last row's label
-                const lastDateLabel = lastRow.querySelector('label').textContent;
-                newDate = new Date(lastDateLabel);
-                newDate.setDate(newDate.getDate() + 1); // Increment date by 1
-            }
-            
-            // Format the new date for the input names
-            const newDateStr = newDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
-        
-            // Determine if the new date is a weekend
-            const isWeekend = newDate.getDay() === 0 || newDate.getDay() === 6; // Sunday (0) or Saturday (6)
-        
-            newRow.setAttribute('data-timesheet-id', 'new'); // Placeholder for new ID
-            newRow.innerHTML = `
-                <td>
-                    <label>${newDateStr}</label>
-                    <input type="hidden" name="new_date" value="${newDateStr}"> 
-                </td>
-                <td>
-                    <textarea class="form-control " 
-                              name="task_description_${newDateStr}" placeholder="Task description" ></textarea>
-                </td>
-                <td>
-                    <input type="hidden" name="location_${newDateStr}" value="weekend">
-
-                    <select name="location_display_${newDateStr}" class="form-control" disabled>
-                        <option value="onsite">Onsite</option>
-                        <option value="remote">Remote</option>
-                        <option value="holiday" selected>Holiday</option>
-                    </select>
-                </td>
-                <td>
-                    <textarea class="form-control }" 
-                              name="notes_${newDateStr}" placeholder="Notes" ></textarea>
-                </td>
-            `;
-        
-            tbody.appendChild(newRow);
-        }
-        </script> -->
+       
         
         </div>
 </div>
 </div>
-<!-- ${isWeekend ? 'readonly' : ''} -->
-<!-- <style>
-    .table-header {
-        font-weight: bold;
-    }
-    .form-control {
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-    }
-    .text-end {
-        text-align: right;
-    }
-</style> -->
 
-{%endblock%}
-
-{% block scripts %}
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    console.log("Script loaded and DOM fully parsed."); // Debugging log
-
-    // Select all relevant textarea elements
-    const timeFields = document.querySelectorAll('textarea[name^="time_in_hrs_"]');
-
-    if (!timeFields.length) {
-        console.error("No time input fields found! Check your selector.");
-        return;
-    }
-    console.log("Time input fields found:", timeFields);
-
-    // Attach an input event listener to each textarea
-    timeFields.forEach((timeInput) => {
-        timeInput.addEventListener("input", function () {
-            const timeValue = this.value;
-
-            // Regular expression for HH:mm format
-            const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-
-            // Validate the input format
+<script>// Select all time input fields that have names starting with 'time_in_hrs_'
+    document.querySelectorAll("textarea[name^='time_in_hrs_']").forEach(function(timeInput) {
+        timeInput.addEventListener("blur", function () {
+            const timeValue = this.value.trim();
+    
+            // Regex to validate the time in HH:mm format (HH from 00 to 23, mm from 00 to 59)
+            const timeRegex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
+    
             if (!timeRegex.test(timeValue)) {
                 this.setCustomValidity("Please enter a valid time in HH:mm format.");
-                this.reportValidity(); // Show the error message
             } else {
-                this.setCustomValidity(""); // Clear the error if valid
+                this.setCustomValidity("");  // Reset the validity if input is correct
             }
         });
     });
-});
-
-
-
-
+    
 </script>  
-
 {%endblock%}
+
+
+
