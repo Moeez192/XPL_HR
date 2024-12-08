@@ -1,0 +1,14 @@
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} Employees {% endblock %}
+{% block content %}
+<link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
+
+
+    {% include "templates/sub_templates/emp_dash.html" %}
+
+
+
+
+{%endblock%}
+

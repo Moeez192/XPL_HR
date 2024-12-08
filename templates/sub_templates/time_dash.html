@@ -1,0 +1,233 @@
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    .alert {
+        position: relative;
+    }
+
+    .close {
+        transition: color 0.2s;
+    }
+
+    .close:hover {
+        color: #ff2a00; /* Color on hover */
+    }
+
+    .alert-info {
+        border-color: #b8daff; /* Optional: customize border color */
+    }
+
+    .alert-info p {
+        margin-bottom: 0; /* Remove bottom margin from the paragraph */
+    }
+</style>
+<br>
+{% if messages %}
+    <!-- <div class="container mt-3"> -->
+        {% for message in messages %}
+            <div class="alert alert-dismissible fade show 
+                {% if message.tags == 'success' %}alert-info{% endif %} 
+                {% if message.tags == 'error' %}alert-danger{% endif %} 
+                mt-2" role="alert">
+                <p>{{ message }}</p>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="border: none; background: none; color: #007bff; font-size: 1.5rem; position: absolute; top: 10px; right: 15px; cursor: pointer;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    <!-- </div> -->
+{% endif %}
+
+<br>
+<!-- Table for Displaying only timesheets for approval here -->
+{% if pending_approval_timesheets %}
+<h3 class="text-center">All Timesheets Pending Approval</h3>
+    <!-- Scrollable Table -->
+    <div class="table-container">
+        <table class="table table-hover" id="employeeTable">
+            <thead class="table-primary">
+                <tr class="table-header">
+                    <th>Employee Name</th>
+                    <th>Project Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for timesheet in pending_approval_timesheets %}
+                <tr>
+                    <td>{{timesheet.employee__first_name}}</td>
+                    <td>{{ timesheet.project__project_name }}</td>
+                    <td>{{ timesheet.start_date }}</td>
+                    <td>{{ timesheet.end_date }}</td>
+                    <td>
+                        <a href="{% url 'view_timesheet' timesheet.timesheet_group_id %}" class="btn btn-info btn-sm"><i class="fa-regular fa-eye"></i></a>
+                        <form id="timesheet-form" method="post" style="display:inline;" action="{% url 'accept_timesheet' timesheet.timesheet_group_id %}">
+                            {% csrf_token %}
+                            <button type="submit" name="action" value="accept" class="btn btn-success btn-sm"><i class="fa fa-check" aria-hidden="true"></i></button>
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#rejectModal"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No timesheet pending approval.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <br>
+{% endif %}   
+
+
+
+<!-- Displaying all timesheets here -->
+    <h3 class="text-center">All Timesheets for {{ employee.first_name }} {{ employee.last_name }}</h3>
+    <!-- Scrollable Table -->
+    <div style="margin-bottom: 3px;">
+        <a href="{% url 'add_timesheet' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> TimeSheet</a>
+    </div>
+    <div class="table-container">
+        <table class="table table-hover" id="employeeTable">
+            <thead class="table-primary">
+                <tr class="table-header">
+                    <th>Project Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Reason</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if timesheets %}
+                    {% for group in timesheets %}
+                    <tr>
+                        <td>{{ group.project__project_name }}</td>
+                        <td>{{ group.start_date }}</td>
+                        <td>{{ group.end_date }}</td>
+                        <td>
+                            {% if group.status == "accepted" %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif group.status == "rejected" %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% elif group.status == "saved" %}
+                                <span class="badge bg-info rounded-pill text-dark">Saved</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if group.status == 'rejected' %}
+                                {{ group.reject_reason }}  <!-- Show rejection reason -->
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if group.status == "saved" %}
+                            <!-- Edit Button -->
+                            <a href="{% url 'edit_timesheet' group.timesheet_group_id %}" class="btn btn-primary btn-sm"><i class="fas fa-pencil-alt"></i></a>
+
+                            <form method="post" action="{% url 'delete_timesheet' group.timesheet_group_id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete all timesheets for this group?');">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                            <form action="{% url 'submit_timesheet' group.timesheet_group_id %}" style="display:inline;" method="post" onsubmit="return confirm('Are you sure you want to submit this timesheet for approval?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-paper-plane"></i> 
+                                </button>
+                            </form>
+                            {% elif group.status == "rejected" %}
+                            <a href="{% url 'edit_timesheet' group.timesheet_group_id %}" class="btn btn-primary btn-sm"><i class="fas fa-pencil-alt"></i></a>
+                            <form action="{% url 'submit_timesheet' group.timesheet_group_id %}" style="display:inline;" method="post" onsubmit="return confirm('Are you sure you want to submit this timesheet for approval?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-paper-plane"></i> 
+                                </button>
+                            </form>
+                            {% elif group.status == "accepted" %}
+                                Approved
+                            {% endif %}
+
+                        </td>
+                        
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">No timesheet entries found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+
+
+    
+    <br>
+
+<!-- modal for reject -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectModalLabel">Reason for Rejection</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="rejectReason" class="form-control" rows="4" placeholder="Enter the reason for rejection here..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="confirmReject">Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.getElementById('confirmReject').onclick = function() {
+        var reason = document.getElementById('rejectReason').value;
+
+        if (reason.trim() === '') {
+            alert('Please provide a reason for rejection.');
+            return; 
+        }
+
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'action';  
+        input.value = 'reject';  
+
+        var reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'reject_reason';  
+        reasonInput.value = reason;
+
+        var form = document.getElementById('timesheet-form');
+        form.appendChild(input);
+        form.appendChild(reasonInput);
+
+        form.submit();
+    };
+</script>
+
+    
+    
+    
+{% endblock %}

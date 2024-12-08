@@ -1,0 +1,897 @@
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} Employees {% endblock %}
+{% block content %}
+{% load widget_tweaks %}
+
+        <h2 class="text-center mb-4">Add Employee</h2>
+        
+        <div class="card-body tabstyle-form-wizard-block p-0 pt-4">
+            <ul class="nav nav-tabs justify-content-between mb-3" id="pills-tab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#step1" data-bs-toggle="tab" role="tab" aria-controls="step1" aria-expanded="true">Basic Information</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#step2" data-bs-toggle="tab" role="tab" aria-controls="step2" aria-expanded="false">Work Information</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#step3" data-bs-toggle="tab" role="tab" aria-controls="step3">Seperation Information</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#step4" data-bs-toggle="tab" role="tab" aria-controls="step4">Bank Account Details</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#step5" data-bs-toggle="tab" role="tab" aria-controls="step5">Contact Details</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#step6" data-bs-toggle="tab" role="tab" aria-controls="step6">Travel History</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#step7" data-bs-toggle="tab" role="tab" aria-controls="step7">Attachments</a>
+                </li>
+            </ul>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="tab-content" id="main_form">
+                    <!-- Basic Information -->
+                    <div class="tab-pane fade show active" role="tabpanel" id="step1">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="profilePhoto" class="form-label">Upload Profile Photo</label>
+                                {% render_field form.profile_photo class+="form-control" accept="image/*" id="profilePhoto" %}
+                                <div id="imagePreviewContainer" class="mt-3" style="display: none;">
+                                    <img id="imagePreview" src="#" alt="Selected Profile Photo" style="max-width: 10%; height: auto; border: 1px solid #ddd; padding: 5px;">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="firstName" class="form-label">First Name</label>
+                                {% render_field form.first_name placeholder="First Name" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                {% render_field form.last_name placeholder="Last Name" class+="form-control" %}
+                            </div>
+                            
+                        
+                            
+                            <div class="col-md-6">
+                                <label for="" class="form-label">Nick Name</label>
+                                {% render_field form.nick_name placeholder="Nick Name" class+="form-control" %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="id_dob"  class="form-label">Date of Birth</label>
+                                {% render_field  form.dob placeholder="Date Of Birth" class+="form-control" %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="id_age" class="form-label">Age</label>
+                                {% render_field form.age placeholder="Age" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="gender" class="form-label">Gender</label>
+                                {% render_field form.gender placeholder="Gender" class+="form-control" %}
+                            </div>
+                        
+                            
+                            <div class="col-md-6">
+                                <label for="skills-input" class="form-label">Skills/Expertise</label>
+                                <div id="tags-container" class="tags-container">
+                                    <!-- Tags will appear here -->
+                                </div>
+                                <input 
+                                    type="text" 
+                                    id="skills-input" 
+                                    placeholder="Enter Skills / Expertise and press Enter" 
+                                    class="form-control"
+                                />
+                                <!-- Hidden field to store the comma-separated skills -->
+                                {% render_field form.skills id="skills-hidden" style="display: none;" %}
+                            </div>
+                            
+                           
+                            <div class="col-md-6">
+                                <label for="address" class="form-label">Marital Status</label>
+                                {% render_field form.marital_status class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nationality" class="form-label">Nationality</label>
+                            {% render_field form.nationality placeholder="Enter Nationality" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="address" class="form-label">Linkdin</label>
+                                {% render_field form.linkdln class+="form-control" placeholder="Linkdin Profile URL" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="address" class="form-label">X/Twitter</label>
+                                {% render_field form.x_twitter class+="form-control" placeholder="X/Twitter URL" %}
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Work Information -->
+                    <div class="tab-pane fade" role="tabpanel" id="step2">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="employeeId" class="form-label">Employee ID</label>
+                                {% render_field form.employee_id placeholder="Enter Employee ID" class+="form-control" readonly="readonly" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="jobTitle" class="form-label">Job Title</label>
+                                {% render_field form.job_title placeholder="Job Title" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Position</label>
+                                {% render_field form.position placeholder="Position" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="department" class="form-label">Department</label>
+                                {% render_field form.department placeholder="Enter Department" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="employeeRole" class="form-label">Business Unit</label>
+                                {% render_field form.business_unit class+="form-control" placeholder="Business Unit" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="employeeRole" class="form-label">Employee Role</label>
+                                {% render_field form.employee_role class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Reporting Manager</label>
+                                {% render_field form.reporting_manager placeholder="Position" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Work Location</label>
+                                {% render_field form.work_location placeholder="Enter Work Location" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bonus" class="form-label">Remote Rate (Daily)</label>
+                                <div class="input-group">
+                                    
+                                    {% render_field form.remote_salary placeholder="Remote Rate (Daily)" class="form-control" %}
+                                    <span class="input-group-text">$</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bonus" class="form-label">Onsite Rate (Daily)</label>
+                                <div class="input-group">
+                                {% render_field form.onsite_salary placeholder="Onsite Rate (Daily)" class+="form-control" %}
+                                <span class="input-group-text">$</span>
+                            </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Rate Basis</label>
+                                {% render_field form.rate_basis  class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Contract beginning Date</label>
+                                {% render_field form.contract_start_date  class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Contract end date</label>
+                                {% render_field form.contract_end_date  class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="dateOfJoining" class="form-label">Date of Joining</label>
+                                {% render_field form.date_of_joining  class+="form-control" %}
+                            </div>
+                            
+                            
+                            <div class="col-md-6">
+                                <label for="employmentType" class="form-label">Employment Type</label>
+                                {% render_field form.employment_type class+="form-control" onchange="generateEmployeeId()" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="employeeStatus" class="form-label">Employee Status</label>
+                                {% render_field form.employee_status class+="form-control" %}
+            
+                            </div>
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Leave Policy</label>
+                                {% render_field form.leave_policy  class+="form-control" placeholder="Source of hire" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="wps_profile" class="form-label">WPS Profile</label>
+                                {% render_field form.wps_profile placeholder="WPS Profile" class+="form-control" id="wps_profile" %}
+                            </div>
+                            <div class="col-md-6" id="mol_id_container">
+                                <label for="mol_id" class="form-label">MOL ID</label>
+                                {% render_field form.mol_id placeholder="MOL ID (14 Digits Only)" class+="form-control" id="mol_id" oninput="restrictMolIdLength(this)" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Source of hire</label>
+                                {% render_field form.source_of_hire  class+="form-control" placeholder="Source of hire" %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Timesheet Required</label>
+                                {% render_field form.timesheet_required  class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sap-certifications-input" class="form-label">SAP Certifications</label>
+                                <div id="tags-container2" class="tags-container">
+                                    <!-- Tags will appear here -->
+                                </div>
+                                <input 
+                                    type="text" 
+                                    id="sap-certifications-input" 
+                                    placeholder="Enter SAP Certifications and press Enter" 
+                                    class="form-control"
+                                />
+                                <!-- Hidden field to store the comma-separated certifications -->
+                                {% render_field form.sap_certifications id="sap-certifications-hidden" style="display: none;" %}
+                            </div>
+                            
+                            
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Total Experience</label>
+                                {% render_field form.total_expirence class+="form-control" placeholder="Total Experience" %}
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- Seperation Information -->
+                    <div class="tab-pane fade" role="tabpanel" id="step3">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="bonus" class="form-label">Date of Exit</label>
+                                {% render_field form.date_of_exit placeholder="Date Of Exit" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bonus" class="form-label">Reason For Exit</label>
+                                {% render_field form.reason_for_exit placeholder="Reason For Exit" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bonus" class="form-label" >Can Join Again</label>
+                                {% render_field form.can_join_again  class+="form-control"   %}
+                            </div>
+        
+                        </div>
+                    </div>
+                    
+                    <!-- Bank Account Details -->
+                    <div class="tab-pane fade" role="tabpanel" id="step4">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="bankAccount" class="form-label">Bank Name</label>
+                            {% render_field form.bank_account placeholder="Bank Name" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bankAccount" class="form-label">Bank Country</label>
+                            {% render_field form.bank_country  class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bankAccount" class="form-label">Account Type</label>
+                            {% render_field form.account_type placeholder="Account Type" class+="form-control" %}
+                            </div>
+                            
+                            
+                            <div class="col-md-6">
+                                <label for="bankAccount" class="form-label">Account Number</label>
+                            {% render_field form.account_number placeholder="Account Number" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bankAccount" class="form-label">IBAN Number</label>
+                            {% render_field form.iban_number placeholder="IBAN Number" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bankAccount" class="form-label">Routing Code</label>
+                            {% render_field form.routing_code placeholder="Routing Code" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bankAccount" class="form-label">Swift Code</label>
+                            {% render_field form.swift_code placeholder="Swift Code" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bankAccount" class="form-label">IFSC Code</label>
+                            {% render_field form.ifsc_code placeholder="IFSC Code" class+="form-control" %}
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <!-- Contact Details -->
+                    <div class="tab-pane fade" role="tabpanel" id="step5">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email</label>
+                                {% render_field form.email placeholder="Email" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Work Phone Number</label>
+                                {% render_field form.phone placeholder="Work Phone Number" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Personel Phone Number</label>
+                                {% render_field form.personel_phone placeholder="Personel Phone Number" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="address" class="form-label">Present Address</label>
+                                {% render_field form.address class+="form-control" placeholder="Present Address" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="address" class="form-label">Permanent Address</label>
+                                {% render_field form.permanent_address class+="form-control" placeholder="Permanent Address" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="emergencyName" class="form-label">Emergency Contact Name</label>
+                                {% render_field form.emergency_name placeholder="Emergency Contact Name" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="emergencyRelation" class="form-label">Relationship</label>
+                                {% render_field form.emergency_relation placeholder="Emergency Relation" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="emergencyPhone" class="form-label">Emergency Contact Phone</label>
+                            {% render_field form.emergency_phone placeholder="Contact Number" class+="form-control" %}
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Travel History -->
+                    <div class="tab-pane fade" role="tabpanel" id="step6">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="emergencyName" class="form-label">First Entry Into Country</label>
+                                {% render_field form.first_entry_in_country placeholder="Emergency Contact Name" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="emergencyName" class="form-label">Latest Exit From Country</label>
+                                {% render_field form.latest_exit_from_country  class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_latest_entry_in_country" class="form-label">Latest Entry Into Country</label>
+                                {% render_field form.latest_entry_in_country placeholder="Emergency Contact Name" class+="form-control" %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_days_from_latest_entry" class="form-label">Days from Latest Entry Into Country</label>
+                                {% render_field form.days_from_latest_entry  class+="form-control" %}
+                            </div>
+            
+                        </div>
+                    </div>
+                    <!-- Attachments -->
+                    <div class="tab-pane fade" role="tabpanel" id="step7">
+                        <div class="col-md-6">
+                            <label for="id_docs" class="form-label">Select Document</label>
+                            {% render_field form.docs class+="form-control" %}
+                        </div>
+                        
+                        <br>
+                        <div id="document-upload-container" class="mb-3">
+                            
+                            <br>
+            
+                        </div>
+                        
+                        
+                       
+                        <br>
+            
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" name="employee_submit" class="btn btn-primary">Save</button>
+                            <a href="{% url 'employees' %}" class="btn btn-secondary">Cancel</a>
+
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.querySelector('form'); // Replace with the specific form selector if needed
+                const dobField = document.getElementById('id_dob');
+        
+                form.addEventListener('submit', function (event) {
+                    if (!dobField.value) {
+                        event.preventDefault(); // Prevent form submission
+                        alert('Please fill in your Date of Birth!');
+                    }
+                });
+            });
+        </script>
+        
+
+<!-- dynamic Field Creater -->
+<script type="text/javascript">
+    // Keep track of dynamically added document fields and their counters
+    const addedDocs = new Set();
+    let docCounter = {};  // To count and differentiate documents of the same type
+
+    // Function to dynamically create a file upload input field
+    function createFileInputField(docType) {
+        const container = document.getElementById('document-upload-container');
+
+        // Initialize counter for document type if not already
+        if (!docCounter[docType]) {
+            docCounter[docType] = 1;  // Start counter from 1 for this document type
+        } else {
+            docCounter[docType]++;  // Increment the counter if it's already used
+        }
+
+        // Create new div container for the file input with Bootstrap grid system
+        const div = document.createElement('div');
+        div.classList.add('row');
+        div.classList.add('mb-4');  // Add margin bottom for spacing between sections
+        div.setAttribute('id', docType + '-' + docCounter[docType]);  // Unique ID for multiple same document types
+
+        // Create the first column for the file upload
+        const col1 = document.createElement('div');
+        col1.classList.add('col-md-6');
+        
+        // Create label for the file input
+        const label1 = document.createElement('label');
+        label1.classList.add('form-label');
+        label1.setAttribute('for', 'id_' + docType + '_' + docCounter[docType] + '_file');
+        label1.textContent = 'Upload ' + docType.charAt(0).toUpperCase() + docType.slice(1) + ' ' + docCounter[docType];  // Label with count
+        
+        // Create the file input field
+        const input1 = document.createElement('input');
+        input1.type = 'file';
+        input1.name = docType + '_file_' + docCounter[docType];  // Unique name for each file input
+        input1.id = 'id_' + docType + '_' + docCounter[docType] + '_file';  // Unique ID for each file input
+        input1.classList.add('form-control');
+        input1.required = true;
+        
+        // Append label and input field to the first column
+        col1.appendChild(label1);
+        col1.appendChild(input1);
+
+        // Create the second column for issue date
+        const col2 = document.createElement('div');
+        col2.classList.add('col-md-6');
+        
+        // Create label for issue date
+        const issueDateLabel = document.createElement('label');
+        issueDateLabel.classList.add('form-label');
+        issueDateLabel.textContent = 'Issue Date';
+        
+        // Create the issue date input field
+        const issueDateInput = document.createElement('input');
+        issueDateInput.type = 'date';
+        issueDateInput.name = docType + '_issue_date_' + docCounter[docType];  // Unique name for each issue date
+        issueDateInput.id = docType + '_issue_date_' + docCounter[docType];
+        issueDateInput.classList.add('form-control');
+        issueDateInput.required = true;
+
+        // Append label and input field to the second column
+        col2.appendChild(issueDateLabel);
+        col2.appendChild(issueDateInput);
+
+        // Create the third column for expiry date
+        const col3 = document.createElement('div');
+        col3.classList.add('col-md-6');
+        
+        // Create label for expiry date
+        const expiryDateLabel = document.createElement('label');
+        expiryDateLabel.classList.add('form-label');
+        expiryDateLabel.textContent = 'Expiry Date';
+        
+        // Create the expiry date input field
+        const expiryDateInput = document.createElement('input');
+        expiryDateInput.type = 'date';
+        expiryDateInput.name = docType + '_expiry_date_' + docCounter[docType];  // Unique name for each expiry date
+        expiryDateInput.id = docType + '_expiry_date_' + docCounter[docType];
+        expiryDateInput.classList.add('form-control');
+        expiryDateInput.required = true;
+
+        // Append label and input field to the third column
+        col3.appendChild(expiryDateLabel);
+        col3.appendChild(expiryDateInput);
+
+        // Create the fourth column for notes
+        const col4 = document.createElement('div');
+        col4.classList.add('col-md-6');
+        
+        // Create label for notes
+        const notesLabel = document.createElement('label');
+        notesLabel.classList.add('form-label');
+        notesLabel.textContent = 'Notes';
+        
+        // Create the notes input field
+        const notesInput = document.createElement('textarea');
+        notesInput.name = docType + '_notes_' + docCounter[docType];  // Unique name for each notes field
+        notesInput.id = docType + '_notes_' + docCounter[docType];
+        notesInput.classList.add('form-control');
+
+        // Append label and input field to the fourth column
+        col4.appendChild(notesLabel);
+        col4.appendChild(notesInput);
+
+        // Create the Cancel Button
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.classList.add('btn', 'btn-danger' ,'btn-sm', 'mt-2');
+        cancelBtn.textContent = 'Remove Field';
+        cancelBtn.addEventListener('click', function() {
+            div.remove();  // Remove the section
+            addedDocs.delete(docType);  // Remove the document type from the addedDocs set
+            docCounter[docType] = 0; // Reset the count for the document type
+        });
+
+        // Create a column for the Cancel button
+        const col5 = document.createElement('div');
+        col5.classList.add('col-md-12');
+        col5.appendChild(cancelBtn);
+
+        // Append all columns to the row
+        div.appendChild(col1);
+        div.appendChild(col2);
+        div.appendChild(col3);
+        div.appendChild(col4);
+        div.appendChild(col5);
+
+        // Append the row to the container
+        container.appendChild(div);
+    }
+
+    // Add an event listener to the dropdown
+    document.getElementById('id_docs').addEventListener('change', function () {
+        const selectedDocType = this.options[this.selectedIndex].text;
+
+        if (selectedDocType && !addedDocs.has(selectedDocType)) {
+            // If the document type is not already added, create a new field
+            addedDocs.add(selectedDocType);
+            createFileInputField(selectedDocType);
+        } else if (addedDocs.has(selectedDocType)) {
+            // If the document type is already added, create again
+            createFileInputField(selectedDocType);
+        }
+        this.value = ""
+    });
+</script>
+
+<!-- Employee id Generation -->
+<script>
+    function generateEmployeeId() {
+        const employmentTypeSelect = document.getElementById("id_employment_type");  
+        const employeeIdField = document.getElementById("id_employee_id");  
+        
+        const selectedEmploymentType = employmentTypeSelect.value;  
+        
+        if (!selectedEmploymentType) return;  
+
+        const prefix = selectedEmploymentType.charAt(0).toUpperCase();  
+        
+        const randomNumber = Math.floor(Math.random() * 900) + 100;
+        
+        employeeIdField.value = `${prefix}${randomNumber}`;
+    }
+
+    window.onload = generateEmployeeId;
+</script>
+
+
+<!-- Display image when selected portion -->
+<script type="text/javascript">
+    document.getElementById('profilePhoto').addEventListener('change', function (event) {
+        const fileInput = event.target;
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const previewImage = document.getElementById('imagePreview');
+        
+        // Check if a file was selected
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+
+            // Set up the FileReader to update the preview image when the file is loaded
+            reader.onload = function (e) {
+                previewImage.src = e.target.result; // Set the preview image source
+                previewContainer.style.display = 'block'; // Make the preview container visible
+            };
+
+            reader.readAsDataURL(fileInput.files[0]); // Read the image file as a data URL
+        } else {
+            // If no file is selected, hide the preview container
+            previewContainer.style.display = 'none';
+            previewImage.src = '#';
+        }
+    });
+</script>
+
+
+
+
+
+
+<!-- age calculator -->
+<script>
+document.getElementById('id_dob').addEventListener('change', function () {
+    const dobInput = this.value; // Get the raw input value
+    console.log("Raw DOB Input:", dobInput);
+
+    // Validate input format for YYYY-MM-DD
+    const datePattern = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
+    if (!datePattern.test(dobInput)) {
+        console.error("Invalid Format:", dobInput);
+        document.getElementById('id_age').value = "Invalid DOB";
+        return;
+    }
+
+    // Parse YYYY-MM-DD into a Date object
+    const [year, month, day] = dobInput.split('-').map(Number);
+    const dob = new Date(year, month - 1, day); // Month is zero-based in JavaScript
+    console.log("Parsed Date:", dob);
+
+    // Check if the parsed date is valid
+    if (isNaN(dob.getTime())) {
+        console.error("Invalid Date:", dob);
+        document.getElementById('id_age').value = "Invalid DOB";
+        return;
+    }
+
+    const today = new Date(); // Current date
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+
+    console.log("Calculated Age:", age);
+    document.getElementById('id_age').value = age >= 0 ? age : "Invalid DOB";
+});
+
+
+
+</script>
+
+
+
+
+<!-- latest entry in country date calculator -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const latestEntryField = document.getElementById('id_latest_entry_in_country');
+        const latestExitField = document.getElementById('id_latest_exit_from_country');
+        const daysField = document.getElementById('id_days_from_latest_entry');
+
+        // Function to calculate the number of days between two dates
+        function calculateDaysFromLatestEntry() {
+            const latestEntryDate = new Date(latestEntryField.value);
+            const latestExitDate = new Date(latestExitField.value);
+            const currentDate = new Date();
+
+            let daysDifference = 0;
+
+            if (latestExitDate > latestEntryDate) {
+                // If Latest Exit is greater than Latest Entry, calculate difference between Latest Entry and Latest Exit
+                daysDifference = Math.floor((latestExitDate - latestEntryDate) / (1000 * 3600 * 24));
+            } else {
+                // If Latest Exit is not greater, calculate difference between Current Date and Latest Exit
+                daysDifference = Math.floor((currentDate - latestExitDate) / (1000 * 3600 * 24));
+            }
+
+            // Display the calculated days with "Days" appended in the days field
+            daysField.value = daysDifference + " Days";
+        }
+
+        // Event listener to trigger the calculation when either the latest entry or latest exit is selected
+        latestEntryField.addEventListener('change', function() {
+            calculateDaysFromLatestEntry();
+        });
+
+        latestExitField.addEventListener('change', function() {
+            calculateDaysFromLatestEntry();
+        });
+
+        // Call the function once on page load if the dates are already filled
+        if (latestEntryField.value && latestExitField.value) {
+            calculateDaysFromLatestEntry();
+        }
+    });
+</script>
+
+
+<!-- wps profile MOL id -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const wpsProfileField = document.getElementById("wps_profile");
+        const molIdContainer = document.getElementById("mol_id_container");
+
+        function toggleMolId() {
+            if (wpsProfileField.value === "no") {
+                molIdContainer.style.display = "none";
+            } else {
+                molIdContainer.style.display = "block";
+            }
+        }
+        function validateWpsProfile() {
+            const value = wpsProfileField.value;
+            if (value.length > 14) {
+                wpsProfileField.value = value.slice(0, 14);
+            }
+        }
+
+        toggleMolId();
+
+        wpsProfileField.addEventListener("change", toggleMolId);
+        wpsProfileField.addEventListener("input", validateWpsProfile);
+    });
+</script>
+
+
+
+
+
+<script>
+    const skillsInput = document.getElementById("skills-input");
+    const tagsContainer = document.getElementById("tags-container");
+    const skillsHidden = document.getElementById("skills-hidden");
+
+    let skillsArray = skillsHidden.value ? skillsHidden.value.split(",") : []; 
+
+    function renderTags() {
+        tagsContainer.innerHTML = "";
+        skillsArray.forEach((skill, index) => {
+            const tag = document.createElement("div");
+            tag.className = "tag";
+            tag.innerHTML = `${skill} <span class="remove-tag" data-index="${index}">&times;</span>`;
+            tagsContainer.appendChild(tag);
+        });
+        updateHiddenInput();
+    }
+
+    skillsInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            const skill = skillsInput.value.trim();
+            if (skill && !skillsArray.includes(skill)) {
+                skillsArray.push(skill);
+                renderTags();
+                skillsInput.value = "";
+            }
+        }
+    });
+
+    tagsContainer.addEventListener("click", function (event) {
+        if (event.target.classList.contains("remove-tag")) {
+            const index = event.target.dataset.index;
+            skillsArray.splice(index, 1);
+            renderTags();
+        }
+    });
+
+    function updateHiddenInput() {
+        skillsHidden.value = skillsArray.join(",");
+    }
+
+    renderTags();
+</script>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        const inputField = document.getElementById('sap-certifications-input');
+        const tagsContainer = document.getElementById('tags-container2');
+        const hiddenField = document.getElementById('sap-certifications-hidden');
+        const separator = ', '; // Separator for the certifications
+
+        // Function to update the hidden field with comma-separated values
+        function updateHiddenField() {
+            const tags = Array.from(tagsContainer.getElementsByClassName('tag'));
+            const certifications = tags.map(tag => tag.textContent.trim()).join(separator);
+            hiddenField.value = certifications;
+        }
+
+        // Function to create a new tag element
+        function createTag(certification) {
+            const tag = document.createElement('span');
+            tag.classList.add('tag');
+            tag.textContent = certification;
+
+            // Add a remove button to each tag
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('remove-tag');
+            removeButton.textContent = '×'; // "×" for remove symbol
+
+            removeButton.addEventListener('click', function() {
+                tagsContainer.removeChild(tag);
+                updateHiddenField(); // Update the hidden field when tag is removed
+            });
+
+            tag.appendChild(removeButton);
+            return tag;
+        }
+
+        // Handle key press on the input field (Enter or Comma)
+        inputField.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' || event.key === ',') {
+                event.preventDefault(); // Prevent form submission or unwanted comma input
+
+                const certification = inputField.value.trim();
+
+                if (certification && !Array.from(tagsContainer.getElementsByClassName('tag'))
+                        .some(tag => tag.textContent.trim().toLowerCase() === certification.toLowerCase())) {
+                    // Create and add the tag only if it's not a duplicate
+                    const tag = createTag(certification);
+                    tagsContainer.appendChild(tag);
+                    inputField.value = ''; // Clear the input field
+                    updateHiddenField(); // Update the hidden field
+                }
+            }
+        });
+
+        // Handle pasting text into the input field
+        inputField.addEventListener('paste', function(event) {
+            const pastedData = event.clipboardData.getData('text');
+            const certifications = pastedData.split(/[,\n;]/).map(item => item.trim()).filter(item => item);
+
+            certifications.forEach(certification => {
+                if (certification && !Array.from(tagsContainer.getElementsByClassName('tag'))
+                        .some(tag => tag.textContent.trim().toLowerCase() === certification.toLowerCase())) {
+                    const tag = createTag(certification);
+                    tagsContainer.appendChild(tag);
+                }
+            });
+
+            inputField.value = ''; // Clear the input field after pasting
+            updateHiddenField(); // Update the hidden field
+        });
+    });
+</script>
+<script type="text/javascript">
+    // Restrict the input to 14 digits and only numeric values
+    function restrictMolIdLength(input) {
+        // Allow only numeric input and ensure the length doesn't exceed 14
+        input.value = input.value.replace(/\D/g, '').slice(0, 14);  // Remove non-numeric characters and limit to 14 digits
+    }
+</script>
+<style>
+    .tags-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 5px;
+        background: #f9f9f9;
+    }
+
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .tag {
+        background-color: #007bff;
+        color: white;
+        margin-bottom: 5px;
+        padding: 5px 10px;
+        border-radius: 10px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .tag .remove-tag {
+        margin-left: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 14px;
+    }
+
+    #skills-input {
+        flex: 1;
+        min-width: 100px;
+    }
+
+    #skills-input:focus {
+        outline: none;
+    }
+    .remove-tag {
+        background: transparent;
+        border: none;
+        color: white;
+        font-weight: bold;
+        margin-left: 5px;
+        cursor: pointer;
+    }
+</style>
+
+{%endblock%}
+

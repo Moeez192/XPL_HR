@@ -1,0 +1,121 @@
+{% extends 'templates/navs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+
+{% block content %}
+<div class="container-fluid mt-6">
+    <div class="scrollable-container">
+        <h2 class="text-center mb-4">Edit Timesheet for {{ project }} Project</h2>
+        <div class="row">
+            <div class="col-6">
+            <div>
+                <label><strong>Project Name:</strong></label>
+                <input type="text" class="form-control" value="{{ project }}" readonly>
+            </div>
+            <div>
+                <label><strong>Employee/Consultant Name:</strong></label>
+                <input type="text" class="form-control" value="{{ employee }}" readonly>
+            </div>
+            </div>
+        </div>
+        <br>
+
+       
+        <form method="post">
+            {% csrf_token %}
+            <table class="table table-hover" id="employeeTable">
+                <thead class="table-primary">
+                    <tr class="table-header">
+                        <th>Date</th>
+                        <th>Task Description</th>
+                        <th>Location</th>
+                        <th>Time In Hrs</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="timesheetBody" >
+                    {% for timesheet in timesheets %}
+                    <tr data-timesheet-id="{{ timesheet.id }}" {% if timesheet.location == "" or timesheet.location == null %} style="background-color: #ffdbdd;"{% endif %}>
+                        <!-- Date Display -->
+                        <td>
+                            <label>{{ timesheet.date|date:"Y-m-d" }}</label>
+                            <input type="hidden" name="date_{{ timesheet.date|date:"Y-m-d" }}" value="{{ timesheet.date|date:"Y-m-d" }}">
+                        </td>
+        
+                        <td>
+                            <textarea class="form-control " 
+                                      name="task_description_{{ timesheet.date|date:"Y-m-d" }}" 
+                                      placeholder="Task description" 
+                                      >{{ timesheet.task_description }}</textarea>
+                        </td>
+                        
+        
+                        <td >
+                            <select name="location_{{ timesheet.date|date:"Y-m-d" }}" class="form-control" 
+                            {% if timesheet.location == "" or timesheet.location == null %}disabled {% endif %}>
+                        {% if timesheet.location == "" or timesheet.location == null %}
+                            <option value="holiday" selected>Holiday</option>
+                        {% else %}
+                            <option value="onsite" {% if timesheet.location == "onsite" %}selected{% endif %}>Onsite</option>
+                            <option value="remote" {% if timesheet.location == "remote" %}selected{% endif %}>Remote</option>
+                        {% endif %}
+                    </select>
+                    
+
+
+                        </td>
+                        <td>
+                            <input type="text" 
+       name="time_in_hrs_{{ timesheet.date|date:'Y-m-d' }}" 
+       class="form-control" 
+       placeholder="HH:mm" 
+       value="{{ timesheet.time_in_hrs }}" 
+       pattern="([01]?[0-9]|2[0-3]):([0-5][0-9])" 
+       title="Please enter a valid time in HH:mm format (e.g., 12:30, 23:59)">
+
+                        </td>
+        
+                        <td>
+                            <textarea class="form-control " 
+                                      name="notes_{{ timesheet.date|date:"Y-m-d" }}" 
+                                      placeholder="Notes" 
+                                      >{{ timesheet.notes }}</textarea>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="text-end mt-3">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+        
+       
+        
+        </div>
+</div>
+</div>
+
+<script>// Select all time input fields that have names starting with 'time_in_hrs_'
+    document.querySelectorAll("textarea[name^='time_in_hrs_']").forEach(function(timeInput) {
+        timeInput.addEventListener("blur", function () {
+            const timeValue = this.value.trim();
+    
+            // Regex to validate the time in HH:mm format (HH from 00 to 23, mm from 00 to 59)
+            const timeRegex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
+    
+            if (!timeRegex.test(timeValue)) {
+                this.setCustomValidity("Please enter a valid time in HH:mm format.");
+            } else {
+                this.setCustomValidity("");  // Reset the validity if input is correct
+            }
+        });
+    });
+    
+</script>  
+{%endblock%}
+
+
+
