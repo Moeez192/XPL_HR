@@ -415,147 +415,33 @@ def employees(request):
 
 
 
+
+
+
+@login_required
+@no_cache
+def leave_config_dash(request):
+    leaves=Leaves.objects.all()
+    return render(request, 'templates/sub_templates/leave_config_dash.html', {
+        'forms' : leaves,
+    })
+
+
 @login_required
 @no_cache
 def leave_configuration(request):
-    leaves=Leaves.objects.all()
-    employee = Employee.objects.get(email=request.user.email)
-    leave_applications_to_approve = LeaveApplication.objects.none()
-    logged_in_user = LeaveApplication.objects.filter(employee=employee)
-
-    def get_hierarchy_for_role(employee, project=None):
-        # First, try to fetch project-specific hierarchy
-        if project:
-            hierarchy = Hierarchy.objects.filter(
-                project_name=project,
-                position=employee.position
-            ).order_by('order_number')
-            if hierarchy.exists():
-                return hierarchy
-
-        # Fall back to role-based hierarchy if no project-specific hierarchy exists
-        return Hierarchy.objects.filter(
-            position=employee.position,
-            project_name=None
-        ).order_by('order_number')
-
-    def advance_to_next_approver(leave_application, approvers):
-        # Identify the current approver in the list
-        current_index = approvers.index(leave_application.current_approver) if leave_application.current_approver in approvers else -1
-        next_index = current_index + 1
-
-        # Move to the next approver if available; otherwise, mark as approved
-        if next_index < len(approvers):
-            leave_application.current_approver = approvers[next_index]
-            leave_application.status = 'pending'
-        else:
-            leave_application.current_approver = None
-            leave_application.status = 'approved'
-        leave_application.save()
-
-    # Collect leave applications for approval
-    all_applications = LeaveApplication.objects.all()
-    for application in all_applications:
-        submitter = application.employee
-        project_assignment = Projects.objects.filter(team_members=submitter).first()
-        
-        # Fetch appropriate hierarchy
-        hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
-        approvers = [entry.approver for entry in hierarchy]
-
-        if employee in approvers:
-            leave_applications_to_approve |= LeaveApplication.objects.filter(id=application.id)
-
     leave_form = LeaveForm()
-    leave_application_form = LeaveApplicationForm(employee=employee)
-
     if request.method == 'POST':
         if 'leave_form' in request.POST:
                 leave_form = LeaveForm(request.POST)
                 if leave_form.is_valid():
                  leave_form.save()
                  messages.success(request, 'Leave information has been successfully submitted!')
-                return redirect('leave')
-        if 'leave_application_form' in request.POST:
-            leave_application_form = LeaveApplicationForm(request.POST, employee=employee)
-            if leave_application_form.is_valid():
-                # Check if the employee is assigned to any project
-               projects = Projects.objects.filter(team_members=employee)
-                
-               hierarchy = None
-               for project in projects:
-                    # First, try finding hierarchy specific to the role and project
-                    hierarchy = Hierarchy.objects.filter(position=employee.position, project_name=project).order_by('order_number')
-                    if hierarchy.exists():
-                        break
-                
-                # If no project-specific hierarchy exists, check for a general role-based hierarchy
-               if not hierarchy or not hierarchy.exists():
-                    hierarchy = Hierarchy.objects.filter(position=employee.position, project_name__isnull=True).order_by('order_number')
-
-               if hierarchy.exists():
-                    # Proceed with saving the leave application if a hierarchy exists
-                    leave_application = leave_application_form.save(commit=False)
-                    leave_application.employee = employee
-
-                    # Set the first approver in the hierarchy
-                    leave_application.current_approver = hierarchy.first().approver
-                    leave_application.status = 'pending'
-                    leave_application.save()
-                    
-                    messages.success(request, 'Leave application has been successfully submitted!')
-               else:
-                    # If no hierarchy is found, show an error message and don't save the application
-                    messages.error(request, "No approval hierarchy exists for your role and project. Please contact HR for assistance.")
-                
-               return redirect('leave')
-            else:
-                error_message = ""
-                non_field_errors = leave_application_form.errors.get('__all__', [])
-                for error in non_field_errors:
-                        error_message += f"{error}" 
-                for field, errors in leave_application_form.errors.items():
-                        if field != '__all__':
-                            for error in errors:
-                                error_message += f"<strong>{field}</strong>: {error}<br>"
-    
-                messages.error(request,error_message)
-                
-                leave_application_form = LeaveApplicationForm(employee=employee)
-
-        elif 'status' in request.POST:
-            leave_application_id = request.POST.get('leave_application_id')
-            leave_application = LeaveApplication.objects.get(id=leave_application_id)
-
-            # Fetch submitter and hierarchy for the application
-            submitter = leave_application.employee
-            project_assignment = Projects.objects.filter(team_members=submitter).first()
-            hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
-            approvers = [entry.approver for entry in hierarchy]
-
-            if leave_application.current_approver == employee:
-                # If status is 'rejected', update and save immediately
-                if request.POST.get('status') == 'rejected':
-                    leave_application.status = 'rejected'
-                    leave_application.remarks = request.POST.get('remarks', '')
-                    leave_application.current_approver = None
-                    leave_application.save()
-                    messages.success(request, 'Leave application rejected.')
-                    return redirect('leave')
-
-                # Otherwise, advance to the next approver or approve fully
-                advance_to_next_approver(leave_application, approvers)
-                messages.success(request, 'Leave application status updated.')
-                return redirect('leave')
-
+                return redirect('leave_config_dashboard')
+       
     return render(request, 'templates/sub_templates/configure_leaves.html', {
         'leave_form': leave_form,
-        'leave_application_form': leave_application_form,
-        'leave_applications': leave_applications_to_approve,
-        'logged_in_user': logged_in_user,
-        'all_leaves' : leaves,
     })
-
 
 @login_required
 @no_cache
@@ -851,7 +737,7 @@ def edit_leave(request, leave_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Leave type updated successfully!')
-            return redirect('leave')  # Redirect to the leave types list
+            return redirect('leave_config_dashboard')  # Redirect to the leave types list
     else:
         form = LeaveForm(instance=leave)
 
@@ -866,7 +752,7 @@ def delete_leave(request, leave_id):
     leave = get_object_or_404(Leaves, id=leave_id)
     leave.delete()
     messages.success(request, 'Leave Type deleted successfully!')
-    return redirect('leave')
+    return redirect('leave_config_dashboard')
     
 @login_required
 @no_cache
@@ -904,37 +790,7 @@ def projects(request):
 
 
 
-# @login_required
-# @no_cache
-# def add_project(request):
-#     supervisors = Employee.objects.all()
-#     employees = Employee.objects.all()
 
-#     if request.method == 'POST':
-#         form = ProjectForm(request.POST, request.FILES)
-
-#         if form.is_valid():
-#             project_instance = form.save(commit=False)
-
-#             client_manager = form.cleaned_data.get('client_manager')
-
-#             if client_manager:
-#                 project_instance.client_manager = client_manager  # This assigns the object, which is valid
-
-#             project_instance.save()
-
-#             messages.success(request, 'Project Added Successfully')
-#             return redirect('projects')
-#         else:
-#             print(form.errors)
-#     else:
-#         form = ProjectForm()
-
-#     return render(request, 'templates/sub_templates/project_configs.html', {
-#         'form': form,
-#         'supervisors': supervisors,
-#         'employees': employees
-#     })
 @login_required
 @no_cache
 def add_project(request):
@@ -945,22 +801,17 @@ def add_project(request):
         form = ProjectForm(request.POST, request.FILES)
 
         if form.is_valid():
-            # Save the project instance without committing it yet
             project_instance = form.save(commit=False)
 
-            # Assign client_manager if provided
             client_manager = form.cleaned_data.get('client_manager')
             if client_manager:
                 project_instance.client_manager = client_manager
 
-            # Save the project instance
             project_instance.save()
 
-            # Process team_members and billing_types
             team_members = request.POST.getlist('team_members[]')
             billing_types = request.POST.getlist('billing_types[]')
 
-            # Save team members in XPL_EmployeeBilling
             if len(team_members) == len(billing_types):
                 for employee_id, billing_type in zip(team_members, billing_types):
                     XPL_EmployeeBilling.objects.create(
@@ -969,17 +820,15 @@ def add_project(request):
                         billing_type=billing_type
                     )
 
-                # Now, save the team members in the project itself
-                # Update the project with the selected team members
-                project_instance.team_members.set(team_members)  # This links the employees to the project
+               
+                project_instance.team_members.set(team_members)  
 
             messages.success(request, 'Project Added Successfully')
             return redirect('projects')
         else:
-            # Ensure previously selected team members remain in the form
             team_members_ids = request.POST.getlist('team_members[]')
             form.fields['team_members'].initial = team_members_ids
-            print(form.errors)  # Debugging to display errors
+            print(form.errors)  
     else:
         form = ProjectForm()
 
@@ -987,7 +836,7 @@ def add_project(request):
         'form': form,
         'supervisors': supervisors,
         'employees': employees,
-        'XPL_EmployeeBilling': XPL_EmployeeBilling  # Pass the model to template to render choices
+        'XPL_EmployeeBilling': XPL_EmployeeBilling  
     })
 
 
@@ -998,34 +847,12 @@ def add_project(request):
 from django.http import JsonResponse
 def get_client_contacts(request, client_id):
     try:
-        # Assuming you pass the client_id to filter the client contacts
         client_contacts = XPL_ClientContact.objects.filter(client_id=client_id)
         contacts_data = [{'id': contact.id, 'full_name': contact.full_name} for contact in client_contacts]
         return JsonResponse({'contacts': contacts_data})
     except XPL_ClientContact.DoesNotExist:
         return JsonResponse({'contacts': []})
 
-# @login_required
-# @no_cache
-# def add_project(request):
-#     supervisors = Employee.objects.all()
-#     employees = Employee.objects.all()
-#     if request.method == 'POST':
-#         form = ProjectForm(request.POST , request.FILES)
-#         if form.is_valid():
-#             form.save()
-#             messages.success(request, 'Project Added Successfuly')
-#             return redirect('projects')
-#         else:
-#             print(form.errors)
-#     else:
-#         form = ProjectForm()
-#     return render(request,'templates/sub_templates/project_configs.html', {
-#         'form' : form,
-#         'projects' : projects,
-#         'supervisors': supervisors,
-#         'employees' : employees
-#         })
 
 
 
@@ -1150,74 +977,55 @@ def project_delete_view(request, pk):
     messages.success(request,"Project Deleted Successfully!")
     return redirect('projects')
 
-# @login_required
-# @no_cache
-# def project_edit_view(request, pk):
-#     project = get_object_or_404(Projects, pk=pk)
 
-#     if request.method == 'POST':
-#         form = ProjectForm(request.POST, request.FILES ,instance=project )
-#         if form.is_valid():
-#             form.save()
-#             messages.success(request,"Project Eddited Successfully!")
-#             return redirect('projects')  # Replace with your project list view name
-#     else:
-#         form = ProjectForm(instance=project)
-
-#     context = {
-#         'form': form,
-#         'project': project,
-#     }
-#     return render(request, 'templates/sub_templates/edit_project.html', context)  
 @login_required
 @no_cache
 def project_edit_view(request, pk):
     project = get_object_or_404(Projects, pk=pk)
-    
-    # Fetch existing billing information for the project
-    existing_billing_data = XPL_EmployeeBilling.objects.filter(project=project)
-    existing_team_members = [entry.employee.id for entry in existing_billing_data]
-    existing_billing_types = [entry.billing_type for entry in existing_billing_data]
+    existing_billing_data = [
+        (entry.employee.id, entry.billing_type) for entry in XPL_EmployeeBilling.objects.filter(project=project)
+    ]
+    client = project.client_name 
 
+    client_contacts = XPL_ClientContact.objects.filter(client=client)
+
+    current_client_manager = project.client_manager.id if project.client_manager else None
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
             project_instance = form.save()
-
-            # Get the selected team members and their corresponding billing types
+            client_manager_id = request.POST.get('client_manager')
+            if client_manager_id:
+                client_manager = XPL_ClientContact.objects.get(id=client_manager_id)
+                project_instance.client_manager = client_manager
+                project_instance.save()
             team_members = request.POST.getlist('team_members[]')
             billing_types = request.POST.getlist('billing_types[]')
 
-            # Save the team members and billing types in XPL_EmployeeBilling
             if len(team_members) == len(billing_types):
-                # First, delete existing billing records for the project
                 XPL_EmployeeBilling.objects.filter(project=project_instance).delete()
-
-                # Save new team members and their billing types
                 for employee_id, billing_type in zip(team_members, billing_types):
                     XPL_EmployeeBilling.objects.create(
                         project=project_instance,
                         employee_id=employee_id,
-                        billing_type=billing_type
+                        billing_type=billing_type,
                     )
-
-                # Save the team members in the project itself
                 project_instance.team_members.set(team_members)
-
             messages.success(request, "Project Edited Successfully!")
-            return redirect('projects')  # Replace with your project list view name
+            return redirect('projects')
     else:
         form = ProjectForm(instance=project)
 
     context = {
         'form': form,
         'project': project,
-        'existing_team_members': existing_team_members,
-        'existing_billing_types': existing_billing_types,
+        'existing_billing_data': existing_billing_data,
+        'employees': Employee.objects.all(),
+        'current_client_manager': current_client_manager,
+        'client_contacts': client_contacts,
+        'XPL_EmployeeBilling': XPL_EmployeeBilling,
     }
     return render(request, 'templates/sub_templates/edit_project.html', context)
-
-
 
 @login_required
 @no_cache 
@@ -1247,6 +1055,19 @@ def project_detail_view(request, pk):
 
     return render(request, 'templates/sub_templates/view_project.html', context)
 
+@login_required
+@no_cache
+def client_detail_view(request, client_id):
+    client = get_object_or_404(ClientInformation, id=client_id)
+    client_leaves = ClientLeave.objects.filter(client=client)
+    client_docs=ClientInformation.objects.filter(documents=client)
+    client_contacts = XPL_ClientContact.objects.filter(client=client)
+    return render(request, 'templates/sub_templates/view_client.html', {
+        'form': client,
+        'leave_forms': client_leaves,
+        'contact_forms': client_contacts,
+        'client_docs': client_docs,
+    })
 
 @login_required
 @no_cache 
@@ -2081,14 +1902,12 @@ def accept_timesheet(request, timesheet_group_id):
     project_name = timesheet.project
     submitting_employee = timesheet.employee
 
-    # Get the approver directly from the project
     timesheet_approver = timesheet.project.timesheet_approver
 
     if timesheet_approver != current_employee:
         messages.error(request, 'You are not authorized to approve this timesheet.')
         return redirect('timesheet')
 
-    # Determine the action (accept or reject) from the POST request
     action = request.POST.get('action')
 
     if action == 'accept':

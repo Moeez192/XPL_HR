@@ -30,15 +30,9 @@
                         {% render_field form.is_paid  class+="form-control" %}
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="autoApproval" class="form-label">Auto Approval?</label>
-                        {% render_field form.auto_approval class+="form-control" %}
-                    </div>
-                    
-                </div>
+                
         <button type="submit" class="btn btn-primary">Save Changes</button>
-        <a href="{% url 'leave' %}" class="btn btn-secondary">Cancel</a>
+        <a href="{% url 'leave_config_dashboard' %}" class="btn btn-secondary">Cancel</a>
 </form>
 
 

@@ -1,0 +1,245 @@
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} View Client {% endblock %}
+{% block content %}
+{% load widget_tweaks %}
+
+<h2 class="text-center mb-4">View Client  </h2>
+        
+<div class="card-body tabstyle-form-wizard-block p-0 pt-4">
+    <ul class="nav nav-tabs justify-content-between mb-3" id="pills-tab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" href="#step1" data-bs-toggle="tab" role="tab" aria-controls="step1" aria-expanded="true">Client Info</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#step2" data-bs-toggle="tab" role="tab" aria-expanded="false" aria-controls="step2" >Client Calendar</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#step3" data-bs-toggle="tab" role="tab" aria-controls="step3" aria-expanded="false">Client Contact</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#step4" data-bs-toggle="tab" role="tab" aria-controls="step4" aria-expanded="false">Address</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#step5" data-bs-toggle="tab" role="tab" aria-controls="step5">Other Details</a>
+        </li>
+    </ul>
+
+        <div class="tab-content" id="main_form">
+            <!-- Basic Information -->
+            <div class="tab-pane fade show active" role="tabpanel" id="step1">
+                <div class="row mb-3">
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Customer Type:</label>
+                        <div>
+                            {{ form.customer_type  }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="firstName" class="form-label">Customer Id:</label>
+                        {{ form.customer_id  }} 
+                    </div>
+                    <div class="col-md-6">
+                        <label for="lastName" class="form-label">Company Name:</label>
+                        {{ form.company_name  }} 
+                    </div>
+                    <div class="col-md-6">
+                        <label for="lastName" class="form-label">Industry:</label>
+                        {{ form.industry  }} 
+                    </div>
+                
+                    
+                    <div class="col-md-6">
+                        <label for="" class="form-label">Display Name:</label>
+                        {{ form.display_name  }} 
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="id_dob"  class="form-label">Email:</label>
+                        {{ form.email_address  }} 
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="id_age" class="form-label">Customer Number:</label>
+                        {{ form.customer_number  }} 
+                    </div>
+                    <div class="col-md-6">
+                        <label for="gender" class="form-label">Phone:</label>
+                        {{ form.phone }} 
+                    </div>
+                
+                  
+                </div>
+                
+            </div>
+
+            <div class="tab-pane fade " role="tabpanel" id="step2">
+                <div class="row mb-3">
+                    
+                    
+                    <div class="col-md-6">
+                        <label for="id_dob"  class="form-label">Year:</label>
+                        {{ form.year  }} 
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="id_age" class="form-label">Weekend:</label>
+                        {{ form.weekend  }}
+                    </div>
+                    <br>
+                    <!-- Leave Section -->
+            <div class="table-responsive" style="margin-top: 10px;">
+                <table class="table table-hover" id="leave-section">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col">Leave Type</th>
+                            <th scope="col">Leave Date</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave_form in leave_forms %}
+                            <tr class="leave-form" id="leave_{{ forloop.counter0 }}">
+                                <td>{{ leave_form.client_leave_type  }}</td>
+                                <td>{{ leave_form.client_leave_date  }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+           
+            
+                    
+                </div>
+                
+            </div>
+
+            <div class="tab-pane fade " role="tabpanel" id="step3">
+                <div class="row mb-3">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="contact-section">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th scope="col">Full Name</th>
+                                        <th scope="col" >Email</th>
+                                        <th scope="col" >Position</th>
+                                        <th scope="col">Contact Number</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for contact_form in contact_forms %}
+                                        <tr class="contact-form" id="contact_{{ forloop.counter0 }}">
+                                            <td>{{ contact_form.full_name  }}</td>
+                                            <td>{{ contact_form.client_email  }}</td>
+                                            <td>{{ contact_form.client_position  }}</td>
+                                            <td>{{ contact_form.client_contact_number  }}</td>
+                                           
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                
+                  
+                </div>
+                
+            </div>
+            
+            <!-- Billing Address -->
+            <div class="tab-pane fade" role="tabpanel" id="step4">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">Billing Address:</label>
+                        {{ form.billing_address }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">Country/Region:</label>
+                        {{ form.country_region }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label" >HQ Address:</label>
+                        {{ form.address }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">City:</label>
+                        {{ form.address }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">State:</label>
+                        {{ form.state }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label" >Zip Code:</label>
+                        {{ form.zip_code }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label">Phone Number:</label>
+                        {{ form.phone_number }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bonus" class="form-label" >Fax Number:</label>
+                        {{ form.fax_number }} 
+                    </div>
+
+
+                   
+                </div>
+            </div>
+
+
+            <!-- Other Details -->
+            <div class="tab-pane fade" role="tabpanel" id="step5">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="employeeId" class="form-label">Tax Treatment:</label>
+                        {{ form.tax_treatment }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="jobTitle" class="form-label">Place Of Supply:</label>
+                        {{ form.place_of_supply }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="workLocation" class="form-label">Currency:</label>
+                        {{ form.currency }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="department" class="form-label">Payment Terms:</label>
+                        {{ form.payment_terms }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="workLocation" class="form-label">Portal Language:</label>
+                        {{ form.portal_language }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="workLocation" class="form-label">Documents:</label>
+                        {% if form.documents %}
+                        <p>Current document: <a href="{{ form.documents.url }}" target="_blank">View Document</a></p>
+                    {% else %}
+                        <p>No document uploaded yet.</p>
+                    {% endif %}
+                    </div>
+                    
+                </div>
+                <div class="text-center">
+                    <a href="{% url 'clients' %}" class="btn btn-secondary">Cancel</a>
+
+                </div>
+            </div>
+            
+            
+            
+            </div>
+            
+
+                </div>
+            </div>
+            
+               
+</div>
+
+{%endblock%}
+

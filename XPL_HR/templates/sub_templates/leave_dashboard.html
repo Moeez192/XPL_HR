@@ -117,6 +117,8 @@
         <tr>
             <th scope="col">Leave Type</th>
             <th scope="col">Leave Days</th>
+            <th scope="col">Start Date</th>
+            <th scope="col">End Date</th>
             <th scope="col">Status</th>
             <th scope="col">Remarks</th>
         </tr>
@@ -126,6 +128,9 @@
         <tr>
             <td>{{ leaves.leave_type }}</td>
             <td>{{ leaves.leave_days }}</td>
+            <td>{{ leaves.start_date }}</td>
+            <td>{{ leaves.end_date }}</td>
+
             <td>
                 {% if leaves.status == "approved" %}
                                 <span class="badge bg-success">Approved</span>

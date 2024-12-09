@@ -273,41 +273,11 @@
                
 </div>
 <script>
-// document.getElementById('add-leave-form').addEventListener('click', function() {
-//     var leaveSection = document.getElementById('leave-section');
-    
-//     // Get the current number of forms
-//     var currentFormCount = leaveSection.querySelectorAll('.leave-form').length;
-
-//     // Create a new form dynamically (instead of cloning)
-//     var newFormHTML = `
-//         <div class="leave-form">
-//              <div class="row mb-3">
-//                  <div class="col-md-6">
-//                     <label for="id_leave_${currentFormCount}-client_leave_type">Type Of Leave:</label>
-//                     <input type="text" name="leave_${currentFormCount}-client_leave_type" class="form-control" id="id_leave_${currentFormCount}-client_leave_type">
-//                 </div>
-//                 <div class="col-md-6">
-//                 <label for="id_leave_${currentFormCount}-client_leave_date">Date:</label>
-//                 <input type="date" name="leave_${currentFormCount}-client_leave_date" class="form-control" id="id_leave_${currentFormCount}-client_leave_date">
-//              </div>
-//                 </div>
-//     `;
-//     leaveSection.insertAdjacentHTML('beforeend', newFormHTML);
-
-//     // Update the leave count hidden input
-//     var leaveCountField = document.getElementById('leave_count');
-//     if (leaveCountField) {
-//         leaveCountField.value = currentFormCount + 1; // Increment form count
-//     }
-// });
 document.getElementById('add-leave-form').addEventListener('click', function() {
     var leaveSection = document.querySelector('#leave-section tbody');
     
-    // Get the current number of forms
     var currentFormCount = leaveSection.querySelectorAll('.leave-form').length;
 
-    // Create a new row dynamically
     var newRowHTML = `
         <tr class="leave-form">
             <td>
@@ -325,30 +295,23 @@ document.getElementById('add-leave-form').addEventListener('click', function() {
     `;
     leaveSection.insertAdjacentHTML('beforeend', newRowHTML);
 
-    // Update the leave count hidden input
     var leaveCountField = document.getElementById('leave_count');
     if (leaveCountField) {
-        leaveCountField.value = currentFormCount + 1; // Increment form count
+        leaveCountField.value = currentFormCount + 1; 
     }
 });
 
-// Add event listener for removing a leave row
 document.getElementById('leave-section').addEventListener('click', function(event) {
     if (event.target.classList.contains('remove-leave-form')) {
         var row = event.target.closest('tr');
         if (row) row.remove();
 
-        // Update the leave count hidden input
         var leaveCountField = document.getElementById('leave_count');
         if (leaveCountField) {
             leaveCountField.value = document.querySelectorAll('.leave-form').length;
         }
     }
 });
-
-
-
-
 
 </script>
 
@@ -357,10 +320,8 @@ document.getElementById('leave-section').addEventListener('click', function(even
 document.getElementById('add-contact-form').addEventListener('click', function() {
     var contactSection = document.querySelector('#contact-section tbody');
     
-    // Get the current number of forms
     var currentFormCount = contactSection.querySelectorAll('.contact-form').length;
 
-    // Create a new row dynamically
     var newRowHTML = `
         <tr class="contact-form">
             <td>
@@ -384,20 +345,17 @@ document.getElementById('add-contact-form').addEventListener('click', function()
     `;
     contactSection.insertAdjacentHTML('beforeend', newRowHTML);
 
-    // Update the contact count hidden input
     var contactCountField = document.getElementById('contact_count');
     if (contactCountField) {
-        contactCountField.value = currentFormCount + 1; // Increment form count
+        contactCountField.value = currentFormCount + 1; 
     }
 });
 
-// Add event listener for removing a row
 document.getElementById('contact-section').addEventListener('click', function(event) {
     if (event.target.classList.contains('remove-contact-form')) {
         var row = event.target.closest('tr');
         if (row) row.remove();
 
-        // Update the contact count hidden input
         var contactCountField = document.getElementById('contact_count');
         if (contactCountField) {
             contactCountField.value = document.querySelectorAll('.contact-form').length;

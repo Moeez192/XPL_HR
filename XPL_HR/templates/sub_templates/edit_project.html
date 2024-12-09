@@ -1,12 +1,132 @@
 {% extends 'templates/navs.html' %}
-{% load widget_tweaks %}
-{% load static %}
-
+{%load static%}
+{% block title %} Projects {% endblock %}
 
 {% block content %}
+{% load widget_tweaks %}
+<style>
+    .container {
+        max-width: 900px;
+        margin-top: 50px;
+    }
+    .form-icon {
+        color: #6c757d;
+        margin-right: 8px;
+    }
+    .selected-employees {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .selected-employee {
+        background-color: #f0f0f0;
+        padding: 5px 10px;
+        border-radius: 4px;
+        position: relative;
+        padding-right: 30px;
+    }
+    .selected-employee .remove {
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+        color: red;
+    }
+    .selected-employee .remove:hover {
+        color: darkred;
+    }
+</style>
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function () {
+        let selectedTeamMembers = [];
+        let selectedProjectManager = null;
+
+        // Search functionality for employees
+        $('#employeeSearch').on('input', function () {
+            let searchValue = $(this).val().toLowerCase();
+            $('#employeeList .form-check').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(searchValue) > -1);
+            });
+        });
+
+        // Search functionality for managers
+        $('#managerSearch').on('input', function () {
+            let searchValue = $(this).val().toLowerCase();
+            $('#managerList .form-check').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(searchValue) > -1);
+            });
+        });
+
+        // Save selected project manager
+        $('#saveManager').on('click', function () {
+            let selectedManager = $('#managerList input[type="checkbox"]:checked').val();
+
+            // Remove any previously selected manager
+            selectedProjectManager = selectedManager;
+
+            $('#projectManagerList').html(`
+                <div class="selected-employee">
+                    ${selectedManager}
+                    <button type="button" class="remove-manager">&times;</button>
+                </div>
+            `);
+
+            // Close the modal
+            $('#projectManagerModal').modal('hide');
+            $('.modal-backdrop').remove();
+        });
+
+        // Remove selected project manager
+        $('#projectManagerList').on('click', '.remove-manager', function () {
+            selectedProjectManager = null;
+            $(this).parent().remove();
+            $('#managerList input[type="checkbox"]').prop('checked', false);
+        });
+
+        // Save selected team members
+        $('#saveEmployees').on('click', function () {
+            let selectedEmployees = $('#employeeList input[type="checkbox"]:checked').map(function () {
+                return { value: $(this).val(), label: $(this).next('label').text() };
+            }).get();
+
+            selectedTeamMembers = selectedEmployees;
+
+            $('#teamMemberList').html('');
+            selectedTeamMembers.forEach(function (member) {
+                $('#teamMemberList').append(`
+                    <div class="selected-employee">
+                        ${member.label}
+                        <button type="button" class="remove" data-value="${member.value}">&times;</button>
+                    </div>
+                `);
+            });
+
+            // Close the modal
+            $('#teamMemberModal').modal('hide');
+            $('.modal-backdrop').remove();
+        });
+
+        // Handle removal of selected team members
+        $('#teamMemberList').on('click', '.remove', function () {
+            let valueToRemove = $(this).data('value');
+            selectedTeamMembers = selectedTeamMembers.filter(member => member.value !== valueToRemove);
+            $(this).parent().remove();
+            $('#' + valueToRemove).prop('checked', false);
+        });
+    });
+</script>
+{% endblock %}
 
 <div class="containe-fluid mt-5">
-    <div class="scrollable-container">
         <!-- <div class="container"> -->
             <h2 class="text-center mb-4">Project Cofiguration</h2>
             <form method="POST" enctype="multipart/form-data">
@@ -15,113 +135,119 @@
                 <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="projectName" class="form-label">Project Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-project-diagram form-icon"></i></span>
+                    
                         {% render_field form.project_name placeholder="Project Name" class+="form-control" %}
-                    </div>
                 </div>
                 <!-- Client Name -->
                 <div class="col-md-6">
                     <label for="clientName" class="form-label">Client Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
-                        {% render_field form.client_name placeholder="Client Name" class+="form-control" %}
-                    </div>
+                    {% render_field form.client_name placeholder="Client Name" class="form-control" id="client_name" %}
                 </div>
                 <div class="col-md-6">
                     <label for="clientName" class="form-label">Client Manager</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
-                        {% render_field form.client_manager placeholder="Client Manager" class+="form-control" %}
-                    </div>
+                    <select id="client_manager" name="client_manager" class="form-control" required>
+                        <option value="">-- Select Client Manager --</option>
+                        {% for contact in client_contacts %}
+                            <option value="{{ contact.id }}" {% if contact.id == current_client_manager %}selected{% endif %}>
+                                {{  contact.full_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="col-md-6">
                     <label for="clientName" class="form-label">Project Sponser</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
+                    
                         {% render_field form.project_sponsor placeholder="Project Sponser" class+="form-control" %}
-                    </div>
                 </div>
                 <div class="col-md-6">
                     <label for="clientName" class="form-label">Timesheet Approver</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user-tie form-icon"></i></span>
+                   
                         {% render_field form.timesheet_approver class+="form-control" %}
-                    </div>
                 </div>
                 <div class="col-md-6">
                     <label for="projectDescription" class="form-label">Project Description</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                    
                         {% render_field form.project_description placeholder="Project Description" class+="form-control" %}
-                    </div>
                 </div>
                 <div class="col-md-6">
                     <label for="projectDescription" class="form-label">Project Budget</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                    
                         {% render_field form.project_budget placeholder="Project Budget" class+="form-control" %}
-                    </div>
                 </div>
                 <div class="col-md-6">
                     <label for="projectDescription" class="form-label">Project Location</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                    
                         {% render_field form.project_location placeholder="Project Location" class+="form-control" %}
-                    </div>
                 </div>
                 <div class="col-md-6">
                     <label for="projectDescription" class="form-label">Billing Method</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-info-circle form-icon"></i></span>
+                    
                         {% render_field form.billing_method  class+="form-control" %}
-                    </div>
                 </div>
                
                 <!-- Start Date -->
                 <div class="col-md-6">
                     <label for="startDate" class="form-label">Start Date</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-calendar-day form-icon"></i></span>
+                   
                         {% render_field form.start_date  class+="form-control" %}
-                    </div>
                 </div>
                 <div class="col-md-6">
                     <label for="projectDeadline" class="form-label">Deadline</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-calendar-alt form-icon"></i></span>
+                    
                         {% render_field form.deadline  class+="form-control" %}
-                    </div>
                 </div>
                 
     
                 <!-- Requirement File Upload -->
                 <div class="col-md-6">
                     <label for="requirementFile" class="form-label">Requirement File</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-file-upload form-icon"></i></span>
+                    
                         {% render_field form.requirement_file  class+="form-control" %}
-                    </div>
                 </div>
     
                 <!-- Project Manager with Modal Trigger -->
                 <div class="col-md-6">
                     <label for="projectManager" class="form-label">Project Manager</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user form-icon"></i></span>
+                   
                     {% render_field form.project_manager class+="form-control" %}
-                    </div>
                 </div>
-                
                 <!-- Team Members with Modal Trigger -->
-                    <div class="col-md-6">
-                        <label for="teamMembers" class="form-label">Team Members</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-users form-icon"></i></span>
-                            {% render_field form.team_members class+="form-control" %}
+                <div class="col-md-6">
+                    <br>
+                    <label for="projectManager" class="form-label">Team Members</label>
+
+                    <div id="team-members-section" class="scrollable-container">
+                        {% for member_id, billing_type in existing_billing_data %}
+                        <div class="team-member-row d-flex mb-2">
+                            <select name="team_members[]" class="form-select me-2" required>
+                                <option value="">Team Member</option>
+                                {% for employee in employees %}
+                                <option value="{{ employee.id }}" {% if employee.id == member_id %}selected{% endif %}>
+                                    {{ employee.first_name }} {{ employee.last_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <select name="billing_types[]" class="form-select" required>
+                                <option value="">Billing Type</option>
+                                {% for value, label in XPL_EmployeeBilling.BILLING_TYPE %}
+                                <option value="{{ value }}" {% if value == billing_type %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="btn btn-sm btn-danger remove-team-member-btn ms-2" onclick="removeTeamMember(this)">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
+                        {% endfor %}
                     </div>
                     
+                    <button type="button" id="add-team-member-btn" class="btn btn-sm btn-secondary mt-2">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                    
+                
     
                     <!-- Timesheet Required -->
                     <div class="col-md-6">
@@ -151,32 +277,109 @@
     
         
     
-        <!-- Modal for Team Members Selection -->
-        <div class="modal fade" id="teamMemberModal" tabindex="-1" aria-labelledby="teamMemberModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="teamMemberModalLabel">Select Team Members</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="text" id="memberSearch" class="form-control mb-3" placeholder="Search team members...">
-                        <div id="employeeList">
-                            {% for employee in form.team_members.field.queryset %}
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="{{ employee.pk }}" id="employee{{ employee.pk }}" {% if employee.pk in form.team_members.value %}checked{% endif %}>
-                                <label class="form-check-label" for="employee{{ employee.pk }}">{{ employee }}</label>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="saveEmployees">Save Selected</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+       
     </div>
 </div>
+
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+    var clientManagerSelect = document.getElementById('client_manager');
+
+    // Prefill with the current client manager
+    var currentManagerId = clientManagerSelect.getAttribute('data-current-manager');
+
+    if (currentManagerId) {
+        var options = clientManagerSelect.options;
+        for (var i = 0; i < options.length; i++) {
+            if (options[i].value === currentManagerId) {
+                options[i].selected = true;
+                break;
+            }
+        }
+    }
+});
+
+// Event listener for client name change
+document.getElementById('client_name').addEventListener('change', function() {
+    var clientId = this.value;
+    var clientManagerSelect = document.getElementById('client_manager');
+
+    // Clear dropdown
+    clientManagerSelect.innerHTML = '<option value="">-- Select Client Manager --</option>';
+
+    if (clientId) {
+        fetch(`/get-client-contacts/${clientId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.contacts && data.contacts.length > 0) {
+                    data.contacts.forEach(contact => {
+                        var option = document.createElement('option');
+                        option.value = contact.id;
+                        option.textContent = contact.full_name;
+                        clientManagerSelect.appendChild(option);
+                    });
+                } else {
+                    var option = document.createElement('option');
+                    option.textContent = 'No Client Managers Available';
+                    clientManagerSelect.appendChild(option);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching client contacts:', error);
+            });
+    }
+});
+
+    </script>
+
+    <script>
+     document.getElementById('add-team-member-btn').addEventListener('click', function () {
+    const teamMembersSection = document.getElementById('team-members-section');
+    const newTeamMemberRow = `
+        <div class="team-member-row d-flex mb-2">
+            <select name="team_members[]" class="form-select me-2" required>
+                <option value=""> Team Member</option>
+                {% for employee in employees %}
+                <option value="{{ employee.id }}">{{ employee.first_name }} {{ employee.last_name }}</option>
+                {% endfor %}
+            </select>
+             <select name="billing_types[]" class="form-select" required>
+                            <option value=""> Billing Type</option>
+                            {% for value, label in XPL_EmployeeBilling.BILLING_TYPE %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                                    <button type="button" class="btn btn-sm btn-danger remove-team-member-btn ms-2" onclick="removeTeamMember(this)"><i class="fas fa-trash"></i></button>
+        </div>
+    `;
+    teamMembersSection.insertAdjacentHTML('beforeend', newTeamMemberRow);
+});
+ // Remove Team Member Function
+ function removeTeamMember(button) {
+        // Find the parent row of the remove button and remove it
+        var row = button.closest('.team-member-row');
+        row.remove();
+    }
+
+
+
+    </script>
+<style>
+    /* Make the team members section scrollable */
+    .scrollable-container {
+        max-height: 120px; /* Adjust the height as needed */
+        overflow-y: auto;
+        /* border: 1px solid #ddd; Optional: Add border for better visibility */
+        padding: 10px;
+    }
+
+    /* Remove button styling */
+    .remove-team-member-btn {
+        background-color: red;
+        color: white;
+        font-size: 14px;
+        padding: 5px;
+    }
+</style>
 {%endblock%}
