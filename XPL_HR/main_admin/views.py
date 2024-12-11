@@ -27,7 +27,19 @@ from django.contrib.auth import authenticate, login
 from django.utils.decorators import decorator_from_middleware
 from django.middleware.cache import CacheMiddleware
 from datetime import datetime
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import EmployeeSerializer
 logger = logging.getLogger(__name__)
+
+
+
+class EmployeeList(APIView):
+    def get(self, request):
+        employees = Employee.objects.all()
+        serializer = EmployeeSerializer(employees, many=True)
+        return Response(serializer.data)
 
 class NoCacheMiddleware(CacheMiddleware):
     def __init__(self, get_response=None):
