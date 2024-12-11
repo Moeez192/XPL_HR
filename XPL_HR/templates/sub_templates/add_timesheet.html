@@ -115,7 +115,9 @@ document.getElementById('project_id').addEventListener('change', function () {
                                 const dateStr = currentDate.toISOString().split('T')[0];
                                 const dayOfWeek = currentDate.getDay(); 
 
-                                const isLeaveDay = leave_days.includes(dateStr);
+                                const leaveDay = leave_days.find(leave => leave.date === dateStr);
+                                const isLeaveDay = !!leaveDay; 
+
                                 const isWeekend = weekends.includes(currentDate.toLocaleString('en-US', { weekday: 'long' }));
 
                                 const row = document.createElement("tr");
@@ -144,7 +146,7 @@ document.getElementById('project_id').addEventListener('change', function () {
                                 taskCell.appendChild(taskInput);
                                 row.appendChild(taskCell);
 
-                                 const locationCell = document.createElement("td");
+                                const locationCell = document.createElement("td");
                                 const locationSelect = document.createElement("select");
                                 locationSelect.name = `location_${dateStr}`;
                                 locationSelect.className = "form-control";
@@ -157,17 +159,45 @@ document.getElementById('project_id').addEventListener('change', function () {
                                     locationSelect.appendChild(option);
                                 });
 
-                                if (isWeekend || isLeaveDay) {
-                                    locationSelect.value = "holiday";
-                                    locationSelect.disabled = true; 
-                                    const holidayOption = document.createElement("option");
-                                    holidayOption.value = "holiday";
-                                    holidayOption.textContent = "Holiday";
-                                    holidayOption.selected = true; 
-                                    locationSelect.appendChild(holidayOption); 
-                                } else {
-                                    locationSelect.disabled = false; 
-                                }
+                           
+                            // if (isLeaveDay || isWeekend) {
+                            //     const holidayOption = document.createElement("option");
+                            //     holidayOption.value = isLeaveDay ? leaveDay.name : "holiday";
+                            //     holidayOption.textContent = isLeaveDay ? leaveDay.name : "Holiday";
+                            //     holidayOption.selected = true;
+
+                            //     locationSelect.innerHTML = ""; 
+                            //     locationSelect.appendChild(holidayOption); 
+                            //     locationSelect.disabled = true; 
+                            // } else {
+                            //     locationSelect.disabled = false; 
+                            //     locationSelect.innerHTML = ""; 
+                            //     ["onsite", "remote"].forEach(loc => {
+                            //         const option = document.createElement("option");
+                            //         option.value = loc;
+                            //         option.textContent = loc.charAt(0).toUpperCase() + loc.slice(1);
+                            //         locationSelect.appendChild(option);
+                            //     });
+                            // }
+                            if (isLeaveDay || isWeekend) {
+                                locationSelect.disabled = true;
+
+                                // Create hidden input for the disabled location
+                                const hiddenLocationInput = document.createElement("input");
+                                hiddenLocationInput.type = "hidden";
+                                hiddenLocationInput.name = `location_${dateStr}`;
+                                hiddenLocationInput.value = isLeaveDay ? leaveDay.name : "Holiday";
+                                locationCell.appendChild(hiddenLocationInput);
+
+                                const holidayOption = document.createElement("option");
+                                holidayOption.value = hiddenLocationInput.value;
+                                holidayOption.textContent = hiddenLocationInput.value;
+                                holidayOption.selected = true;
+                                locationSelect.appendChild(holidayOption);
+                            } else {
+                                locationSelect.disabled = false;
+                            }
+
                                 locationCell.appendChild(locationSelect);
                                 row.appendChild(locationCell);
 
@@ -220,6 +250,11 @@ document.getElementById('project_id').addEventListener('change', function () {
                 console.error('Error fetching project details:', error);
             });
     }
+});
+document.querySelector('form').addEventListener('submit', function () {
+    document.querySelectorAll('select[disabled]').forEach(select => {
+        select.disabled = false;
+    });
 });
 
 </script>

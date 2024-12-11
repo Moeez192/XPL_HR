@@ -36,7 +36,13 @@
                 </thead>
                 <tbody id="timesheetBody" >
                     {% for timesheet in timesheets %}
-                    <tr data-timesheet-id="{{ timesheet.id }}" {% if timesheet.location == "" or timesheet.location == null %} style="background-color: #ffdbdd;"{% endif %}>
+                    <tr data-timesheet-id="{{ timesheet.id }}" {% if timesheet.location != "onsite" and timesheet.location != "remote" %}
+                    {% if timesheet.location != "Holiday" %} style="background-color: #d7f9df;"
+                        {% else %} 
+                        style="background-color: #ffdbdd;"
+                        {% endif %}
+                        {% endif %}>
+                    
                         <!-- Date Display -->
                         <td>
                             <label>{{ timesheet.date|date:"Y-m-d" }}</label>
@@ -53,9 +59,9 @@
         
                         <td >
                             <select name="location_{{ timesheet.date|date:"Y-m-d" }}" class="form-control" 
-                            {% if timesheet.location == "" or timesheet.location == null %}disabled {% endif %}>
-                        {% if timesheet.location == "" or timesheet.location == null %}
-                            <option value="holiday" selected>Holiday</option>
+                            {% if timesheet.location != "onsite" and timesheet.location != "remote" %} disabled {% endif %}>
+                        {% if timesheet.location != "onsite" and timesheet.location != 'remote' %}
+                            <option value="{{timesheet.location}}" selected>{{timesheet.location}}</option>
                         {% else %}
                             <option value="onsite" {% if timesheet.location == "onsite" %}selected{% endif %}>Onsite</option>
                             <option value="remote" {% if timesheet.location == "remote" %}selected{% endif %}>Remote</option>

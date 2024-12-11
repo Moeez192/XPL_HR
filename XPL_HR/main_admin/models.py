@@ -498,11 +498,11 @@ class Timesheet(models.Model):
     time_in_hrs = models.CharField(max_length=6, null=True, blank=True)
 
     location = models.CharField(
-        max_length=50,
-        choices=[('onsite', 'Onsite'),
-                ('remote', 'Remote'),
-                # ('holiday','Holiday'),
-                ]
+        max_length=250,
+        # choices=[('onsite', 'Onsite'),
+        #         ('remote', 'Remote'),
+        #         # ('holiday','Holiday'),
+        #         ]
     )
     STATUS_CHOICES = [
         ('pending', 'Pending'),
