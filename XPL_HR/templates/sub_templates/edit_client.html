@@ -12,13 +12,16 @@
             <a class="nav-link active" href="#step1" data-bs-toggle="tab" role="tab" aria-controls="step1" aria-expanded="true">Client Info</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#step2" data-bs-toggle="tab" role="tab" aria-controls="step2" aria-expanded="false">Client Contact</a>
+            <a class="nav-link" href="#step2" data-bs-toggle="tab" role="tab" aria-expanded="false" aria-controls="step2" >Client Calendar</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#step3" data-bs-toggle="tab" role="tab" aria-controls="step3" aria-expanded="false">Other Details</a>
+            <a class="nav-link" href="#step3" data-bs-toggle="tab" role="tab" aria-controls="step3" aria-expanded="false">Client Contact</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#step4" data-bs-toggle="tab" role="tab" aria-controls="step4">Address</a>
+            <a class="nav-link" href="#step4" data-bs-toggle="tab" role="tab" aria-controls="step4" aria-expanded="false">Address</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#step5" data-bs-toggle="tab" role="tab" aria-controls="step5">Other Details</a>
         </li>
     </ul>
 
@@ -80,58 +83,104 @@
                 
             </div>
 
-            <div class="tab-pane fade show active" role="tabpanel" id="step2">
+            <div class="tab-pane fade " role="tabpanel" id="step2">
                 <div class="row mb-3">
                     
                     
                     <div class="col-md-6">
-                        <label for="id_dob"  class="form-label">First Name</label>
-                        {% render_field  form.first_name placeholder="Email" class+="form-control" %}
+                        <label for="id_dob"  class="form-label">Year</label>
+                        {% render_field  form.year placeholder="select Year" class+="form-control" %}
                     </div>
                     
                     <div class="col-md-6">
-                        <label for="id_age" class="form-label">Last Name</label>
-                        {% render_field form.last_name placeholder="Customer Number" class+="form-control" %}
+                        <label for="id_age" class="form-label">Weekend</label>
+                        {% render_field form.weekend  class+="form-control" %}
                     </div>
-                    <div class="col-md-6">
-                        <label for="gender" class="form-label">Client Email</label>
-                        {% render_field form.client_email placeholder="Client Email" class+="form-control" %}
-                    </div>
+                    <br>
+                    <!-- Leave Section -->
+            <div class="table-responsive" style="margin-top: 10px;">
+                <table class="table table-hover" id="leave-section">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col">Leave Type</th>
+                            <th scope="col">Leave Date</th>
+                            <th scope="col">
+                                <!-- Button to Add More Leave Forms -->
+                                <button type="button" class="btn btn-sm btn-success" id="add-leave-form">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave_form in leave_forms %}
+                            <tr class="leave-form" id="leave_{{ forloop.counter0 }}">
+                                <td>{% render_field leave_form.client_leave_type class="form-control" %}</td>
+                                <td>{% render_field leave_form.client_leave_date class="form-control" %}</td>
+                                <td >
+                                    <button type="button" class="btn btn-sm btn-danger remove-leave-form">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Hidden Field to Track the Number of Leave Forms -->
+            <input type="hidden" id="leave_count" name="leave_count" value="{{ leave_forms|length }}">
+           
+            
+                    
+                </div>
+                
+            </div>
+
+            <div class="tab-pane fade " role="tabpanel" id="step3">
+                <div class="row mb-3">
+                    <!-- Contact Section -->
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="contact-section">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th scope="col">Full Name</th>
+                                        <th scope="col" >Email</th>
+                                        <th scope="col" >Position</th>
+                                        <th scope="col">Contact Number</th>
+                                        <th scope="col">
+                                            <!-- Button to Add More Contact Forms -->
+                                            <button type="button" class="btn btn-sm btn-success" id="add-contact-form">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for contact_form in contact_forms %}
+                                        <tr class="contact-form" id="contact_{{ forloop.counter0 }}">
+                                            <td>{% render_field contact_form.full_name class="form-control" %}</td>
+                                            <td>{% render_field contact_form.client_email class="form-control" %}</td>
+                                            <td>{% render_field contact_form.client_position class="form-control" %}</td>
+                                            <td>{% render_field contact_form.client_contact_number class="form-control" %}</td>
+                                            <td >
+                                                <button type="button" class="btn btn-sm btn-danger remove-contact-form">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Hidden Field to Track the Number of Contact Forms -->
+                        <input type="hidden" id="contact_count" name="contact_count" value="{{ contact_forms|length }}">
+
                 
                   
                 </div>
                 
-            </div>
-            
-            <!-- Other Details -->
-            <div class="tab-pane fade" role="tabpanel" id="step3">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="employeeId" class="form-label">Tax Treatment</label>
-                        {% render_field form.tax_treatment placeholder="Taxt Treatment" class+="form-control"  %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="jobTitle" class="form-label">Place Of Supply</label>
-                        {% render_field form.place_of_supply placeholder="Place Of Supply" class+="form-control" %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="workLocation" class="form-label">Currency</label>
-                        {% render_field form.currency placeholder="Currency" class+="form-control" %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="department" class="form-label">Payment Terms</label>
-                        {% render_field form.payment_terms placeholder="Payment Terms" class+="form-control" %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="workLocation" class="form-label">Portal Language</label>
-                        {% render_field form.portal_language placeholder="Portal Language" class+="form-control" %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="workLocation" class="form-label">Documents</label>
-                        {% render_field form.documents placeholder="Documents" class+="form-control" %}
-                    </div>
-                    
-                </div>
             </div>
             
             <!-- Billing Address -->
@@ -171,13 +220,48 @@
                     </div>
 
 
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <a href="{% url 'clients' %}" class="btn btn-secondary">Cancel</a>
-    
-                    </div>
+                   
                 </div>
             </div>
+
+
+            <!-- Other Details -->
+            <div class="tab-pane fade" role="tabpanel" id="step5">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="employeeId" class="form-label">Tax Treatment</label>
+                        {% render_field form.tax_treatment placeholder="Taxt Treatment" class+="form-control"  %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="jobTitle" class="form-label">Place Of Supply</label>
+                        {% render_field form.place_of_supply placeholder="Place Of Supply" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="workLocation" class="form-label">Currency</label>
+                        {% render_field form.currency placeholder="Currency" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="department" class="form-label">Payment Terms</label>
+                        {% render_field form.payment_terms placeholder="Payment Terms" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="workLocation" class="form-label">Portal Language</label>
+                        {% render_field form.portal_language placeholder="Portal Language" class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="workLocation" class="form-label">Documents</label>
+                        {% render_field form.documents placeholder="Documents" class+="form-control" %}
+                    </div>
+                    
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="{% url 'clients' %}" class="btn btn-secondary">Cancel</a>
+
+                </div>
+            </div>
+            
+            
             
             </div>
             
@@ -188,7 +272,98 @@
             
                
 </div>
+<script>
+document.getElementById('add-leave-form').addEventListener('click', function() {
+    var leaveSection = document.querySelector('#leave-section tbody');
+    
+    var currentFormCount = leaveSection.querySelectorAll('.leave-form').length;
+
+    var newRowHTML = `
+        <tr class="leave-form">
+            <td>
+                <input type="text" name="leave_${currentFormCount}-client_leave_type" class="form-control" id="id_leave_${currentFormCount}-client_leave_type">
+            </td>
+            <td>
+                <input type="date" name="leave_${currentFormCount}-client_leave_date" class="form-control" id="id_leave_${currentFormCount}-client_leave_date">
+            </td>
+            <td >
+                <button type="button" class="btn btn-sm btn-danger remove-leave-form">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+        </tr>
+    `;
+    leaveSection.insertAdjacentHTML('beforeend', newRowHTML);
+
+    var leaveCountField = document.getElementById('leave_count');
+    if (leaveCountField) {
+        leaveCountField.value = currentFormCount + 1; 
+    }
+});
+
+document.getElementById('leave-section').addEventListener('click', function(event) {
+    if (event.target.classList.contains('remove-leave-form')) {
+        var row = event.target.closest('tr');
+        if (row) row.remove();
+
+        var leaveCountField = document.getElementById('leave_count');
+        if (leaveCountField) {
+            leaveCountField.value = document.querySelectorAll('.leave-form').length;
+        }
+    }
+});
+
+</script>
 
 
+<script>
+document.getElementById('add-contact-form').addEventListener('click', function() {
+    var contactSection = document.querySelector('#contact-section tbody');
+    
+    var currentFormCount = contactSection.querySelectorAll('.contact-form').length;
 
+    var newRowHTML = `
+        <tr class="contact-form">
+            <td>
+                <input type="text" name="contact_${currentFormCount}-full_name" class="form-control" id="id_contact_${currentFormCount}-full_name">
+            </td>
+            <td>
+                <input type="email" name="contact_${currentFormCount}-client_email" class="form-control" id="id_contact_${currentFormCount}-client_email">
+            </td>
+            <td>
+                <input type="text" name="contact_${currentFormCount}-client_position" class="form-control" id="id_contact_${currentFormCount}-client_position">
+            </td>
+            <td>
+                <input type="text" name="contact_${currentFormCount}-client_contact_number" class="form-control" id="id_contact_${currentFormCount}-client_contact_number">
+            </td>
+            <td >
+                <button type="button" class="btn btn-sm btn-danger remove-contact-form">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+        </tr>
+    `;
+    contactSection.insertAdjacentHTML('beforeend', newRowHTML);
+
+    var contactCountField = document.getElementById('contact_count');
+    if (contactCountField) {
+        contactCountField.value = currentFormCount + 1; 
+    }
+});
+
+document.getElementById('contact-section').addEventListener('click', function(event) {
+    if (event.target.classList.contains('remove-contact-form')) {
+        var row = event.target.closest('tr');
+        if (row) row.remove();
+
+        var contactCountField = document.getElementById('contact_count');
+        if (contactCountField) {
+            contactCountField.value = document.querySelectorAll('.contact-form').length;
+        }
+    }
+});
+
+
+</script>
 {%endblock%}
+

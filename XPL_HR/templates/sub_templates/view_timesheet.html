@@ -23,19 +23,16 @@
 <table class="table table-container mt-4">
     <thead class="table-primary">
         <tr class="table-header">
-            <th>Project Name</th>
             <th>Date</th>
             <th>Task Description</th>
             <th>Location</th>
             <th>Time In Hrs</th>
             <th>Notes</th>
-            <th>Status</th>
         </tr>
     </thead>
     <tbody>
         {% for timesheet in timesheets %}
         <tr>
-            <td>{{ timesheet.project.project_name  }}</td>
             <td>{{ timesheet.date }}</td>
             <td>{{ timesheet.task_description }}</td>
             <td>
@@ -46,7 +43,6 @@
                 {% endif %}
             </td>            <td>{{ timesheet.time_in_hrs }}</td>
             <td>{{ timesheet.notes }}</td>
-            <td>{{ timesheet.status }}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -90,30 +86,25 @@
     document.getElementById('confirmReject').onclick = function() {
         var reason = document.getElementById('rejectReason').value;
 
-        // Check if the rejection reason is provided
         if (reason.trim() === '') {
             alert('Please provide a reason for rejection.');
-            return; // Exit if no reason is given
+            return; 
         }
 
-        // Create a hidden input for the reason
         var input = document.createElement('input');
         input.type = 'hidden';
-        input.name = 'action';  // Ensure this name matches the view's expectation
-        input.value = 'reject';  // Set the action to 'reject'
+        input.name = 'action';  
+        input.value = 'reject';  
 
-        // Create another hidden input for the reason
         var reasonInput = document.createElement('input');
         reasonInput.type = 'hidden';
-        reasonInput.name = 'reject_reason';  // Ensure this name matches the view's expectation
+        reasonInput.name = 'reject_reason';  
         reasonInput.value = reason;
 
-        // Append both inputs to the form
         var form = document.getElementById('timesheet-form');
         form.appendChild(input);
         form.appendChild(reasonInput);
 
-        // Submit the form
         form.submit();
     };
 </script>

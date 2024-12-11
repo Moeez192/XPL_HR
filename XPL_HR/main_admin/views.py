@@ -926,29 +926,280 @@ def add_client(request):
 
 
 
+
+
+# @login_required
+# @no_cache
+# def edit_client(request, client_id):
+#     client = get_object_or_404(ClientInformation, id=client_id)
+
+#     if request.method == 'POST':
+#         print(request.POST)
+#         client_form = ClientInformationForm(request.POST, request.FILES, instance=client)
+        
+#         leave_forms = []
+#         leave_count = int(request.POST.get('leave_count', 0))  
+#         print(leave_count)
+
+#         for i in range(leave_count):
+#             leave_instance = ClientLeave.objects.filter(client=client).first() if i < len(ClientLeave.objects.filter(client=client)) else None
+#             leave_form = ClientLeaveForm(request.POST, prefix=f'leave_{i}', instance=leave_instance)
+#             leave_forms.append(leave_form)
+
+#         contact_forms = []
+#         contact_count = int(request.POST.get('contact_count', 0))  
+#         print(contact_count)
+
+#         for i in range(contact_count):
+#             contact_instance = XPL_ClientContact.objects.filter(client=client).first() if i < len(XPL_ClientContact.objects.filter(client=client)) else None
+#             contact_form = XPL_ClientContactForm(request.POST, prefix=f'contact_{i}', instance=contact_instance)
+#             contact_forms.append(contact_form)
+
+#         if (
+#             client_form.is_valid()
+#             and all(leave_form.is_valid() for leave_form in leave_forms)
+#             and all(contact_form.is_valid() for contact_form in contact_forms)
+#         ):
+#             client = client_form.save()
+
+#             for leave_form in leave_forms:
+#                 leave = leave_form.save(commit=False)
+#                 leave.client = client  
+#                 leave.save()
+
+#             for contact_form in contact_forms:
+#                 contact = contact_form.save(commit=False)
+#                 contact.client = client 
+#                 contact.save()
+
+#             messages.success(request, 'Client, Leave Types, and Contacts Updated Successfully')
+#             return redirect('clients')
+#         else:
+#             print(client_form.errors)
+#             for leave_form in leave_forms:
+#                 print(leave_form.errors)
+#             for contact_form in contact_forms:
+#                 print(contact_form.errors)
+#     else:
+#         client_form = ClientInformationForm(instance=client)
+#         leave_forms = [
+#             ClientLeaveForm(prefix=f'leave_{i}', instance=leave)
+#             for i, leave in enumerate(ClientLeave.objects.filter(client=client))
+#         ]
+#         contact_forms = [
+#             XPL_ClientContactForm(prefix=f'contact_{i}', instance=contact)
+#             for i, contact in enumerate(XPL_ClientContact.objects.filter(client=client))
+#         ]
+
+#     return render(request, 'templates/sub_templates/edit_client.html', {
+#         'form': client_form,
+#         'leave_forms': leave_forms,
+#         'contact_forms': contact_forms,
+#         'client': client,
+#     })
+
+# @login_required
+# @no_cache
+# def edit_client(request, client_id):
+#     client = get_object_or_404(ClientInformation, id=client_id)
+
+#     if request.method == 'POST':
+#         print(request.POST)
+#         client_form = ClientInformationForm(request.POST, request.FILES, instance=client)
+        
+#         # Dynamically collect leave forms
+#         leave_forms = []
+#         leave_count = int(request.POST.get('leave_count', 0))  # Number of leave forms
+#         existing_leaves = list(ClientLeave.objects.filter(client=client))  # Fetch existing leaves
+
+#         for i in range(leave_count):
+#             if i < len(existing_leaves):
+#                 # Use existing instance for updates
+#                 leave_instance = existing_leaves[i]
+#             else:
+#                 # No instance means a new leave is being added
+#                 leave_instance = None
+
+#             leave_form = ClientLeaveForm(request.POST, prefix=f'leave_{i}', instance=leave_instance)
+#             leave_forms.append(leave_form)
+
+#         # Dynamically collect client contact forms
+#         contact_forms = []
+#         contact_count = int(request.POST.get('contact_count', 0))  # Number of contact forms
+#         existing_contacts = list(XPL_ClientContact.objects.filter(client=client))  # Fetch existing contacts
+
+#         for i in range(contact_count):
+#             if i < len(existing_contacts):
+#                 # Use existing instance for updates
+#                 contact_instance = existing_contacts[i]
+#             else:
+#                 # No instance means a new contact is being added
+#                 contact_instance = None
+
+#             contact_form = XPL_ClientContactForm(request.POST, prefix=f'contact_{i}', instance=contact_instance)
+#             contact_forms.append(contact_form)
+
+#         # Check if client form, all leave forms, and all contact forms are valid
+#         if (
+#             client_form.is_valid()
+#             and all(leave_form.is_valid() for leave_form in leave_forms)
+#             and all(contact_form.is_valid() for contact_form in contact_forms)
+#         ):
+#             # Save the client
+#             client = client_form.save()
+
+#             # Save each leave form and link it to the client
+#             for leave_form in leave_forms:
+#                 leave = leave_form.save(commit=False)
+#                 leave.client = client  # Associate the leave form with the client
+#                 leave.save()
+
+#             # Save each contact form and link it to the client
+#             for contact_form in contact_forms:
+#                 contact = contact_form.save(commit=False)
+#                 contact.client = client  # Associate the contact form with the client
+#                 contact.save()
+
+#             messages.success(request, 'Client, Leave Types, and Contacts Updated Successfully')
+#             return redirect('clients')
+#         else:
+#             # Debugging errors to check what's going wrong
+#             print(client_form.errors)
+#             for leave_form in leave_forms:
+#                 print(leave_form.errors)
+#             for contact_form in contact_forms:
+#                 print(contact_form.errors)
+#     else:
+#         # Pre-fill forms with existing client, leave, and contact data
+#         client_form = ClientInformationForm(instance=client)
+#         leave_forms = [
+#             ClientLeaveForm(prefix=f'leave_{i}', instance=leave)
+#             for i, leave in enumerate(ClientLeave.objects.filter(client=client))
+#         ]
+#         contact_forms = [
+#             XPL_ClientContactForm(prefix=f'contact_{i}', instance=contact)
+#             for i, contact in enumerate(XPL_ClientContact.objects.filter(client=client))
+#         ]
+
+#     return render(request, 'templates/sub_templates/edit_client.html', {
+#         'form': client_form,
+#         'leave_forms': leave_forms,
+#         'contact_forms': contact_forms,
+#         'client': client,
+#     })
+
 @login_required
 @no_cache
 def edit_client(request, client_id):
-    # Retrieve the client object or return 404 if not found
     client = get_object_or_404(ClientInformation, id=client_id)
 
     if request.method == 'POST':
-        # Pass the instance to the form for updating
-        form = ClientInformationForm(request.POST, request.FILES, instance=client)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Client updated successfully!')
+        print(request.POST)
+        client_form = ClientInformationForm(request.POST, request.FILES, instance=client)
+        
+        # Dynamically collect leave forms
+        leave_forms = []
+        leave_count = int(request.POST.get('leave_count', 0))  # Number of leave forms
+        existing_leaves = list(ClientLeave.objects.filter(client=client))  # Fetch existing leaves
+
+        leave_ids_in_form = []  # To track leave IDs present in the form
+
+        for i in range(leave_count):
+            leave_id = request.POST.get(f'leave_{i}-id')
+            if leave_id:
+                leave_ids_in_form.append(int(leave_id))
+
+            if leave_id:
+                # Use existing instance for updates
+                leave_instance = ClientLeave.objects.filter(id=leave_id, client=client).first()
+            else:
+                # New leave being added
+                leave_instance = None
+
+            leave_form = ClientLeaveForm(request.POST, prefix=f'leave_{i}', instance=leave_instance)
+            leave_forms.append(leave_form)
+
+        # Dynamically collect client contact forms
+        contact_forms = []
+        contact_count = int(request.POST.get('contact_count', 0))  # Number of contact forms
+        existing_contacts = list(XPL_ClientContact.objects.filter(client=client))  # Fetch existing contacts
+
+        contact_ids_in_form = []  # To track contact IDs present in the form
+
+        for i in range(contact_count):
+            contact_id = request.POST.get(f'contact_{i}-id')
+            if contact_id:
+                contact_ids_in_form.append(int(contact_id))
+
+            if contact_id:
+                # Use existing instance for updates
+                contact_instance = XPL_ClientContact.objects.filter(id=contact_id, client=client).first()
+            else:
+                # New contact being added
+                contact_instance = None
+
+            contact_form = XPL_ClientContactForm(request.POST, prefix=f'contact_{i}', instance=contact_instance)
+            contact_forms.append(contact_form)
+
+        # Check if client form, all leave forms, and all contact forms are valid
+        if (
+            client_form.is_valid()
+            and all(leave_form.is_valid() for leave_form in leave_forms)
+            and all(contact_form.is_valid() for contact_form in contact_forms)
+        ):
+            # Save the client
+            client = client_form.save()
+
+            # Save each leave form and link it to the client
+            for leave_form in leave_forms:
+                leave = leave_form.save(commit=False)
+                leave.client = client  # Associate the leave form with the client
+                leave.save()
+
+            # Delete leaves not present in the form
+            for leave in existing_leaves:
+                if leave.id not in leave_ids_in_form:
+                    leave.delete()
+
+            # Save each contact form and link it to the client
+            for contact_form in contact_forms:
+                contact = contact_form.save(commit=False)
+                contact.client = client  # Associate the contact form with the client
+                contact.save()
+
+            # Delete contacts not present in the form
+            for contact in existing_contacts:
+                if contact.id not in contact_ids_in_form:
+                    contact.delete()
+
+            messages.success(request, 'Client, Leave Types, and Contacts Updated Successfully')
             return redirect('clients')
         else:
-            print(form.errors)  # Debugging purposes
+            # Debugging errors to check what's going wrong
+            print(client_form.errors)
+            for leave_form in leave_forms:
+                print(leave_form.errors)
+            for contact_form in contact_forms:
+                print(contact_form.errors)
     else:
-        # Pre-fill the form with the client's data
-        form = ClientInformationForm(instance=client)
+        # Pre-fill forms with existing client, leave, and contact data
+        client_form = ClientInformationForm(instance=client)
+        leave_forms = [
+            ClientLeaveForm(prefix=f'leave_{i}', instance=leave)
+            for i, leave in enumerate(ClientLeave.objects.filter(client=client))
+        ]
+        contact_forms = [
+            XPL_ClientContactForm(prefix=f'contact_{i}', instance=contact)
+            for i, contact in enumerate(XPL_ClientContact.objects.filter(client=client))
+        ]
 
     return render(request, 'templates/sub_templates/edit_client.html', {
-        'form': form,
+        'form': client_form,
+        'leave_forms': leave_forms,
+        'contact_forms': contact_forms,
         'client': client,
     })
+
 
 
 @login_required
