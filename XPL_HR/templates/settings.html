@@ -1,41 +1,81 @@
 {% extends 'templates/navs.html' %}
 {%load static%}
-{% block title %} Leave {% endblock %}
+{% block title %} Leave Policy {% endblock %}
 
 {% block content %}
 
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
+<style>
+    .alert {
+        position: relative;
+    }
+
+    .close {
+        transition: color 0.2s;
+    }
+
+    .close:hover {
+        color: #ff2a00; /* Color on hover */
+    }
+
+    .alert-info {
+        border-color: #b8daff; /* Optional: customize border color */
+    }
+
+    .alert-info p {
+        margin-bottom: 0; /* Remove bottom margin from the paragraph */
+    }
+    .normal {
+    color: black;
+    font-weight: normal;
+}
+
+.approaching {
+    color: orange;
+    font-weight: bold;
+}
+
+.deadline-today {
+    color: red;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.missed {
+    color: darkred;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+</style>
+<!-- <div class="containe-fluid mt-5" > -->
+    <!-- Dashboard Cards -->
+    
+     {% if messages %}
+    <!-- <div class="container mt-3"> -->
+        {% for message in messages %}
+            <div class="alert alert-dismissible fade show 
+                {% if message.tags == 'success' %}alert-info{% endif %} 
+                {% if message.tags == 'error' %}alert-danger{% endif %} 
+                mt-2" role="alert">
+                <p>{{ message }}</p>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="border: none; background: none; color: #007bff; font-size: 1.5rem; position: absolute; top: 10px; right: 15px; cursor: pointer;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    <!-- </div> -->
+{% endif %}
 
 
-<header class="nav-bar">
-    <div class="nav-bar-left">
-        <nav class="nav-bar-nav">
-            <a href="#" class="navbar-link active" data-tab="option1">Set Heirarchy</a>
-            <a href="#" class="navbar-link" data-tab="option2">Leave Policy</a>
-            <a href="#" class="navbar-link" data-tab="option3">Document Types</a>
-            <a href="#" class="navbar-link" data-tab="option4">Billing Types</a>
-        </nav>
-    </div>
-</header>
-<div class="header-image"> </div>
 
-
-<div class="container-fluid active" id="option1-section" style="display: block;" >
-    {% include "templates/sub_templates/set_heirarchy.html" %}
-
-</div>
-<div class="container-fluid" id="option2-section" style="display: none;">
     {% include "templates/sub_templates/leave_policy.html" %}
 </div>
-<div class="container-fluid" id="option3-section" style="display: none;">
-    {% include "templates/sub_templates/doc_types.html" %}
-</div>
 
-<div class="container-fluid" id="option4-section" style="display: none;">
-    {% include "templates/sub_templates/billing_types.html" %}
-</div>
-
+\
 
 
 {%endblock%}

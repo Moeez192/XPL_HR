@@ -102,10 +102,11 @@ class ProjectForm(forms.ModelForm):
         required=False  
     )
      billing_type = forms.ChoiceField(
-        choices=XPL_EmployeeBilling.BILLING_TYPE,  # Referencing the model's choices
+        choices=[],  # Referencing the model's choices
         widget=forms.Select(attrs={'class': 'form-control'}),
         required=False
     )
+
      project_description = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}))
      
      class Meta:
@@ -115,7 +116,12 @@ class ProjectForm(forms.ModelForm):
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'deadline': forms.DateInput(attrs={'type': 'date'}),
         }
-    
+     def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Populate choices dynamically from the BillingType table
+        self.fields['billing_type'].choices = [
+            (bt.id, bt.billing_type) for bt in BillingType.objects.all()
+        ]
 
        
 
@@ -353,7 +359,7 @@ class XPL_ClientContactForm(forms.ModelForm):
 class XPL_EmployeeBillingForm(forms.ModelForm):
     class Meta:
         model = XPL_EmployeeBilling
-        fields = ['employee', 'billing_type']
+        fields = '__all__'
         widgets = {
             'employee': forms.Select(attrs={'class': 'form-select'}),
             'billing_type': forms.Select(attrs={'class': 'form-select'}),

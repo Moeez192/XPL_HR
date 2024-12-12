@@ -75,6 +75,14 @@ urlpatterns = [
     path('leave_config_dashboard/', views.leave_config_dash, name='leave_config_dashboard'),
     path('view_client/<int:client_id>/', views.client_detail_view, name='view_client'),
     path('api/employees/', views.EmployeeList.as_view(), name='employee-list'),
+    path('add_leave_policy/', views.add_leave_policy, name='add_leave_policy'),
+    path('billing_types/', views.billingtypes, name='billing_types'),
+    path('add_billing_types/', views.add_billing_types, name='add_billing_types'),
+    path('document_types/', views.doc_types, name='document_types'),
+    path('add_document_types/', views.add_doc_types, name='add_document_types'),
+    path('delete_doc_types/<int:id>/', views.delete_doc_type, name='delete_doc_types'),
+    path('delete_billing_types/<int:id>/', views.delete_billing_type, name='delete_billing_types'),
+    path('delete_leave_policy/<int:id>/', views.delete_leave_policy, name='delete_leave_policy'),
 
 
 

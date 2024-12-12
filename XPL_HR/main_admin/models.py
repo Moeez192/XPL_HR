@@ -451,7 +451,7 @@ class XPL_EmployeeBilling(models.Model):
         ('A1', 'A1'),
         ('C1', 'C1'),
     ]
-    billing_type = models.CharField(max_length=50, choices=BILLING_TYPE)
+    billing_type = models.CharField(max_length=50, default="none")
 
 class LeaveApplication(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)  # Link to the Employee model
@@ -495,6 +495,7 @@ class Timesheet(models.Model):
     task_description = models.TextField(blank=True, null=True)
     current_approver = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name='current_approvers')
     reject_reason = models.TextField(blank=True, null=True)
+    accept_reason = models.TextField(blank=True, null=True)
     time_in_hrs = models.CharField(max_length=6, null=True, blank=True)
 
     location = models.CharField(
@@ -511,8 +512,6 @@ class Timesheet(models.Model):
         ('rejected', 'Rejected')
     ]
     notes = models.TextField(blank=True, null=True)
-    supervisor_approved = models.BooleanField(default=False)
-    is_editable = models.BooleanField(default=True)  
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
     timesheet_group_id = models.CharField(max_length=100, blank=True, null=True)  

@@ -808,6 +808,7 @@ def projects(request):
 def add_project(request):
     supervisors = Employee.objects.all()
     employees = Employee.objects.all()
+    billing_types = BillingType.objects.all()  
 
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES)
@@ -848,6 +849,7 @@ def add_project(request):
         'form': form,
         'supervisors': supervisors,
         'employees': employees,
+        'billing_types': billing_types,
         'XPL_EmployeeBilling': XPL_EmployeeBilling  
     })
 
@@ -1085,6 +1087,8 @@ def project_delete_view(request, pk):
 @no_cache
 def project_edit_view(request, pk):
     project = get_object_or_404(Projects, pk=pk)
+    billing_types = BillingType.objects.all()  
+
     existing_billing_data = [
         (entry.employee.id, entry.billing_type) for entry in XPL_EmployeeBilling.objects.filter(project=project)
     ]
@@ -1126,6 +1130,7 @@ def project_edit_view(request, pk):
         'employees': Employee.objects.all(),
         'current_client_manager': current_client_manager,
         'client_contacts': client_contacts,
+        'billing_types': billing_types,
         'XPL_EmployeeBilling': XPL_EmployeeBilling,
     }
     return render(request, 'templates/sub_templates/edit_project.html', context)
@@ -1616,7 +1621,7 @@ def add_timesheet(request):
                             'notes': notes,
                             'time_in_hrs': time_in_hrs,
                             'status': 'saved',
-                            'is_editable': True,
+                            # 'is_editable': True,
                             'timesheet_group_id': timesheet_group_id,
                         }
                     )
@@ -1625,7 +1630,7 @@ def add_timesheet(request):
                         timesheet.location = location
                         timesheet.time_in_hrs = time_in_hrs
                         timesheet.notes = notes
-                        timesheet.is_editable = True
+                        # timesheet.is_editable = True
                         timesheet.status = 'saved'
                         timesheet.timesheet_group_id = timesheet_group_id
                         timesheet.save()
@@ -1654,11 +1659,13 @@ def add_timesheet(request):
 
 
 
+
+@login_required
 def get_project_details(request, project_id):
     try:
         project = Projects.objects.get(id=project_id)
-        client = project.client_name  
-        
+        client = project.client_name
+
         client_leaves = ClientLeave.objects.filter(client=client).values('client_leave_date', 'client_leave_type')
         leave_days = [
             {
@@ -1668,14 +1675,28 @@ def get_project_details(request, project_id):
             for leave in client_leaves
         ]
 
-        
+        employee = request.user  
+        employee_leaves = LeaveApplication.objects.filter(employee=employee)
+
+        employee_leave_days = []
+        for leave in employee_leaves:
+            current_date = leave.start_date
+            while current_date <= leave.end_date:
+                employee_leave_days.append({
+                    'date': current_date,
+                    'name': leave.leave_type.leave_name 
+                })
+                current_date += timedelta(days=1)
+
         client_weekends = client.weekend.split('/')  
 
         return JsonResponse({
             'status': 'success',
             'leave_days': leave_days,  
+            'employee_leaves': employee_leave_days, 
             'weekends': client_weekends,
         })
+
     except Projects.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Project not found.'}, status=404)
 
@@ -1688,7 +1709,7 @@ def timesheet(request):
     all_ranges = DateRange.objects.all()
     timesheets = (
         Timesheet.objects.filter(employee=employee)
-        .values('timesheet_group_id', 'project__project_name', 'status', 'reject_reason')
+        .values('timesheet_group_id', 'project__project_name', 'status', 'reject_reason','accept_reason')
         .annotate(start_date=Min('date'), end_date=Max('date'))
         .order_by('-start_date')
     )
@@ -2021,8 +2042,12 @@ def accept_timesheet(request, timesheet_group_id):
     action = request.POST.get('action')
 
     if action == 'accept':
-        timesheet_group.update(status='accepted', current_approver_id=None)
-        messages.success(request, 'Timesheet accepted successfully!')
+        accept_reason = request.POST.get('accept_reason', '').strip()
+        if accept_reason:
+            timesheet_group.update(status='accepted',accept_reason=accept_reason, current_approver_id=None)
+            messages.success(request, f'Timesheet Accepted due to reason: {accept_reason}')
+        else:
+            messages.error(request, 'Acceptance reason is required.')
 
     elif action == 'reject':
         reject_reason = request.POST.get('reject_reason', '').strip()
@@ -2319,8 +2344,109 @@ def calculate_employee_salary(request, employee_id):
 
 
 
+@login_required
+@no_cache
+def add_leave_policy(request):
+    leave_policy_form=LeavePolicyForm(request.POST)
+    
+    if request.method == 'POST':
+            if leave_policy_form.is_valid():
+                leave_policy_form.save()
+                messages.success(request, 'Leave Policy saved successfully!')
+                return redirect('settings')
+            else:
+                errors = leave_policy_form.non_field_errors()
+            for error in errors:
+                        messages.error(request, error)
+            
+
+    leave_policy_form= LeavePolicyForm()
+        
+
+    return render(request, 'templates/sub_templates/add_leave_policy.html', { 'leave_policy_form':leave_policy_form,})
 
 
+
+@login_required
+@no_cache
+def add_billing_types(request):
+    billing_type_form=BillingTypeForm(request.POST)
+    if request.method == 'POST':
+        if billing_type_form.is_valid():
+            billing_type_form.save()
+            messages.success(request, 'Billing Type saved successfully!')
+            return redirect('billing_types')
+        else:
+            errors = billing_type_form.non_field_errors()
+        for error in errors:
+                    messages.error(request, error)
+    else:
+        billing_type_form = BillingTypeForm()
+    return render(request, 'templates/sub_templates/add_billing_types.html', {
+        'billing_type_form': billing_type_form,
+    })
+
+
+
+@login_required
+@no_cache
+def billingtypes(request):
+    billingtype=BillingType.objects.all()
+    return render(request, 'templates/sub_templates/billing_types.html', {
+        'billingtype': billingtype,
+    })
+
+
+@login_required
+@no_cache
+def doc_types(request):
+    doc_types = uploadDocType.objects.all()
+    return render(request, 'templates/sub_templates/doc_types.html', {
+        'doc_types': doc_types,
+    })
+
+@login_required
+@no_cache
+def add_doc_types(request):
+    doc_type_form = uploadDocTypeForm(request.POST)
+    if request.method == 'POST':
+        if doc_type_form.is_valid():
+            doc_type_form.save()
+            messages.success(request, 'Document Type saved successfully!')
+            return redirect('document_types')
+        else:
+            errors = doc_type_form.non_field_errors()
+        for error in errors:
+                    messages.error(request, error)
+    else:
+        doc_type_form = uploadDocTypeForm()
+    return render(request, 'templates/sub_templates/add_doc_types.html', {
+        'doc_type_form': doc_type_form,
+    })
+
+@login_required 
+@no_cache
+def delete_doc_type(request, id):
+    doc_type = get_object_or_404(uploadDocType, id=id)
+    doc_type.delete()
+    messages.success(request, "Document Type Deleted Successfully!")
+    return redirect('document_types')
+
+@login_required
+@no_cache
+def delete_billing_type(request, id):
+    billing_type = get_object_or_404(BillingType, id=id)
+    billing_type.delete()
+    messages.success(request, "Billing Type Deleted Successfully!")
+    return redirect('billing_types')
+
+@login_required
+@no_cache
+def delete_leave_policy(request, id):
+    leave_policy = get_object_or_404(LeavePolicy, id=id)
+    leave_policy.delete()
+    messages.success(request, "Leave Policy Deleted Successfully!")
+    return redirect('settings')
 
 
 @login_required

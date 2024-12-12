@@ -66,7 +66,7 @@
                         <a href="{% url 'view_timesheet' timesheet.timesheet_group_id %}" class="btn btn-info btn-sm"><i class="fa-regular fa-eye"></i></a>
                         <form id="timesheet-form" method="post" style="display:inline;" action="{% url 'accept_timesheet' timesheet.timesheet_group_id %}">
                             {% csrf_token %}
-                            <button type="submit" name="action" value="accept" class="btn btn-success btn-sm"><i class="fa fa-check" aria-hidden="true"></i></button>
+                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#acceptModal"><i class="fa fa-check" aria-hidden="true"></i></button>
                             <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#rejectModal"><i class="fa fa-times" aria-hidden="true"></i></button>
                         </form>
                     </td>
@@ -121,10 +121,11 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if group.status == 'rejected' %}
-                                {{ group.reject_reason }}  <!-- Show rejection reason -->
-                            {% else %}
-                                N/A
+                            
+                            {% if group.status == 'accepted' %}
+                                 {{ group.accept_reason }}
+                            {% elif group.status == 'rejected' %}
+                                {{ group.reject_reason }}
                             {% endif %}
                         </td>
                         <td>
@@ -174,7 +175,6 @@
     
     <br>
 
-<!-- modal for reject -->
     <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -195,6 +195,25 @@
         </div>
     </div>
 
+    <div class="modal fade" id="acceptModal" tabindex="-1" role="dialog" aria-labelledby="acceptModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="acceptModalLabel">Reason for Acceptance</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="acceptReason" class="form-control" rows="4" placeholder="Enter the reason or comments for acceptance here..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" id="confirmAccept">Accept</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -227,7 +246,33 @@
     };
 </script>
 
-    
+<script>
+    document.getElementById('confirmAccept').onclick = function() {
+        var reason = document.getElementById('acceptReason').value;
+
+        if (reason.trim() === '') {
+            alert('Please provide a reason or comment for acceptance.');
+            return; 
+        }
+
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'action';  
+        input.value = 'accept';  
+
+        var reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'accept_reason';  
+        reasonInput.value = reason;
+
+        var form = document.getElementById('timesheet-form');
+        form.appendChild(input);
+        form.appendChild(reasonInput);
+
+        form.submit();
+    };
+</script>
+
     
     
 {% endblock %}

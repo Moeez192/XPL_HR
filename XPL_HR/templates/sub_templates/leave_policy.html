@@ -1,30 +1,9 @@
 {% load widget_tweaks %}
 
 
-<div class="containe-fluid mt-5">
-    <div class="scrollable-container">
-        <h2 class="text-center mb-4">Leave Policy</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label  class="form-label">Set Leave Policy</label>
-                    {% render_field leave_policy_form.leave_policy class+="form-control" placeholder="21 Days.." %}
-                </div>
-            </div>   
-
-
-            <div class="d-flex  mt-4">
-            <button type="submit" name="leave_policy_form_submit" class="btn btn-primary">Save Leave Policy </button>
-            </div>
-          </form>
-
-
-
-          <br>
-<div class="table-controls mb-3">
-    
-</div>
+<div style="margin-bottom: 3px;">
+    <a href="{% url 'add_leave_policy' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> Leave Policy</a>
+</div>          
         <h3 class="text-center">Leave Policies</h3>
     <!-- Scrollable Table -->
     <div class="table-container">
@@ -41,7 +20,12 @@
                 {% for p in policy %}
                     <tr>
                         <td>{{ p.leave_policy }}</td>
-                        <td>Actions Here</td>  <!-- Display Yes or No for final approver -->
+                        <td><form action="{% url 'delete_leave_policy' p.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete?');">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form></td>  
                     </tr>
                 {% empty %}
                     <tr>

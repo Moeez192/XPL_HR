@@ -228,12 +228,9 @@
                                 {% endfor %}
                             </select>
                             <select name="billing_types[]" class="form-select" required>
-                                <option value="">Billing Type</option>
-                                {% for value, label in XPL_EmployeeBilling.BILLING_TYPE %}
-                                <option value="{{ value }}" {% if value == billing_type %}selected{% endif %}>
-                                    {{ label }}
-                                </option>
-                                {% endfor %}
+                                {% for billing_type in billing_types %}
+                                <option value="{{ billing_type.billing_type }}">{{ billing_type.billing_type }}</option>
+                            {% endfor %}
                             </select>
                             <button type="button" class="btn btn-sm btn-danger remove-team-member-btn ms-2" onclick="removeTeamMember(this)">
                                 <i class="fas fa-trash"></i>
@@ -345,10 +342,9 @@ document.getElementById('client_name').addEventListener('change', function() {
                 {% endfor %}
             </select>
              <select name="billing_types[]" class="form-select" required>
-                            <option value=""> Billing Type</option>
-                            {% for value, label in XPL_EmployeeBilling.BILLING_TYPE %}
-                                <option value="{{ value }}">{{ label }}</option>
-                            {% endfor %}
+                            {% for billing_type in billing_types %}
+                            <option value="{{ billing_type.billing_type }}">{{ billing_type.billing_type }}</option>
+                        {% endfor %}
                         </select>
                                     <button type="button" class="btn btn-sm btn-danger remove-team-member-btn ms-2" onclick="removeTeamMember(this)"><i class="fas fa-trash"></i></button>
         </div>
