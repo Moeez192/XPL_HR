@@ -151,7 +151,7 @@
             <div class="kleon-navmenu">
                 <h6 class="hidden-header text-gray text-uppercase ls-1 ms-4 mb-4">Main Menu</h6>
                 <ul class="main-menu">                
-                    <li class="menu-section-title text-gray ff-heading fs-16 fw-bold text-uppercase mt-4 mb-2"><span>Sass</span></li>
+                    <li class="menu-section-title text-gray ff-heading fs-16 fw-bold text-uppercase mt-4 mb-2"><span></span></li>
                     <!-- HR Management -->
                     <li class="menu-item menu-item-has-children"><a href="#"> 
                         <span class="nav-icon flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
@@ -159,7 +159,6 @@
                       </svg></span> <span class="nav-text">Employee</span></a> 
                         <ul class="sub-menu">
                             <li class="menu-item {% if request.path == '/employees/' %} active {% else %} {% endif %}"><a href="{% url 'employees' %}"> List Employee</a></li>
-                            <li class="menu-item {% if request.path == '/departments/' %} active {% else %} {% endif %}"><a href="{% url 'departments' %}"> Departments </a></li>
                            
                         </ul>
                         <span class='submenu-opener'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
@@ -186,7 +185,6 @@
                         <span class="nav-icon flex-shrink-0"><i class="fa fa-user-plus" aria-hidden="true"></i>
                         </span> <span class="nav-text">Client</span></a> 
                         <ul class="sub-menu">
-                            <li class="menu-item {% if request.path == '/payment_terms/' %} active {% else %} {% endif %}"><a href="{% url 'payment_terms' %}">Payment Terms</a></li> 
                             <li class="menu-item {% if request.path == '/clients/' %} active {% else %} {% endif %}"><a href="{% url 'clients' %}"> List Clients</a></li> 
                                                       
                           
@@ -215,7 +213,7 @@
                         </span> <span class="nav-text">Leave</span></a> 
                         <ul class="sub-menu">
                             <li class="menu-item {% if request.path == '/leave/' %} active {% else %} {% endif %}"><a href="{% url 'leave' %}">List Leaves</a></li>  
-                            <li class="menu-item {% if request.path == '/leave_config_dashboard/' %} active {% else %} {% endif %}"><a href="{% url 'leave_config_dashboard' %}"> Leave Configuration</a></li>                         
+                                                  
                        
                         </ul>
                         <span class='submenu-opener'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
@@ -230,7 +228,11 @@
                         <ul class="sub-menu">
                             <li class="menu-item {% if request.path == '/settings/' %} active  {% else %} {% endif %}"><a href="{% url 'settings' %}">Leave policy</a></li>   
                             <li class="menu-item {% if request.path == '/billing_types/' %} active  {% else %} {% endif %} "><a href="{% url 'billing_types' %}">Billing Types</a></li>   
-                            <li class="menu-item {% if request.path == '/document_types/' %} active  {% else %} {% endif %} "><a href="{% url 'document_types' %}">Document Types</a></li>                     
+                            <li class="menu-item {% if request.path == '/document_types/' %} active  {% else %} {% endif %} "><a href="{% url 'document_types' %}">Document Types</a></li>   
+                            <li class="menu-item {% if request.path == '/departments/' %} active {% else %} {% endif %}"><a href="{% url 'departments' %}"> Departments </a></li>
+                            <li class="menu-item {% if request.path == '/payment_terms/' %} active {% else %} {% endif %}"><a href="{% url 'payment_terms' %}">Payment Terms</a></li>
+                            <li class="menu-item {% if request.path == '/leave_config_dashboard/' %} active {% else %} {% endif %}"><a href="{% url 'leave_config_dashboard' %}"> Leave Configuration</a></li>   
+                  
                         </ul>
                         
     

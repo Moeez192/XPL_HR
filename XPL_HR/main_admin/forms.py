@@ -20,7 +20,7 @@ class uploadDocTypeForm(forms.ModelForm):
 class BillingTypeForm(forms.ModelForm):
     class Meta:
         model = BillingType
-        fields = ['billing_type']
+        fields = '__all__'
 
 class EmployeeForm(forms.ModelForm):
     class Meta:
@@ -120,7 +120,7 @@ class ProjectForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Populate choices dynamically from the BillingType table
         self.fields['billing_type'].choices = [
-            (bt.id, bt.billing_type) for bt in BillingType.objects.all()
+            (bt.id, bt.billing_type,bt.rate) for bt in BillingType.objects.all()
         ]
 
        

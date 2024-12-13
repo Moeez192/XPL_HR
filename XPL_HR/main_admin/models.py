@@ -62,9 +62,10 @@ class uploadDocType(models.Model):
 
 class BillingType(models.Model):
     billing_type=models.CharField(max_length=50)
+    rate = models.PositiveBigIntegerField(default=200)
 
     def __str__(self):
-        return f"{self.billing_type}"
+        return f"{self.billing_type}-{self.rate}"
 
 
 class Employee(models.Model):

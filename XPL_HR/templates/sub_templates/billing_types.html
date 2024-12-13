@@ -78,6 +78,7 @@
                 <tr class="table-header">
                     <tr>
                         <th>Billing Name</th>
+                        <th>Rate</th>
                         <th>Actions</th>
                     </tr>
                 </tr>
@@ -86,6 +87,7 @@
                 {% for p in billingtype %}
                     <tr>
                         <td>{{ p.billing_type }}</td>
+                        <td>{{ p.rate }} $</td>
                         <td><form action="{% url 'delete_billing_types' p.id %}" method="POST" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete?');">

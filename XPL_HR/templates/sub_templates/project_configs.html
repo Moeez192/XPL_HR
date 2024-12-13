@@ -219,7 +219,7 @@
                         </select>
                         <select name="billing_types[]" class="form-select" required>
                             {% for billing_type in billing_types %}
-                            <option value="{{ billing_type.billing_type }}">{{ billing_type.billing_type }}</option>
+                            <option value="{{ billing_type.billing_type }} {{ billing_type.rate}}">{{ billing_type.billing_type }}- {{ billing_type.rate}} $</option>
                         {% endfor %}
                         </select>
                         <button type="button" class="btn  btn-sm btn-danger remove-team-member-btn ms-2" onclick="removeTeamMember(this)"><i class="fas fa-trash"></i></button>
@@ -322,7 +322,7 @@
             </select>
             <select name="billing_types[]" class="form-select" required>
                             {% for billing_type in billing_types %}
-                            <option value="{{ billing_type.billing_type }}">{{ billing_type.billing_type }}</option>
+                            <option value="{{ billing_type.billing_type }} {{ billing_type.rate}}">{{ billing_type.billing_type }}- {{ billing_type.rate}} $</option>
                         {% endfor %}
                         </select>
                                     <button type="button" class="btn btn-sm btn-danger remove-team-member-btn ms-2" onclick="removeTeamMember(this)"><i class="fas fa-trash"></i></button>

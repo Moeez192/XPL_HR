@@ -12,10 +12,16 @@
             {% csrf_token %}
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label  class="form-label">Upload Billing Type</label>
+                    <label  class="form-label">Billing Type</label>
                     {% render_field billing_type_form.billing_type class+="form-control" placeholder="e.g A-Rate" %}
                 </div>
             </div>   
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label  class="form-label">Rate</label>
+                    {% render_field billing_type_form.rate class+="form-control" placeholder="e.g A-Rate" %}
+                </div>
+            </div>  
 
 
             <div class="d-flex  mt-4">
