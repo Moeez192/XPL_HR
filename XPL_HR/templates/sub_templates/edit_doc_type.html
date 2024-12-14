@@ -1,0 +1,26 @@
+
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} Add Document Types {% endblock %}
+{% load widget_tweaks %}
+{% block content %}
+
+
+<h2 class="text-center mb-4">Document Types</h2>
+<form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label  class="form-label">Upload Document Type</label>
+            {% render_field doc_type_form.doc_type class+="form-control" placeholder="e.g Passport." %}
+        </div>
+    </div>   
+
+
+    <div class="d-flex  mt-4">
+    <button type="submit" name="upload_doc_form_submit" class="btn btn-primary">Save</button>
+    </div>
+  </form>
+
+
+  {%endblock%}

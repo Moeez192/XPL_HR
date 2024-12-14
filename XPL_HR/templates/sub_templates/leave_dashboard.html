@@ -39,16 +39,16 @@
     <!-- </div> -->
 {% endif %}
 <div style="margin-bottom: 3px;">
-    <a href="{% url 'apply_leave' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> Leave</a>
+    <a href="{% url 'apply_leave' %}" class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1; border-radius: 20px;"> <i class="fa fa-plus"></i> Leave</a>
 </div>
 {% if leave_applications %}
-<h3 class="text-center">Leave Requests</h3>
-<br>
+
     <!-- Scrollable Table -->
     <div class="table-container">
-        
+        <h4>Leave Requests</h4>
+<br>
             <table class="table table-hover" id="employeeTable">
-                <thead class="table-primary">
+                <thead class="">
                     <tr>
                         <th scope="col">Applicant Name</th>
                         <th scope="col">Leave Type</th>
@@ -111,9 +111,12 @@
     
  
     <br>
-    <h3 class="text-center">Your Leave Applications</h2>
+   
+        <div class="table-container" >
+            <h4>Your Leave Applications</h4>
+            <br>
 <table class="table">
-    <thead class="table-primary">
+    <thead class="">
         <tr>
             <th scope="col">Leave Type</th>
             <th scope="col">Leave Days</th>
@@ -150,7 +153,7 @@
         {% endfor %}
     </tbody>
 </table>
-
+</div>
 </div>
 <style>
     td.remarks {

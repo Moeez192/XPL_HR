@@ -19022,7 +19022,7 @@ a:hover .text-soft-dark {
 }
 
 .kleon-vertical-nav ul.main-menu li.current > a, .kleon-vertical-nav ul.main-menu li.active > a, .kleon-vertical-nav ul.main-menu li:hover > a {
-  color: #924AEF;
+  color: #74747d;
   background-color: #F6EEFF;
   transition: none;
 }

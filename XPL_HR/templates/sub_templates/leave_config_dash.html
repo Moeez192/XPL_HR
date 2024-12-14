@@ -1,10 +1,11 @@
-{% extends 'templates/navs.html' %}
+{% extends 'templates/settings.html' %}
 {%load static%}
 {% block title %} Leave Configuration Dashboard {% endblock %}
-{% block content %}
+{% block settings_content %}
 {% load widget_tweaks %}
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
 <style>
     .alert {
         position: relative;
@@ -68,15 +69,16 @@
 {% endif %}
     <!-- Search and Table Filter -->
     {% if request.session.role == 'admin' %}
-<h3 class="text-center">Leave Configs</h3>
-<div style="margin-bottom: 3px;">
-    <a href="{% url 'leave_configuration' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> Leave Config</a>
+<div>
+    <a href="{% url 'leave_configuration' %}" class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1;border-radius: 20px;"> <i class="fa fa-plus"></i> Leave Policy</a>
 </div>
-<br>
     <!-- Scrollable Table -->
     <div class="table-container">
+        <h4>Leave Policy</h4>
+        <br>
+
         <table class="table table-hover" id="employeeTable">
-            <thead class="table-primary">
+            <thead class="">
                 <tr>
                     <th scope="col">Leave Name</th>
                     <th scope="col">Leave Days Allowed</th>

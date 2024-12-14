@@ -2448,10 +2448,85 @@ def delete_leave_policy(request, id):
     messages.success(request, "Leave Policy Deleted Successfully!")
     return redirect('settings')
 
+@login_required
+@no_cache
+def edit_leave_policy(request, id):
+    leave_policy = get_object_or_404(LeavePolicy, id=id)
+    leave_policy_form = LeavePolicyForm(request.POST or None, instance=leave_policy)
+    if request.method == 'POST':
+        if leave_policy_form.is_valid():
+            leave_policy_form.save()
+            messages.success(request, 'Leave Policy updated successfully!')
+            return redirect('settings')
+        else:
+            errors = leave_policy_form.non_field_errors()
+        for error in errors:
+                    messages.error(request, error)
+    return render(request, 'templates/sub_templates/edit_leave_policy.html', {
+        'leave_policy_form': leave_policy_form,
+    })
+
 
 @login_required
 @no_cache
-def setting(request):
+def edit_billing_type(request, id):
+    billing_type = get_object_or_404(BillingType, id=id)
+    billing_type_form = BillingTypeForm(request.POST or None, instance=billing_type)
+    if request.method == 'POST':
+        if billing_type_form.is_valid():
+            billing_type_form.save()
+            messages.success(request, 'Billing Type updated successfully!')
+            return redirect('billing_types')
+        else:
+            errors = billing_type_form.non_field_errors()
+        for error in errors:
+                    messages.error(request, error)
+    return render(request, 'templates/sub_templates/edit_billing_type.html', {
+        'billing_type_form': billing_type_form,
+    })
+
+
+@login_required
+@no_cache
+def edit_doc_type(request, id):
+    doc_type = get_object_or_404(uploadDocType, id=id)
+    doc_type_form = uploadDocTypeForm(request.POST or None, instance=doc_type)
+    if request.method == 'POST':
+        if doc_type_form.is_valid():
+            doc_type_form.save()
+            messages.success(request, 'Document Type updated successfully!')
+            return redirect('document_types')
+        else:
+            errors = doc_type_form.non_field_errors()
+        for error in errors:
+                    messages.error(request, error)
+    return render(request, 'templates/sub_templates/edit_doc_type.html', {
+        'doc_type_form': doc_type_form,
+    })
+
+
+@login_required
+@no_cache
+def edit_payment_terms(request, id):
+    payment_term = get_object_or_404(PaymentTerms, id=id)
+    payment_terms_form = PaymentTermsForm(request.POST or None, instance=payment_term)
+    if request.method == 'POST':
+        if payment_terms_form.is_valid():
+            payment_terms_form.save()
+            messages.success(request, 'Payment Terms updated successfully!')
+            return redirect('payment_terms')
+        else:
+            errors = payment_terms_form.non_field_errors()
+        for error in errors:
+                    messages.error(request, error)
+    return render(request, 'templates/sub_templates/edit_payment_terms.html', {
+        'payment_terms_form': payment_terms_form,
+    })
+
+
+@login_required
+@no_cache
+def leave_policy(request):
     hierarchies = Hierarchy.objects.all()
     leave_policy_form=LeavePolicyForm(request.POST)
     doc_types = uploadDocType.objects.all()
@@ -2573,7 +2648,7 @@ def setting(request):
         leave_policy_form= LeavePolicyForm()
         
 
-    return render(request, 'templates/settings.html', {
+    return render(request, 'templates/sub_templates/leave_policy.html', {
         'form': form,
         'billing_type_form':billing_type_form,
         'billingtype':billingtype,

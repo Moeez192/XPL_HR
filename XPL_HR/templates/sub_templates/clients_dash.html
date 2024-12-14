@@ -63,15 +63,15 @@
 {% endif %}
     <!-- Search and Table Filter -->
     {% if request.session.role == 'admin' %}
-<h3 class="text-center">Clients</h3>
+
 <div style="margin-bottom: 3px;">
-    <a href="{% url 'add_client' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> Client</a>
+    <a href="{% url 'add_client' %}" class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1; border-radius: 20px;"> <i class="fa fa-plus"></i> Client</a>
 </div>
-<br>
     <!-- Scrollable Table -->
     <div class="table-container">
+        <h4>Clients</h4>
         <table class="table table-hover" id="employeeTable">
-            <thead class="table-primary">
+            <thead class="">
                 <tr>
                     <th scope="col">Client Id</th>
                     <th scope="col">Client Type</th>

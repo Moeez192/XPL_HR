@@ -1,14 +1,21 @@
+{% extends 'templates/settings.html' %}
+{% load static %}
+{% block title %} Leave Policy {% endblock %}
+{% block settings_content %}
 {% load widget_tweaks %}
+<link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
 
 
-<div style="margin-bottom: 3px;">
-    <a href="{% url 'add_leave_policy' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> Leave Policy</a>
+<div>
+    <a href="{% url 'add_leave_policy' %}" class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1;border-radius: 20px;"> <i class="fa fa-plus"></i> Leave Policy</a>
 </div>          
-        <h3 class="text-center">Leave Policies</h3>
+        
     <!-- Scrollable Table -->
     <div class="table-container">
+        <h4 >Leave Policies</h4>
+        <br>
         <table class="table table-hover" id="employeeTable">
-            <thead class="table-primary">
+            <thead class="">
                 <tr class="table-header">
                     <tr>
                         <th>Leave Policy</th>
@@ -20,11 +27,14 @@
                 {% for p in policy %}
                     <tr>
                         <td>{{ p.leave_policy }}</td>
+                        
                         <td><form action="{% url 'delete_leave_policy' p.id %}" method="POST" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete?');">
                                 <i class="fas fa-trash"></i>
                             </button>
+                            <a href="{% url 'edit_leave_policy' p.id %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit"></i>
                         </form></td>  
                     </tr>
                 {% empty %}
@@ -37,3 +47,6 @@
     </div>
     </div>
 </div>
+
+
+{%endblock%}

@@ -19,6 +19,7 @@ from main_admin import views
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
 
 
 urlpatterns = [
@@ -45,7 +46,7 @@ urlpatterns = [
     path('projects/edit/<int:pk>/',views.project_edit_view, name='edit_project'),
     path('projects/<int:pk>/',views.project_detail_view, name='project_detail'),
     path('timesheet/',views.timesheet, name='timesheet'),
-    path('settings/',views.setting, name='settings'),
+    path('leave_policy/',views.leave_policy, name='leave_policy'),
     path('timesheet/action/<int:timesheet_id>/', views.timesheet_action, name='timesheet_action'),
     path('timesheet/download/<str:month>/', views.download_timesheet_pdf, name='download_timesheet'),
     path('calculate_salary/<int:employee_id>/', views.calculate_employee_salary, name='calculate_employee_salary'),
@@ -83,6 +84,11 @@ urlpatterns = [
     path('delete_doc_types/<int:id>/', views.delete_doc_type, name='delete_doc_types'),
     path('delete_billing_types/<int:id>/', views.delete_billing_type, name='delete_billing_types'),
     path('delete_leave_policy/<int:id>/', views.delete_leave_policy, name='delete_leave_policy'),
+    path('edit_leave_policy/<int:id>/', views.edit_leave_policy, name='edit_leave_policy'),
+    path('edit_billing_types/<int:id>/', views.edit_billing_type, name='edit_billing_types'),
+    path('edit_doc_types/<int:id>/', views.edit_doc_type, name='edit_doc_types'),
+    path('edit_payment_terms/<int:id>/', views.edit_payment_terms, name='edit_payment_terms'),
+    path('settings/', lambda request: redirect('billing_types'), name='settings'),
 
 
 

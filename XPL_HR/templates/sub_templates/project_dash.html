@@ -48,34 +48,37 @@
     <div class="row text-center mb-4">
         <div class="col-md-4">
             <div class="dashboard-card card-total-employees">
+                
+                <div class="dashboard-text">
+                    <h5>Completed </h5>
+                    <h3>{{ completed_projects }}</h3> 
+                </div>
                 <div class="icon-container">
                     <i class="fa-solid fa-check-double"></i> <!-- employee icon -->
-                </div>
-                <div class="dashboard-text">
-                    <h5>Completed Projects</h5>
-                    <h3>{{ completed_projects }}</h3> 
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="dashboard-card card-total-departments">
-                <div class="icon-container">
-                    <i class="fa-regular fa-circle-play"></i> <!-- Department Icon -->
-                </div>
+                
                 <div class="dashboard-text">
                     <h5>On Going</h5>
                     <h3>{{ ongoing_projects }}</h3> 
+                </div>
+                <div class="icon-container">
+                    <i class="fa-regular fa-circle-play"></i> <!-- Department Icon -->
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="dashboard-card card-total-supervisors">
-                <div class="icon-container">
-                    <i class="fas fa-user-tie"></i> <!-- Supervisors Icon -->
-                </div>
+                
                 <div class="dashboard-text">
                     <h5>Total Supervisors</h5>
                     <h3>{{total_supervisors}}</h3> 
+                </div>
+                <div class="icon-container">
+                    <i class="fas fa-user-tie"></i> <!-- Supervisors Icon -->
                 </div>
             </div>
         </div>
@@ -99,13 +102,12 @@
     {% if request.session.role == 'admin' %}
 <h3 class="text-center">All Running Projects</h3>
 <div style="margin-bottom: 3px;">
-    <a href="{% url 'add_project' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> Project</a>
+    <a href="{% url 'add_project' %}" class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1; border-radius: 20px;"> <i class="fa fa-plus"></i> Project</a>
 </div>
-<br>
     <!-- Scrollable Table -->
     <div class="table-container">
         <table class="table table-hover" id="employeeTable">
-            <thead class="table-primary">
+            <thead class="" >
                 <tr>
                     <th scope="col">Project Name</th>
                     <th scope="col">Client Name</th>
@@ -166,7 +168,7 @@
     <!-- Scrollable Table -->
     <div class="table-container">
         <table class="table table-hover" id="employeeTable">
-            <thead class="table-primary">
+            <thead class="">
                 <tr>
                     <th scope="col">Project Name</th>
                     <th scope="col">Client Name</th>

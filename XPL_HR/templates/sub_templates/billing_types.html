@@ -1,12 +1,13 @@
-{% extends 'templates/navs.html' %}
+{% extends 'templates/settings.html' %}
 {%load static%}
 {% block title %} Billing Types {% endblock %}
-{% block content %}
+{% block settings_content %}
 {% load widget_tweaks %}
 
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
 
 <style>
     .alert {
@@ -67,14 +68,15 @@
 {% endif %}
 
     
-<div style="margin-bottom: 3px;">
-    <a href="{% url 'add_billing_types' %}" class="btn btn-sm btn-primary "> <i class="fa fa-plus"></i> Billing Type</a>
+<div style="margin-bottom: 3px; ">
+    <a href="{% url 'add_billing_types' %}" class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1;border-radius: 20px;"> <i class="fa fa-plus"></i> Billing Type</a>
 </div> 
-        <h3 class="text-center">Billing Types</h3>
     <!-- Scrollable Table -->
     <div class="table-container">
+        <h4>Billing Types</h4>
+        <br>
         <table class="table table-hover" id="employeeTable">
-            <thead class="table-primary">
+            <thead class="">
                 <tr class="table-header">
                     <tr>
                         <th>Billing Name</th>
@@ -93,7 +95,10 @@
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete?');">
                                 <i class="fas fa-trash"></i>
                             </button>
-                        </form></td>  
+                        </form>
+                        <a href="{% url 'edit_billing_types' p.id %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit"></i>
+                    </td>  
                     </tr>
                 {% empty %}
                     <tr>
