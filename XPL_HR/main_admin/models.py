@@ -48,6 +48,20 @@ def get_currency_choices():
         return []
 
 
+class Leaves(models.Model):
+     
+    IS_PAID = [
+        ('yes', 'Yes'),
+        ('no', 'No'),
+    ]
+    leave_name = models.CharField(max_length=20)
+    leave_days_allowed = models.PositiveIntegerField()  
+    max_leaves_per_month = models.PositiveIntegerField()  
+    is_paid = models.CharField(max_length=4,choices=IS_PAID)
+
+    def __str__(self):
+        return f"{self.leave_name} - {self.leave_days_allowed} days"
+    
 class LeavePolicy(models.Model):
     leave_policy = models.CharField(max_length=50)
     def __str__(self):
@@ -200,7 +214,7 @@ class Employee(models.Model):
     latest_entry_in_country= models.DateField()
     total_expirence = models.CharField(max_length=20)
     latest_exit_from_country= models.DateField(null=True,blank=True)
-    leave_policy = models.ForeignKey(LeavePolicy, on_delete=models.SET_NULL,null=True, related_name='employee_leave_policy')
+    leave_policy = models.ForeignKey(Leaves, on_delete=models.SET_NULL,null=True, related_name='employee_leave_policy')
     sap_certifications = models.TextField(null=True,blank=True)
     age = models.CharField(max_length=50,default='0')
     docs = models.ForeignKey(uploadDocType, on_delete=models.SET_NULL,null=True,blank=True, related_name='employee_docs_upload')
@@ -293,19 +307,7 @@ class Department(models.Model):
     
 
 
-class Leaves(models.Model):
-     
-    IS_PAID = [
-        ('yes', 'Yes'),
-        ('no', 'No'),
-    ]
-    leave_name = models.CharField(max_length=20)
-    leave_days_allowed = models.PositiveIntegerField()  
-    max_leaves_per_month = models.PositiveIntegerField()  
-    is_paid = models.CharField(max_length=4,choices=IS_PAID)
 
-    def __str__(self):
-        return self.leave_name
     
 
    
