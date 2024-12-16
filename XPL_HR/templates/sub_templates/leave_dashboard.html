@@ -56,7 +56,7 @@
                         <th scope="col">Leave End</th>
                         <th scope="col">Reason</th>
                         <th scope="col">Status</th>
-                        <th scope="col">Action</th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -80,11 +80,11 @@
                                 {% if leaves.current_approver.id == request.user.id %}
                                 <button type="button" class="btn btn-warning btn-sm" 
                                 onclick="openModal('{{ leaves.id }}', 'approved')">
-                                     <i class="fa fa-check"></i> Approve
+                                     <i class="fa fa-check"></i> 
                                 </button>
                                     <button type="button" class="btn btn-danger btn-sm" 
                                             onclick="openModal('{{ leaves.id }}', 'rejected')">
-                                        <i class="fas fa-trash"></i> Reject
+                                        <i class="fas fa-trash"></i> 
                                     </button>
                                 {% else %}
                                     <span class="text-muted">Waiting for another approver...</span>
@@ -187,7 +187,7 @@
 
 /* Close Button */
 .close {
-    color: #aaa;
+    color: #000000;
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -214,7 +214,7 @@ textarea {
 
        <!-- remarks popup modal -->
        <div id="remarksModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="display: block; border-radius: 20px; width: 40%;">
             <span class="close" onclick="closeModal()">&times;</span>
             <h2>Leave Remarks</h2>
             <form method="POST" id="remarksForm" action="{% url 'leave' %}">

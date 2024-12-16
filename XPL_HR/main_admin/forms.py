@@ -1,11 +1,28 @@
 from django import forms 
 from django.forms import modelformset_factory
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile, LeavePolicy, uploadDocType, BillingType , ClientInformation , PaymentTerms, ClientLeave, XPL_ClientContact , XPL_EmployeeBilling
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument , Timesheet , Hierarchy, DateRange, ProjectFile, LeavePolicy, uploadDocType, BillingType , ClientInformation , PaymentTerms, ClientLeave, XPL_ClientContact , XPL_EmployeeBilling, XPL_EmployeeRole,XPL_Industry,XPL_Position
 from django.utils.timezone import now
+from datetime import datetime
+from django.db.models import Sum
 from django.core.exceptions import ValidationError
 import random
 
 
+
+class XPL_IndustryForm(forms.ModelForm):
+    class Meta:
+        model = XPL_Industry
+        fields = ['industry_name']
+
+class XPL_PositionForm(forms.ModelForm):
+    class Meta:
+        model = XPL_Position
+        fields = ['position_name']
+
+class XPL_EmployeeRoleForm(forms.ModelForm):
+    class Meta:
+        model = XPL_EmployeeRole
+        fields = ['role_name']
 
 class LeavePolicyForm(forms.ModelForm):
     class Meta:
@@ -71,7 +88,7 @@ class DepForm(forms.ModelForm):
 class LeaveForm(forms.ModelForm):
     class Meta:
         model = Leaves
-        fields = ['leave_name','leave_days_allowed','max_leaves_per_month','is_paid']
+        fields = ['leave_name','leave_days_allowed','max_leaves_per_month','is_paid','leave_approver']
 
 
 class LoginForm(forms.Form):
@@ -123,9 +140,11 @@ class ProjectForm(forms.ModelForm):
             (bt.id, bt.billing_type,bt.rate) for bt in BillingType.objects.all()
         ]
 
-       
+
 
 class LeaveApplicationForm(forms.ModelForm):
+    available_leaves = forms.IntegerField(required=False, widget=forms.NumberInput(attrs={'class': 'form-control', 'readonly': 'readonly'}))
+
     class Meta:
         model = LeaveApplication
         fields = ['leave_type', 'start_date', 'end_date', 'reason','remarks','resource_replacement_email_id']
@@ -136,56 +155,130 @@ class LeaveApplicationForm(forms.ModelForm):
             'reason': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+
+    
     def __init__(self, *args, **kwargs):
-        self.employee = kwargs.pop('employee', None)  # Pass employee instance via form kwargs
+        self.employee = kwargs.pop('employee', None)  
         super(LeaveApplicationForm, self).__init__(*args, **kwargs)
-        self.fields['leave_type'].queryset = Leaves.objects.all()  # Populate leave types
+    
+        if self.employee and self.employee.leave_policy_id:  
+            self.fields['leave_type'].queryset = Leaves.objects.filter(id=self.employee.leave_policy_id)  
+        else:
+            self.fields['leave_type'].queryset = Leaves.objects.none()  
+
+        if self.employee:
+                self.calculate_available_leaves()
+
+    def calculate_available_leaves(self):
+        
+        # leave_type = self.employee.leave_policy_id  
+        
+        # if not leave_type:
+        #     raise ValidationError("Leave policy not found for the employee.")
+        # leave_type=Leaves.objects.get(id=leave_type)
+        # total_leave_days = leave_type.leave_days_allowed  
+        # monthly_leave_entitlement = total_leave_days / 12  
+
+        # start_date = self.employee.date_of_joining  
+        # current_date = datetime.now()
+        # months_worked = (current_date.year - start_date.year) * 12 + current_date.month - start_date.month
+
+        # available_leaves = months_worked * monthly_leave_entitlement
+        # approved_leaves = LeaveApplication.objects.filter(
+        #         employee=self.employee,
+        #         leave_type=leave_type,
+        #         status='approved'
+        #     )
+        # print(f"Approved Leaves: {approved_leaves}")
+
+        # approved_leave_days = sum(
+        #         (leave.end_date - leave.start_date).days + 1 for leave in approved_leaves if leave.end_date and leave.start_date
+        #     )
+
+        # available_leaves -= approved_leave_days  
+        # print(f"Available Leaves After Deduction: {available_leaves}")
+
+
+        print("hello")
+
+
 
     def clean(self):
+        
+
         cleaned_data = super().clean()
         leave_type = cleaned_data.get('leave_type')
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
 
-        # Ensure all required fields are present
         if not leave_type or not start_date or not end_date:
             raise ValidationError("Leave type, start date, and end date are required.")
 
-        # Ensure start date is not in the past
         if start_date < now().date():
             raise ValidationError("Start date cannot be in the past.")
 
-        # Calculate leave days
         leave_days = (end_date - start_date).days + 1
 
-        # Check 1: Ensure the number of days is positive
         if leave_days <= 0:
             raise ValidationError("The number of leave days must be greater than zero.")
 
-        # Check 2: Ensure that the leave days do not exceed the max allowed for the leave type
         if leave_days > leave_type.leave_days_allowed:
             raise ValidationError(
                 f"You can only apply for a maximum of {leave_type.leave_days_allowed} days for {leave_type.leave_name} Leave."
             )
+
+        
+        total_leave_days = leave_type.leave_days_allowed  
+        monthly_leave_entitlement = total_leave_days / 12 
+
+        if self.employee:
+            start_date = self.employee.date_of_joining
+            current_date = datetime.now()
+            months_worked = (current_date.year - start_date.year) * 12 + current_date.month - start_date.month
+            print(f"Months Worked: {months_worked}")
+
+            available_leaves = months_worked * monthly_leave_entitlement
+            print(f"Available Leaves: {available_leaves}")
+
+            approved_leaves = LeaveApplication.objects.filter(
+                employee=self.employee,
+                leave_type=leave_type,
+                status='approved'
+            )
+            print(f"Approved Leaves: {approved_leaves}")
+
+            approved_leave_days = sum(
+                (leave.end_date - leave.start_date).days + 1 for leave in approved_leaves if leave.end_date and leave.start_date
+            )
+
+            available_leaves -= approved_leave_days  
+            print(f"Available Leaves After Deduction: {available_leaves}")
+
+            if leave_days > available_leaves:
+                raise ValidationError(
+                    f"You cannot apply for more than {available_leaves:.2f} days based on your months worked and already availed leaves."
+                )
+
         current_month = now().month
         current_year = now().year
-
-        # Count approved leaves of the same type in the current month
-        if self.employee:  
+        if self.employee:
             approved_leaves_in_current_month = LeaveApplication.objects.filter(
                 employee=self.employee,
                 leave_type=leave_type,
                 start_date__month=current_month,
                 start_date__year=current_year,
-                status='approved'  # Only count approved leaves
+                status='approved'  
             ).count()
 
             if approved_leaves_in_current_month >= leave_type.max_leaves_per_month:
+                print(approved_leaves_in_current_month)
                 raise ValidationError(
                     f"You can only apply for {leave_type.max_leaves_per_month} {leave_type.leave_name} leave(s) in a month."
                 )
 
         return cleaned_data
+
+
 
 
 

@@ -84,6 +84,7 @@
                     <th scope="col">Leave Days Allowed</th>
                     <th scope="col">Max Leaves Per Month</th>
                     <th scope="col">Is paid Leave?</th>
+                    <th scope="col">Leave Approver</th>
                     <th scope="col">Actions </th>
                 </tr>
             </thead>
@@ -94,6 +95,7 @@
                     <td>{{ form.leave_days_allowed }}</td>
                     <td>{{ form.max_leaves_per_month }}</td>
                     <td>{{ form.is_paid }}</td>
+                    <td>{{ form.leave_approver }}</td>
                     
                     <td>
                         
@@ -109,7 +111,7 @@
                 </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center">No Clients Yet!</td>
+                        <td colspan="6" class="text-center">No Clients Yet!</td>
                     </tr>
                 {% endfor %}
                 

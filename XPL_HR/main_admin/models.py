@@ -47,6 +47,21 @@ def get_currency_choices():
         print(f"Error reading currency data: {e}")
         return []
 
+class XPL_Position(models.Model):
+    position_name = models.CharField(max_length=50)
+    def __str__(self):
+        return self.position_name
+
+class XPL_EmployeeRole(models.Model):
+    role_name = models.CharField(max_length=50)
+    def __str__(self):
+        return self.role_name
+    
+class XPL_Industry(models.Model):
+    industry_name = models.CharField(max_length=50)
+    def __str__(self):
+        return self.industry_name
+
 
 class Leaves(models.Model):
      
@@ -58,6 +73,7 @@ class Leaves(models.Model):
     leave_days_allowed = models.PositiveIntegerField()  
     max_leaves_per_month = models.PositiveIntegerField()  
     is_paid = models.CharField(max_length=4,choices=IS_PAID)
+    leave_approver=models.ForeignKey('Employee',on_delete=models.SET_NULL,null=True,blank=True,related_name='leave_approver')
 
     def __str__(self):
         return f"{self.leave_name} - {self.leave_days_allowed} days"
@@ -119,7 +135,9 @@ class Employee(models.Model):
         ('admin', 'Admin'),
         ('user', 'User'),
     ]
-    employee_role=models.CharField(max_length=20,choices=ROLE,default="user")
+    # employee_role=models.CharField(max_length=20,choices=ROLE,default="user")
+    employee_role=models.ForeignKey(XPL_EmployeeRole,on_delete=models.SET_NULL,default="user",null=True)
+
     employee_id = models.CharField(max_length=10, unique=True)
     job_title = models.CharField(max_length=100)
     department = models.ForeignKey(
@@ -253,7 +271,9 @@ class Employee(models.Model):
         ]
     
 
-    position = models.CharField(max_length=20,choices=POSITION,null=True)
+    # position = models.CharField(max_length=20,choices=POSITION,null=True)
+    position = models.ForeignKey(XPL_Position,on_delete=models.SET_NULL,null=True)
+
 
 
     work_location = models.CharField(max_length=35,choices=WORK_LOCATION,null=True)
@@ -349,7 +369,7 @@ class ClientInformation(models.Model):
         ('IT', 'IT'),
         ('Software', 'Software'),
     ]
-    industry=models.CharField(max_length=50,choices=INDUSTRY,default='IT')
+    industry=models.ForeignKey(XPL_Industry,on_delete=models.SET_NULL,null=True,default='IT')
     country_region = models.CharField(max_length=50,choices=get_country_choices())
     address= models.TextField()
     city = models.CharField(max_length=50)

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect , get_object_or_404
-from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm , ProjectFileForm, LeavePolicyForm, uploadDocTypeForm,BillingTypeForm,ClientInformationForm , PaymentTermsForm, ClientLeaveFormSet , ClientLeaveForm, XPL_ClientContactForm ,XPL_EmployeeBillingForm
-from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange , ProjectFile , PasswordResetToken,LeavePolicy , uploadDocType , EmployeeDocument , BillingType , ClientInformation , PaymentTerms,ClientLeave,XPL_ClientContact , XPL_EmployeeBilling
+from .forms import EmployeeForm , DepForm , LeaveForm , LoginForm , ProjectForm , LeaveApplicationForm , EmployeeUpdateForm , EducationalDocumentForm , TimesheetForm , ApprovalHierarchyForm , PeriodForm , ProjectFileForm, LeavePolicyForm, uploadDocTypeForm,BillingTypeForm,ClientInformationForm , PaymentTermsForm, ClientLeaveFormSet , ClientLeaveForm, XPL_ClientContactForm ,XPL_EmployeeBillingForm , XPL_PositionForm,XPL_IndustryForm , XPL_EmployeeRoleForm
+from .models import Employee , Department , Leaves , Projects , LeaveApplication , EducationalDocument, Timesheet , Salary, Hierarchy , DateRange , ProjectFile , PasswordResetToken,LeavePolicy , uploadDocType , EmployeeDocument , BillingType , ClientInformation , PaymentTerms,ClientLeave,XPL_ClientContact , XPL_EmployeeBilling , XPL_EmployeeRole, XPL_Position , XPL_Industry
 from django.contrib import messages
 from django.core.mail import send_mail
 import uuid  
@@ -15,6 +15,7 @@ from calendar import monthrange
 from django.db.models import Q  
 from weasyprint import HTML
 from collections import defaultdict
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.template.loader import get_template
 from django.views.decorators.http import require_POST
@@ -31,6 +32,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import EmployeeSerializer
+from django.http import JsonResponse
+
 logger = logging.getLogger(__name__)
 
 
@@ -54,6 +57,206 @@ class NoCacheMiddleware(CacheMiddleware):
 
 no_cache = decorator_from_middleware(NoCacheMiddleware)
 
+from django.http import JsonResponse
+from .models import Employee, Leaves
+from datetime import datetime
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
+@csrf_exempt
+def calculate_available_leaves(request):
+    if request.method == 'POST':
+        leave_type_id = request.POST.get('leave_type_id')
+        employee_id = Employee.objects.get(email=request.user.email).id
+        
+        if not leave_type_id or not employee_id:
+            return JsonResponse({'error': 'Missing required parameters'}, status=400)
+
+        try:
+            leave_type = Leaves.objects.get(id=leave_type_id)
+            employee = Employee.objects.get(id=employee_id)
+        except Leaves.DoesNotExist:
+            return JsonResponse({'error': 'Invalid leave type ID'}, status=404)
+        except Employee.DoesNotExist:
+            return JsonResponse({'error': 'Invalid employee ID'}, status=404)
+
+        # Calculate available leaves
+        total_leave_days = leave_type.leave_days_allowed
+        monthly_leave_entitlement = total_leave_days / 12
+
+        start_date = employee.date_of_joining
+        current_date = datetime.now()
+        months_worked = (current_date.year - start_date.year) * 12 + current_date.month - start_date.month
+        available_leaves = months_worked * monthly_leave_entitlement
+
+        # Deduct previously availed leaves
+        approved_leaves = LeaveApplication.objects.filter(
+                employee=employee,
+                leave_type=leave_type,
+                status='approved'
+            )
+        print(f"Approved Leaves: {approved_leaves}")
+
+        leaves_taken = sum(
+                (leave.end_date - leave.start_date).days + 1 for leave in approved_leaves if leave.end_date and leave.start_date
+            )
+
+        available_leaves -= leaves_taken
+
+        return JsonResponse({'available_leaves': max(0, available_leaves)})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+  
+@login_required
+@no_cache
+def employee_position(request):
+    positions = XPL_Position.objects.all()
+    return render(request, 'templates/sub_templates/employee_position.html', {
+        'positions': positions,
+    })
+
+@login_required
+@no_cache
+def delete_employee_position(request, id):
+    position = get_object_or_404(XPL_Position, id=id)
+    position.delete()
+    messages.success(request, 'Position deleted successfully!')
+    return redirect('position')
+
+@login_required
+@no_cache
+def edit_employee_position(request, id):
+    position = get_object_or_404(XPL_Position, id=id)
+    if request.method == 'POST':
+        position_form = XPL_PositionForm(request.POST, instance=position)
+        if position_form.is_valid():
+            position_form.save()
+            messages.success(request, 'Position updated successfully!')
+            return redirect('position')
+    else:
+        position_form = XPL_PositionForm(instance=position)
+    return render(request, 'templates/sub_templates/edit_employee_position.html', {
+        'position_form': position_form,
+        'position': position,
+    })
+
+@login_required
+@no_cache
+def add_employee_position(request):
+    position_form = XPL_PositionForm(request.POST)
+    if request.method == 'POST':
+            position_form = XPL_PositionForm(request.POST)
+            if position_form.is_valid():
+                position_form.save()
+                messages.success(request, 'Position added successfully!')
+                return redirect('position')
+    else:
+        position_form = XPL_PositionForm()
+    return render(request, 'templates/sub_templates/add_employee_position.html', {
+        'position_form': position_form,
+    })
+
+@login_required
+@no_cache
+def employee_role(request):
+    roles = XPL_EmployeeRole.objects.all()
+    return render(request, 'templates/sub_templates/employee_role.html', {
+        'roles': roles,
+    })
+
+@login_required
+@no_cache
+def add_employee_role(request):
+    role_form = XPL_EmployeeRoleForm(request.POST)
+    if request.method == 'POST':
+            role_form = XPL_EmployeeRoleForm(request.POST)
+            if role_form.is_valid():
+                role_form.save()
+                messages.success(request, 'Role added successfully!')
+                return redirect('role')
+    else:
+        role_form = XPL_EmployeeRoleForm()
+    return render(request, 'templates/sub_templates/add_employee_role.html', {
+        'role_form': role_form,
+    })
+
+@login_required
+@no_cache
+def delete_employee_role(request, id):
+    role = get_object_or_404(XPL_EmployeeRole, id=id)
+    role.delete()
+    messages.success(request, 'Role deleted successfully!')
+    return redirect('role')
+
+@login_required
+@no_cache
+def edit_employee_role(request, id):
+    role = get_object_or_404(XPL_EmployeeRole, id=id)
+    if request.method == 'POST':
+        role_form = XPL_EmployeeRoleForm(request.POST, instance=role)
+        if role_form.is_valid():
+            role_form.save()
+            messages.success(request, 'Role updated successfully!')
+            return redirect('role')
+    else:
+        role_form = XPL_EmployeeRoleForm(instance=role)
+    return render(request, 'templates/sub_templates/edit_employee_role.html', {
+        'role_form': role_form,
+        'role': role,
+    })
+
+@login_required
+@no_cache
+def employee_industry(request):
+    industries = XPL_Industry.objects.all()
+    return render(request, 'templates/sub_templates/employee_industry.html', {
+        'industries': industries,
+    })
+
+@login_required
+@no_cache
+def add_employee_industry(request):
+    industry_form = XPL_IndustryForm(request.POST)
+    if request.method == 'POST':
+            industry_form = XPL_IndustryForm(request.POST)
+            if industry_form.is_valid():
+                industry_form.save()
+                messages.success(request, 'Industry added successfully!')
+                return redirect('industry')
+    else:
+        industry_form = XPL_IndustryForm()
+    return render(request, 'templates/sub_templates/add_employee_industry.html', {
+        'industry_form': industry_form,
+    })
+
+@login_required
+@no_cache
+def delete_employee_industry(request, id):
+    industry = get_object_or_404(XPL_Industry, id=id)
+    industry.delete()
+    messages.success(request, 'Industry deleted successfully!')
+    return redirect('industry')
+
+@login_required
+@no_cache
+def edit_employee_industry(request, id):
+    industry = get_object_or_404(XPL_Industry, id=id)
+    if request.method == 'POST':
+        industry_form = XPL_IndustryForm(request.POST, instance=industry)
+        if industry_form.is_valid():
+            industry_form.save()
+            messages.success(request, 'Industry updated successfully!')
+            return redirect('industry')
+    else:
+        industry_form = XPL_IndustryForm(instance=industry)
+    return render(request, 'templates/sub_templates/edit_employee_industry.html', {
+        'industry_form': industry_form,
+        'industry': industry,
+    })
 
 @login_required
 @no_cache
@@ -77,7 +280,7 @@ def login_view(request):
             #  role from  Employee model 
             try:
                 employee = Employee.objects.get(email=email)
-                request.session['role'] = employee.employee_role  
+                request.session['role'] = employee.employee_role.id
                 
                 print("Session after login:", request.session.keys())  
                 return redirect("dashboard")  
@@ -455,268 +658,198 @@ def leave_configuration(request):
         'leave_form': leave_form,
     })
 
-@login_required
-@no_cache
-def apply_leave(request):
-    leaves=Leaves.objects.all()
-    employee = Employee.objects.get(email=request.user.email)
-    leave_applications_to_approve = LeaveApplication.objects.none()
-    logged_in_user = LeaveApplication.objects.filter(employee=employee)
+# @login_required
+# @no_cache
+# def apply_leave(request):
+#     leaves=Leaves.objects.all()
+#     employee = Employee.objects.get(email=request.user.email)
+#     leave_applications_to_approve = LeaveApplication.objects.none()
+#     logged_in_user = LeaveApplication.objects.filter(employee=employee)
 
-    def get_hierarchy_for_role(employee, project=None):
-        # First, try to fetch project-specific hierarchy
-        if project:
-            hierarchy = Hierarchy.objects.filter(
-                project_name=project,
-                position=employee.position
-            ).order_by('order_number')
-            if hierarchy.exists():
-                return hierarchy
+#     def get_hierarchy_for_role(employee, project=None):
+#         # First, try to fetch project-specific hierarchy
+#         if project:
+#             hierarchy = Hierarchy.objects.filter(
+#                 project_name=project,
+#                 position=employee.position
+#             ).order_by('order_number')
+#             if hierarchy.exists():
+#                 return hierarchy
 
-        # Fall back to role-based hierarchy if no project-specific hierarchy exists
-        return Hierarchy.objects.filter(
-            position=employee.position,
-            project_name=None
-        ).order_by('order_number')
+#         # Fall back to role-based hierarchy if no project-specific hierarchy exists
+#         return Hierarchy.objects.filter(
+#             position=employee.position,
+#             project_name=None
+#         ).order_by('order_number')
 
-    def advance_to_next_approver(leave_application, approvers):
-        # Identify the current approver in the list
-        current_index = approvers.index(leave_application.current_approver) if leave_application.current_approver in approvers else -1
-        next_index = current_index + 1
+#     def advance_to_next_approver(leave_application, approvers):
+#         # Identify the current approver in the list
+#         current_index = approvers.index(leave_application.current_approver) if leave_application.current_approver in approvers else -1
+#         next_index = current_index + 1
 
-        # Move to the next approver if available; otherwise, mark as approved
-        if next_index < len(approvers):
-            leave_application.current_approver = approvers[next_index]
-            leave_application.status = 'pending'
-        else:
-            leave_application.current_approver = None
-            leave_application.status = 'approved'
-        leave_application.save()
+#         # Move to the next approver if available; otherwise, mark as approved
+#         if next_index < len(approvers):
+#             leave_application.current_approver = approvers[next_index]
+#             leave_application.status = 'pending'
+#         else:
+#             leave_application.current_approver = None
+#             leave_application.status = 'approved'
+#         leave_application.save()
 
-    # Collect leave applications for approval
-    all_applications = LeaveApplication.objects.all()
-    for application in all_applications:
-        submitter = application.employee
-        project_assignment = Projects.objects.filter(team_members=submitter).first()
+#     # Collect leave applications for approval
+#     all_applications = LeaveApplication.objects.all()
+#     for application in all_applications:
+#         submitter = application.employee
+#         project_assignment = Projects.objects.filter(team_members=submitter).first()
         
-        # Fetch appropriate hierarchy
-        hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
-        approvers = [entry.approver for entry in hierarchy]
+#         # Fetch appropriate hierarchy
+#         hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
+#         approvers = [entry.approver for entry in hierarchy]
 
-        if employee in approvers:
-            leave_applications_to_approve |= LeaveApplication.objects.filter(id=application.id)
+#         if employee in approvers:
+#             leave_applications_to_approve |= LeaveApplication.objects.filter(id=application.id)
 
-    leave_form = LeaveForm()
-    leave_application_form = LeaveApplicationForm(employee=employee)
+#     leave_form = LeaveForm()
+#     leave_application_form = LeaveApplicationForm(employee=employee)
 
-    if request.method == 'POST':
-        if 'leave_form' in request.POST:
-                leave_form = LeaveForm(request.POST)
-                if leave_form.is_valid():
-                 leave_form.save()
-                 messages.success(request, 'Leave information has been successfully submitted!')
-                return redirect('leave')
-        if 'leave_application_form' in request.POST:
-            leave_application_form = LeaveApplicationForm(request.POST, employee=employee)
-            if leave_application_form.is_valid():
-                # Check if the employee is assigned to any project
-               projects = Projects.objects.filter(team_members=employee)
+#     if request.method == 'POST':
+#         if 'leave_form' in request.POST:
+#                 leave_form = LeaveForm(request.POST)
+#                 if leave_form.is_valid():
+#                  leave_form.save()
+#                  messages.success(request, 'Leave information has been successfully submitted!')
+#                 return redirect('leave')
+#         if 'leave_application_form' in request.POST:
+#             leave_application_form = LeaveApplicationForm(request.POST, employee=employee)
+#             if leave_application_form.is_valid():
+#                 # Check if the employee is assigned to any project
+#                projects = Projects.objects.filter(team_members=employee)
                 
-               hierarchy = None
-               for project in projects:
-                    # First, try finding hierarchy specific to the role and project
-                    hierarchy = Hierarchy.objects.filter(position=employee.position, project_name=project).order_by('order_number')
-                    if hierarchy.exists():
-                        break
+#                hierarchy = None
+#                for project in projects:
+#                     # First, try finding hierarchy specific to the role and project
+#                     hierarchy = Hierarchy.objects.filter(position=employee.position, project_name=project).order_by('order_number')
+#                     if hierarchy.exists():
+#                         break
                 
-                # If no project-specific hierarchy exists, check for a general role-based hierarchy
-               if not hierarchy or not hierarchy.exists():
-                    hierarchy = Hierarchy.objects.filter(position=employee.position, project_name__isnull=True).order_by('order_number')
+#                 # If no project-specific hierarchy exists, check for a general role-based hierarchy
+#                if not hierarchy or not hierarchy.exists():
+#                     hierarchy = Hierarchy.objects.filter(position=employee.position, project_name__isnull=True).order_by('order_number')
 
-               if hierarchy.exists():
-                    # Proceed with saving the leave application if a hierarchy exists
-                    leave_application = leave_application_form.save(commit=False)
-                    leave_application.employee = employee
+#                if hierarchy.exists():
+#                     # Proceed with saving the leave application if a hierarchy exists
+#                     leave_application = leave_application_form.save(commit=False)
+#                     leave_application.employee = employee
 
-                    # Set the first approver in the hierarchy
-                    leave_application.current_approver = hierarchy.first().approver
-                    leave_application.status = 'pending'
-                    leave_application.save()
+#                     # Set the first approver in the hierarchy
+#                     leave_application.current_approver = hierarchy.first().approver
+#                     leave_application.status = 'pending'
+#                     leave_application.save()
                     
-                    messages.success(request, 'Leave application has been successfully submitted!')
-               else:
-                    # If no hierarchy is found, show an error message and don't save the application
-                    messages.error(request, "No approval hierarchy exists for your role and project. Please contact HR for assistance.")
+#                     messages.success(request, 'Leave application has been successfully submitted!')
+#                else:
+#                     # If no hierarchy is found, show an error message and don't save the application
+#                     messages.error(request, "No approval hierarchy exists for your role and project. Please contact HR for assistance.")
                 
-               return redirect('leave')
-            else:
-                error_message = ""
-                non_field_errors = leave_application_form.errors.get('__all__', [])
-                for error in non_field_errors:
-                        error_message += f"{error}" 
-                for field, errors in leave_application_form.errors.items():
-                        if field != '__all__':
-                            for error in errors:
-                                error_message += f"<strong>{field}</strong>: {error}<br>"
+#                return redirect('leave')
+#             else:
+#                 error_message = ""
+#                 non_field_errors = leave_application_form.errors.get('__all__', [])
+#                 for error in non_field_errors:
+#                         error_message += f"{error}" 
+#                 for field, errors in leave_application_form.errors.items():
+#                         if field != '__all__':
+#                             for error in errors:
+#                                 error_message += f"<strong>{field}</strong>: {error}<br>"
     
-                messages.error(request,error_message)
+#                 messages.error(request,error_message)
                 
-                leave_application_form = LeaveApplicationForm(employee=employee)
+#                 leave_application_form = LeaveApplicationForm(employee=employee)
 
-        elif 'status' in request.POST:
-            leave_application_id = request.POST.get('leave_application_id')
-            leave_application = LeaveApplication.objects.get(id=leave_application_id)
+#         elif 'status' in request.POST:
+#             leave_application_id = request.POST.get('leave_application_id')
+#             leave_application = LeaveApplication.objects.get(id=leave_application_id)
 
-            # Fetch submitter and hierarchy for the application
-            submitter = leave_application.employee
-            project_assignment = Projects.objects.filter(team_members=submitter).first()
-            hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
-            approvers = [entry.approver for entry in hierarchy]
+#             # Fetch submitter and hierarchy for the application
+#             submitter = leave_application.employee
+#             project_assignment = Projects.objects.filter(team_members=submitter).first()
+#             hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
+#             approvers = [entry.approver for entry in hierarchy]
 
-            if leave_application.current_approver == employee:
-                # If status is 'rejected', update and save immediately
-                if request.POST.get('status') == 'rejected':
-                    leave_application.status = 'rejected'
-                    leave_application.remarks = request.POST.get('remarks', '')
-                    leave_application.current_approver = None
-                    leave_application.save()
-                    messages.success(request, 'Leave application rejected.')
-                    return redirect('leave')
+#             if leave_application.current_approver == employee:
+#                 # If status is 'rejected', update and save immediately
+#                 if request.POST.get('status') == 'rejected':
+#                     leave_application.status = 'rejected'
+#                     leave_application.remarks = request.POST.get('remarks', '')
+#                     leave_application.current_approver = None
+#                     leave_application.save()
+#                     messages.success(request, 'Leave application rejected.')
+#                     return redirect('leave')
 
-                # Otherwise, advance to the next approver or approve fully
-                advance_to_next_approver(leave_application, approvers)
-                messages.success(request, 'Leave application status updated.')
-                return redirect('leave')
+#                 # Otherwise, advance to the next approver or approve fully
+#                 advance_to_next_approver(leave_application, approvers)
+#                 messages.success(request, 'Leave application status updated.')
+#                 return redirect('leave')
 
-    return render(request, 'templates/sub_templates/apply_leave.html', {
-        'leave_form': leave_form,
-        'leave_application_form': leave_application_form,
-        'leave_applications': leave_applications_to_approve,
-        'logged_in_user': logged_in_user,
-        'all_leaves' : leaves,
-    })
+#     return render(request, 'templates/sub_templates/apply_leave.html', {
+#         'leave_form': leave_form,
+#         'leave_application_form': leave_application_form,
+#         'leave_applications': leave_applications_to_approve,
+#         'logged_in_user': logged_in_user,
+#         'all_leaves' : leaves,
+#     })
 
 
 @login_required
 @no_cache
 def leave(request):
-    leaves=Leaves.objects.all()
     employee = Employee.objects.get(email=request.user.email)
-    leave_applications_to_approve = LeaveApplication.objects.none()
+    leaves = Leaves.objects.all()
+
+    leave_applications_to_approve = LeaveApplication.objects.filter(current_approver_id=employee, status='pending')
+    print("Applications for approval:", leave_applications_to_approve)  # Debugging
     logged_in_user = LeaveApplication.objects.filter(employee=employee)
-
-    def get_hierarchy_for_role(employee, project=None):
-        # First, try to fetch project-specific hierarchy
-        if project:
-            hierarchy = Hierarchy.objects.filter(
-                project_name=project,
-                position=employee.position
-            ).order_by('order_number')
-            if hierarchy.exists():
-                return hierarchy
-
-        # Fall back to role-based hierarchy if no project-specific hierarchy exists
-        return Hierarchy.objects.filter(
-            position=employee.position,
-            project_name=None
-        ).order_by('order_number')
-
-    def advance_to_next_approver(leave_application, approvers):
-        # Identify the current approver in the list
-        current_index = approvers.index(leave_application.current_approver) if leave_application.current_approver in approvers else -1
-        next_index = current_index + 1
-
-        # Move to the next approver if available; otherwise, mark as approved
-        if next_index < len(approvers):
-            leave_application.current_approver = approvers[next_index]
-            leave_application.status = 'pending'
-        else:
-            leave_application.current_approver = None
-            leave_application.status = 'approved'
-        leave_application.save()
-
-    # Collect leave applications for approval
-    all_applications = LeaveApplication.objects.all()
-    for application in all_applications:
-        submitter = application.employee
-        project_assignment = Projects.objects.filter(team_members=submitter).first()
-        
-        # Fetch appropriate hierarchy
-        hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
-        approvers = [entry.approver for entry in hierarchy]
-
-        if employee in approvers:
-            leave_applications_to_approve |= LeaveApplication.objects.filter(id=application.id)
 
     leave_form = LeaveForm()
     leave_application_form = LeaveApplicationForm(employee=employee)
 
     if request.method == 'POST':
-        if 'leave_form' in request.POST:
-                leave_form = LeaveForm(request.POST)
-                if leave_form.is_valid():
-                 leave_form.save()
-                 messages.success(request, 'Leave information has been successfully submitted!')
-                return redirect('leave')
         if 'leave_application_form' in request.POST:
             leave_application_form = LeaveApplicationForm(request.POST, employee=employee)
             if leave_application_form.is_valid():
-                # Check if the employee is assigned to any project
-               projects = Projects.objects.filter(team_members=employee)
-                
-               hierarchy = None
-               for project in projects:
-                    # First, try finding hierarchy specific to the role and project
-                    hierarchy = Hierarchy.objects.filter(position=employee.position, project_name=project).order_by('order_number')
-                    if hierarchy.exists():
-                        break
-                
-                # If no project-specific hierarchy exists, check for a general role-based hierarchy
-               if not hierarchy or not hierarchy.exists():
-                    hierarchy = Hierarchy.objects.filter(position=employee.position, project_name__isnull=True).order_by('order_number')
+                leave_application = leave_application_form.save(commit=False)
+                leave_application.employee = employee
 
-               if hierarchy.exists():
-                    # Proceed with saving the leave application if a hierarchy exists
-                    leave_application = leave_application_form.save(commit=False)
-                    leave_application.employee = employee
-
-                    # Set the first approver in the hierarchy
-                    leave_application.current_approver = hierarchy.first().approver
+                # Set approver from the Leaves table
+                leave_type = leave_application.leave_type
+                if leave_type and leave_type.leave_approver:
+                    leave_application.current_approver = leave_type.leave_approver
                     leave_application.status = 'pending'
                     leave_application.save()
-                    
                     messages.success(request, 'Leave application has been successfully submitted!')
-               else:
-                    # If no hierarchy is found, show an error message and don't save the application
-                    messages.error(request, "No approval hierarchy exists for your role and project. Please contact HR for assistance.")
-                
-               return redirect('leave')
+                else:
+                    messages.error(request, "No approver is assigned for the selected leave type. Please contact HR.")
+
+                return redirect('leave')
             else:
+                # Handle form errors
                 error_message = ""
                 non_field_errors = leave_application_form.errors.get('__all__', [])
                 for error in non_field_errors:
-                        error_message += f"{error}" 
+                    error_message += f"{error}" 
                 for field, errors in leave_application_form.errors.items():
-                        if field != '__all__':
-                            for error in errors:
-                                error_message += f"<strong>{field}</strong>: {error}<br>"
-    
-                messages.error(request,error_message)
-                
+                    if field != '__all__':
+                        for error in errors:
+                            error_message += f"<strong>{field}</strong>: {error}<br>"
+
+                messages.error(request, error_message)
                 leave_application_form = LeaveApplicationForm(employee=employee)
 
         elif 'status' in request.POST:
             leave_application_id = request.POST.get('leave_application_id')
             leave_application = LeaveApplication.objects.get(id=leave_application_id)
 
-            # Fetch submitter and hierarchy for the application
-            submitter = leave_application.employee
-            project_assignment = Projects.objects.filter(team_members=submitter).first()
-            hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
-            approvers = [entry.approver for entry in hierarchy]
-
             if leave_application.current_approver == employee:
-                # If status is 'rejected', update and save immediately
                 if request.POST.get('status') == 'rejected':
                     leave_application.status = 'rejected'
                     leave_application.remarks = request.POST.get('remarks', '')
@@ -725,18 +858,215 @@ def leave(request):
                     messages.success(request, 'Leave application rejected.')
                     return redirect('leave')
 
-                # Otherwise, advance to the next approver or approve fully
-                advance_to_next_approver(leave_application, approvers)
-                messages.success(request, 'Leave application status updated.')
-                return redirect('leave')
+                if request.POST.get('status') == 'approved':
+                    leave_application.status = 'approved'
+                    leave_application.current_approver = None
+                    leave_application.save()
+                    messages.success(request, 'Leave application approved.')
+                    return redirect('leave')
 
     return render(request, 'templates/leave.html', {
         'leave_form': leave_form,
         'leave_application_form': leave_application_form,
-        'leave_applications': leave_applications_to_approve,
-        'logged_in_user': logged_in_user,
-        'all_leaves' : leaves,
+        'leave_applications': leave_applications_to_approve,  
+        'logged_in_user': logged_in_user, 
+        'all_leaves': leaves,  
     })
+
+@login_required
+@no_cache
+def apply_leave(request):
+    employee = Employee.objects.get(email=request.user.email)
+    leaves = Leaves.objects.all()
+
+    leave_applications_to_approve = LeaveApplication.objects.filter(current_approver_id=employee, status='pending')
+    print("Applications for approval:", leave_applications_to_approve)  # Debugging
+    logged_in_user = LeaveApplication.objects.filter(employee=employee)
+
+    leave_form = LeaveForm()
+    leave_application_form = LeaveApplicationForm(employee=employee)
+
+    if request.method == 'POST':
+        if 'leave_application_form' in request.POST:
+            leave_application_form = LeaveApplicationForm(request.POST, employee=employee)
+            if leave_application_form.is_valid():
+                leave_application = leave_application_form.save(commit=False)
+                leave_application.employee = employee
+
+                # Set approver from the Leaves table
+                leave_type = leave_application.leave_type
+                if leave_type and leave_type.leave_approver:
+                    leave_application.current_approver = leave_type.leave_approver
+                    leave_application.status = 'pending'
+                    leave_application.save()
+                    messages.success(request, 'Leave application has been successfully submitted!')
+                else:
+                    messages.error(request, "No approver is assigned for the selected leave type. Please contact HR.")
+
+                return redirect('leave')
+            else:
+                # Handle form errors
+                error_message = ""
+                non_field_errors = leave_application_form.errors.get('__all__', [])
+                for error in non_field_errors:
+                    error_message += f"{error}" 
+                for field, errors in leave_application_form.errors.items():
+                    if field != '__all__':
+                        for error in errors:
+                            error_message += f"<strong>{field}</strong>: {error}<br>"
+
+                messages.error(request, error_message)
+                return redirect('leave')
+                # leave_application_form = LeaveApplicationForm(employee=employee)
+
+        elif 'status' in request.POST:
+            leave_application_id = request.POST.get('leave_application_id')
+            leave_application = LeaveApplication.objects.get(id=leave_application_id)
+
+            if leave_application.current_approver == employee:
+                if request.POST.get('status') == 'rejected':
+                    leave_application.status = 'rejected'
+                    leave_application.remarks = request.POST.get('remarks', '')
+                    leave_application.current_approver = None
+                    leave_application.save()
+                    messages.success(request, 'Leave application rejected.')
+                    return redirect('leave')
+
+                if request.POST.get('status') == 'approved':
+                    leave_application.status = 'approved'
+                    leave_application.current_approver = None
+                    leave_application.save()
+                    messages.success(request, 'Leave application approved.')
+                    return redirect('leave')
+
+    return render(request, 'templates/sub_templates/apply_leave.html', {
+        'leave_form': leave_form,
+        'leave_application_form': leave_application_form,
+        'leave_applications': leave_applications_to_approve,  
+        'logged_in_user': logged_in_user, 
+        'all_leaves': leaves,  
+    })
+# @login_required
+# @no_cache
+# def leave(request):
+    
+#     employee = Employee.objects.get(email=request.user.email)
+#     leaves=Leaves.objects.all()
+    
+#     leave_applications_to_approve = LeaveApplication.objects.none()
+#     logged_in_user = LeaveApplication.objects.filter(employee=employee)
+
+#     def get_hierarchy_for_role(employee, project=None):
+#         if project:
+#             hierarchy = Hierarchy.objects.filter(
+#                 project_name=project,
+#                 position=employee.position
+#             ).order_by('order_number')
+#             if hierarchy.exists():
+#                 return hierarchy
+
+#         return Hierarchy.objects.filter(
+#             position=employee.position,
+#             project_name=None
+#         ).order_by('order_number')
+
+#     def advance_to_next_approver(leave_application, approvers):
+#         current_index = approvers.index(leave_application.current_approver) if leave_application.current_approver in approvers else -1
+#         next_index = current_index + 1
+
+#         if next_index < len(approvers):
+#             leave_application.current_approver = approvers[next_index]
+#             leave_application.status = 'pending'
+#         else:
+#             leave_application.current_approver = None
+#             leave_application.status = 'approved'
+#         leave_application.save()
+
+#     all_applications = LeaveApplication.objects.all()
+#     for application in all_applications:
+#         submitter = application.employee
+#         project_assignment = Projects.objects.filter(team_members=submitter).first()
+        
+#         hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
+#         approvers = [entry.approver for entry in hierarchy]
+
+#         if employee in approvers:
+#             leave_applications_to_approve |= LeaveApplication.objects.filter(id=application.id)
+
+#     leave_form = LeaveForm()
+#     leave_application_form = LeaveApplicationForm(employee=employee)
+
+#     if request.method == 'POST':
+#         if 'leave_application_form' in request.POST:
+#             leave_application_form = LeaveApplicationForm(request.POST, employee=employee)
+#             if leave_application_form.is_valid():
+#                projects = Projects.objects.filter(team_members=employee)
+                
+#                hierarchy = None
+#                for project in projects:
+#                     hierarchy = Hierarchy.objects.filter(position=employee.position, project_name=project).order_by('order_number')
+#                     if hierarchy.exists():
+#                         break
+                
+#                if not hierarchy or not hierarchy.exists():
+#                     hierarchy = Hierarchy.objects.filter(position=employee.position, project_name__isnull=True).order_by('order_number')
+
+#                if hierarchy.exists():
+#                     leave_application = leave_application_form.save(commit=False)
+#                     leave_application.employee = employee
+
+#                     leave_application.current_approver = hierarchy.first().approver
+#                     leave_application.status = 'pending'
+#                     leave_application.save()
+                    
+#                     messages.success(request, 'Leave application has been successfully submitted!')
+#                else:
+#                     messages.error(request, "No approval hierarchy exists for your role and project. Please contact HR for assistance.")
+                
+#                return redirect('leave')
+#             else:
+#                 error_message = ""
+#                 non_field_errors = leave_application_form.errors.get('__all__', [])
+#                 for error in non_field_errors:
+#                         error_message += f"{error}" 
+#                 for field, errors in leave_application_form.errors.items():
+#                         if field != '__all__':
+#                             for error in errors:
+#                                 error_message += f"<strong>{field}</strong>: {error}<br>"
+    
+#                 messages.error(request,error_message)
+                
+#                 leave_application_form = LeaveApplicationForm(employee=employee)
+
+#         elif 'status' in request.POST:
+#             leave_application_id = request.POST.get('leave_application_id')
+#             leave_application = LeaveApplication.objects.get(id=leave_application_id)
+
+#             submitter = leave_application.employee
+#             project_assignment = Projects.objects.filter(team_members=submitter).first()
+#             hierarchy = get_hierarchy_for_role(submitter, project=project_assignment)
+#             approvers = [entry.approver for entry in hierarchy]
+
+#             if leave_application.current_approver == employee:
+#                 if request.POST.get('status') == 'rejected':
+#                     leave_application.status = 'rejected'
+#                     leave_application.remarks = request.POST.get('remarks', '')
+#                     leave_application.current_approver = None
+#                     leave_application.save()
+#                     messages.success(request, 'Leave application rejected.')
+#                     return redirect('leave')
+
+#                 advance_to_next_approver(leave_application, approvers)
+#                 messages.success(request, 'Leave application status updated.')
+#                 return redirect('leave')
+
+#     return render(request, 'templates/leave.html', {
+#         'leave_form': leave_form,
+#         'leave_application_form': leave_application_form,
+#         'leave_applications': leave_applications_to_approve,
+#         'logged_in_user': logged_in_user,
+#         'all_leaves' : leaves,
+#     })
 
 
 @login_required

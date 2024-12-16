@@ -43,6 +43,9 @@
         <li><a href="{% url 'billing_types' %}" class="{% if request.path == '/billing_types/' %}active{% endif %}">Billing Types</a></li>
         <li><a href="{% url 'departments' %}" class="{% if request.path == '/departments/' %}active{% endif %}">Departments</a></li>
         <li><a href="{% url 'document_types' %}" class="{% if request.path == '/document_types/' %}active{% endif %}">Document Types</a></li>
+        <li><a href="{% url 'industry' %}" class="{% if request.path == '/industry/' %}active{% endif %}">Industry</a></li>
+        <li><a href="{% url 'position' %}" class="{% if request.path == '/position/' %}active{% endif %}">Employee Positions</a></li>
+        <li><a href="{% url 'role' %}" class="{% if request.path == '/role/' %}active{% endif %}">Employee Roles</a></li>
         <li><a href="{% url 'leave_config_dashboard' %}" class="{% if request.path == '/leave_config_dashboard/' %}active{% endif %}">Leave Policy</a></li>
         <li><a href="{% url 'payment_terms' %}" class="{% if request.path == '/payment_terms/' %}active{% endif %}">Payment Terms</a></li>
     </ul>

@@ -13,22 +13,30 @@
         <!-- Employee Selection -->
         <div class="mb-3">
             <label for="employeeSelect" class="form-label">Select Leave Type</label>
-            {% render_field leave_application_form.leave_type class+="form-control" onchange="updateMaxDays()" %}
+            {% render_field leave_application_form.leave_type class+="form-control" id="id_leave_type" onchange="updateMaxDays()" %}
         </div>            
     
         <!-- Leave Dates -->
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label for="startDate" class="form-label">Start Date</label>
-                {% render_field leave_application_form.start_date class+="form-control" id="startDate" onchange="updateMaxDays()" %}
+                {% render_field leave_application_form.start_date class+="form-control" id="startDate" onchange="updateAvailableLeaves()" %}
             </div>
             <div class="col-md-6 mb-3">
                 <label for="endDate" class="form-label">End Date</label>
-                {% render_field leave_application_form.end_date class+="form-control" id="endDate" %}
+                {% render_field leave_application_form.end_date class+="form-control" id="endDate" onchange="updateAvailableLeaves()" %}
             </div>
             <div class="col-md-6 mb-3">
                 <label for="endDate" class="form-label">Resource Replacement Email Id</label>
-                {% render_field leave_application_form.resource_replacement_email_id placeholder="Resource Replacement Email Id" class+="form-control" id="endDate" %}
+                {% render_field leave_application_form.resource_replacement_email_id placeholder="Resource Replacement Email Id" class+="form-control"  %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="endDate" class="form-label">Available Leaves</label>
+                {% render_field leave_application_form.available_leaves id="id_available_leaves" class+="form-control" id="endDate" %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="remaining_leaves" class="form-label">Remaining Leave Balance</label>
+                <input type="text" class="form-control" id="remainingLeaves" readonly="readonly">
             </div>
         </div>
     
@@ -43,5 +51,68 @@
     </div>
 </div>
 
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#id_leave_type').change(function () {
+            const leaveTypeId = $(this).val();
+            
+
+
+            if (leaveTypeId) {
+                $.ajax({
+                    url: "{% url 'calculate_available_leaves' %}", 
+                    method: "POST",
+                    data: {
+                        leave_type_id: leaveTypeId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        $('#id_available_leaves').val(response.available_leaves);
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            } else {
+                $('#id_available_leaves').val('');
+            }
+        });
+    });
+</script>
+<script>
+    function updateAvailableLeaves() {
+        var startDate = document.getElementById("startDate").value;
+        var endDate = document.getElementById("endDate").value;
+        
+        var availableLeaves = parseInt(document.getElementById("id_available_leaves").value);
+
+        if (startDate && endDate) {
+            var start = new Date(startDate);  
+            var end = new Date(endDate);      
+
+            start.setHours(0, 0, 0, 0);
+            end.setHours(0, 0, 0, 0);
+
+            if (end < start) {
+                alert("End date cannot be before start date.");
+                return;
+            }
+
+            var timeDiff = end - start; 
+            var dayDifference = timeDiff / (1000 * 3600 * 24); 
+
+            dayDifference += 1; 
+
+            var remainingLeaves = availableLeaves - dayDifference;
+
+            document.getElementById("remainingLeaves").value = remainingLeaves;
+
+        } else {
+            document.getElementById("remainingLeaves").value = availableLeaves;
+        }
+    }
+</script>
 
 {% endblock %}

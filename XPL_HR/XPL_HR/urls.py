@@ -89,6 +89,20 @@ urlpatterns = [
     path('edit_doc_types/<int:id>/', views.edit_doc_type, name='edit_doc_types'),
     path('edit_payment_terms/<int:id>/', views.edit_payment_terms, name='edit_payment_terms'),
     path('settings/', lambda request: redirect('billing_types'), name='settings'),
+    path('position/', views.employee_position, name='position'),
+    path('add_position/', views.add_employee_position, name='add_position'),
+    path('delete_position/<int:id>/', views.delete_employee_position, name='delete_position'),
+    path('edit_position/<int:id>/', views.edit_employee_position, name='edit_position'),
+    path('industry/', views.employee_industry, name='industry'),
+    path('add_industry/', views.add_employee_industry, name='add_industry'),
+    path('delete_industry/<int:id>/', views.delete_employee_industry, name='delete_industry'),
+    path('edit_industry/<int:id>/', views.edit_employee_industry, name='edit_industry'),
+    path('role/', views.employee_role, name='role'),
+    path('add_role/', views.add_employee_role, name='add_role'),
+    path('delete_role/<int:id>/', views.delete_employee_role, name='delete_role'),
+    path('edit_role/<int:id>/', views.edit_employee_role, name='edit_role'),
+    path('calculate-available-leaves/', views.calculate_available_leaves, name='calculate_available_leaves'),
+
 
 
 

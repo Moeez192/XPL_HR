@@ -1,12 +1,10 @@
 {% extends 'templates/settings.html' %}
 {%load static%}
-{% block title %} Document Types {% endblock %}
-{% load widget_tweaks %}
+{% block title %} Leave Configuration Dashboard {% endblock %}
 {% block settings_content %}
-
+{% load widget_tweaks %}
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
 <style>
     .alert {
@@ -18,15 +16,15 @@
     }
 
     .close:hover {
-        color: #ff2a00; 
+        color: #ff2a00; /* Color on hover */
     }
 
     .alert-info {
-        border-color: #b8daff; 
+        border-color: #b8daff; /* Optional: customize border color */
     }
 
     .alert-info p {
-        margin-bottom: 0; 
+        margin-bottom: 0; /* Remove bottom margin from the paragraph */
     }
     .normal {
     color: black;
@@ -51,9 +49,11 @@
 }
 
 </style>
-
+<!-- <div class="containe-fluid mt-5" > -->
+    <!-- Dashboard Cards -->
     
      {% if messages %}
+    <!-- <div class="container mt-3"> -->
         {% for message in messages %}
             <div class="alert alert-dismissible fade show 
                 {% if message.tags == 'success' %}alert-info{% endif %} 
@@ -65,55 +65,52 @@
                 </button>
             </div>
         {% endfor %}
+    <!-- </div> -->
 {% endif %}
-
-
-
-       
-
-
-
-<div >
-    <a href="{% url 'add_document_types' %}" class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1;border-radius: 20px;"> <i class="fa fa-plus"></i> Document Type</a>
-</div>  
-        
+    <!-- Search and Table Filter -->
+<div>
+    <a href="{% url 'add_role' %}" class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1;border-radius: 20px;"> <i class="fa fa-plus"></i> Employee Role</a>
+</div>
+    <!-- Scrollable Table -->
     <div class="table-container">
-        <h4>Document Types</h4>
+        <h4>Employee Role</h4>
         <br>
+
         <table class="table table-hover" id="employeeTable">
             <thead class="">
-                <tr class="table-header">
-                    <tr>
-                        <th>Document Name</th>
-                        <th>Actions</th>
-                    </tr>
+                <tr>
+                    <th scope="col">Role Name</th>
+                    <th scope="col">Actions </th>
                 </tr>
             </thead>
             <tbody>
-                {% for p in doc_types %}
-                    <tr>
-                        <td>{{ p.doc_type }}</td>
-                        <td><form action="{% url 'delete_doc_types' p.id %}" method="POST" style="display:inline;">
+                {% for form in roles %}
+                <tr>
+                    <td>{{ form.role_name  }}</td>
+                    
+                    <td>
+                        
+                        <a href="{% url 'edit_role' form.id %}" class="btn btn-primary btn-sm"><i class="fas fa-pencil-alt"></i></a>
+                        <form action="{% url 'delete_role' form.id %}" method="post" style="display:inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete?');">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this Role?');">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
-                        <a href="{% url 'edit_doc_types' p.id %}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-edit"></i>
-                    </td> 
-                    </tr>
+                    </td>
+                    
+                </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="2">No Document Type Found.</td>
+                        <td colspan="2" class="text-center">No Roles Yet!</td>
                     </tr>
                 {% endfor %}
+                
             </tbody>
         </table>
     </div>
-    </div>
-</div>
+
+    {% endblock %}
+    
 
 
-
-{% endblock %}

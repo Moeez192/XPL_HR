@@ -34,6 +34,10 @@
                                 <label for="leavePaid" class="form-label">Is Paid Leave?</label>
                                 {% render_field leave_form.is_paid  class+="form-control" %}
                             </div>
+                            <div class="col-md-6">
+                                <label for="leavePaid" class="form-label">Leave Approver</label>
+                                {% render_field leave_form.leave_approver class+="form-control" %}
+                            </div>
                         </div>
                         
                         <button type="submit" name="leave_form" class="btn btn-primary">Save</button>
