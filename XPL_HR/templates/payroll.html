@@ -1,0 +1,56 @@
+{% extends 'templates/navs.html' %}
+
+{% block title %} Payroll{% endblock %}
+{% block content %}
+<style>
+.secondary-nav {
+    margin-top: -37px;
+    background-color: #111827;
+    padding: 10px 0; 
+    border-radius: 50px;
+}
+
+.secondary-nav .nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding-left: 8px;
+    gap: 20px; 
+}
+
+.secondary-nav .nav-links li a {
+    text-decoration: none;
+    color: #64748b; 
+    font-weight: 500;
+    padding: 8px 15px; 
+    border-radius: 25px; 
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.secondary-nav .nav-links li a.active {
+    background-color: #ff4d00; 
+    color: #ffffff; 
+}
+
+.secondary-nav .nav-links li a:hover {
+    background-color: #ff4d00; 
+    color: #ffffff; 
+}
+
+</style>
+<div class="secondary-nav" style="margin-right: 68%;">
+    <ul class="nav-links">
+        <li><a href="{% url 'payroll_uae' %}" class="{% if request.path == '/payroll_uae/' %}active{% endif %}">Payroll For UAE</a></li>
+        <li><a href="#" class="">Payroll for Contractors</a></li>
+    </ul>
+</div>
+<br>
+
+
+    <div id="payroll-content">
+        {% block payroll_content %}
+        
+
+        {% endblock %}
+    </div>
+{% endblock %}

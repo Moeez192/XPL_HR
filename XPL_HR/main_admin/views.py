@@ -2598,7 +2598,6 @@ def download_timesheet_pdf(request, month):
 @login_required
 @no_cache
 def calculate_salaries_for_month(year, month, employee):
-    # Get the accepted timesheets for the month
     timesheets = Timesheet.objects.filter(
         employee=employee,
         date__year=year,
@@ -2606,23 +2605,18 @@ def calculate_salaries_for_month(year, month, employee):
         status='accepted'
     )
     
-    # Get unique days from the timesheets
-    unique_days_worked = set(timesheet.date for timesheet in timesheets)  # Ensures only unique dates are counted
+    unique_days_worked = set(timesheet.date for timesheet in timesheets)  
     total_days_worked = len(unique_days_worked)
     
     print("Total unique days worked:", total_days_worked)
 
-    # Get the number of days in the month
     days_in_month = monthrange(year, month)[1]
 
-    # Calculate total salary
     total_salary = 0.0
 
-    # Calculate the salary based on distinct dates and corresponding timesheets
     for work_day in unique_days_worked:
-        day_timesheets = timesheets.filter(date=work_day)  # Get all timesheets for that day
+        day_timesheets = timesheets.filter(date=work_day)  
         
-        # Calculate the salary for each unique day
         daily_salary = 0.0
         for timesheet in day_timesheets:
             if timesheet.location == 'onsite':
@@ -2639,12 +2633,11 @@ def calculate_salaries_for_month(year, month, employee):
         employee=employee,
         month=datetime(year, month, 1),
           defaults={
-            'total_days_worked': 0,  # Default value if new
-            'total_salary': 0.0  ,     # Default value if new
-        }  # First day of the month
+            'total_days_worked': 0,  
+            'total_salary': 0.0  ,     
+        }  
     )
 
-    # Set the fields before saving
     salary.total_days_worked = total_days_worked
     salary.total_salary = total_salary
 
@@ -3028,3 +3021,435 @@ def payment_term_delete_view(request, pk):
     messages.success(request, "Payment Term Deleted Successfully")
     return redirect('payment_terms') 
 
+
+
+# def generate_payroll(month_str,employee,date):
+#     year, month = map(int, month_str.split('-'))
+#     print("Generating payroll for:", employee, year, month)
+    
+#     timesheets = Timesheet.objects.filter(
+#         employee=employee,
+#         date__year=year,
+#         date__month=month,
+#         status='accepted'
+#     )
+    
+#     project_timesheets = defaultdict(list)
+#     for timesheet in timesheets:
+#         project_timesheets[timesheet.project_id].append(timesheet)
+    
+#     project_salary_data = {}
+    
+#     for project_id, project_timesheet_list in project_timesheets.items():
+#         unique_days_worked = set(timesheet.date for timesheet in project_timesheet_list)
+#         total_days_worked = len(unique_days_worked)
+        
+#         total_hours_worked = 0.0  
+#         total_salary = 0.0  
+        
+#         print(f"Project {project_id}: Total unique days worked:", total_days_worked)
+        
+#         for work_day in unique_days_worked:
+#             day_timesheets = [t for t in project_timesheet_list if t.date == work_day]
+            
+#             daily_salary = 0.0
+#             for timesheet in day_timesheets:
+#                 total_hours = 0.0
+#                 try:
+#                     hours, minutes = map(int, timesheet.time_in_hrs.split(':'))
+#                     total_hours = hours + (minutes / 60.0)
+#                 except (ValueError, AttributeError):
+#                     print(f"Invalid or missing time_in_hrs for timesheet ID {timesheet.id}. Skipping this entry.")
+                
+#                 total_hours_worked += total_hours
+                
+#                 if timesheet.location == 'onsite':
+#                     daily_salary += total_hours * employee.onsite_salary
+#                 elif timesheet.location == 'remote':
+#                     daily_salary += total_hours * employee.remote_salary
+            
+#             total_salary += daily_salary
+        
+#         print(f"Project {project_id}: Total salary:", total_salary)
+#         print(f"Project {project_id}: Total hours worked:", total_hours_worked)
+        
+#         project_salary_data[project_id] = {
+#             'total_days_worked': total_days_worked,
+#             'total_hours_worked': total_hours_worked,
+#             'total_salary': total_salary,
+#         }
+    
+#     for project_id, salary_data in project_salary_data.items():
+#         salary, created = Salary.objects.get_or_create(
+#             employee=employee,
+#             project_id=project_id,
+#             month=datetime(year, month, 1),
+#             defaults={
+#                 'total_days_worked': 0,
+#                 'total_hours_worked': 0.0,
+#                 'total_salary': 0.0,
+#             }
+#         )
+        
+#         salary.total_days_worked = salary_data['total_days_worked']
+#         salary.total_hours_worked = salary_data['total_hours_worked']
+#         salary.total_salary = salary_data['total_salary']
+        
+#         salary.save()
+#         print(f"Salary record updated for Project {project_id}")
+
+from collections import defaultdict
+from datetime import datetime
+from collections import defaultdict
+from datetime import datetime
+from collections import defaultdict
+from datetime import datetime
+# def generate_payroll(month_str, employee, date):
+#     year, month = map(int, month_str.split('-'))
+#     print(f"Generating payroll for employee: {employee}, Year: {year}, Month: {month}")
+
+#     # Fetch approved leaves for the employee in the selected month and date range
+#     leaves = LeaveApplication.objects.filter(
+#         employee=employee,
+#         status='approved',
+#         start_date__lte=date,
+#         end_date__gte=datetime(year, month, 1)
+#     )
+
+#     # Build a dictionary of leave dates for easier lookup
+#     leave_dates_dict = {}
+#     for leave in leaves:
+#         leave_dates = set(
+#             leave.start_date + timedelta(days=i)
+#             for i in range((leave.end_date - leave.start_date).days + 1)
+#         )
+#         leave_dates_dict[leave.id] = {'dates': leave_dates, 'is_paid': leave.leave_type.is_paid}
+
+#     timesheets = Timesheet.objects.filter(
+#         employee=employee,
+#         date__year=year,
+#         date__month=month,
+#         status='accepted'
+#     )
+
+#     # Store project-wise timesheets
+#     project_timesheets = defaultdict(list)
+#     for timesheet in timesheets:
+#         project_timesheets[timesheet.project_id].append(timesheet)
+
+#     project_salary_data = {}
+
+#     for project_id, project_timesheet_list in project_timesheets.items():
+#         unique_days_worked = set(timesheet.date for timesheet in project_timesheet_list)
+#         total_days_worked = len(unique_days_worked)
+#         total_hours_worked = 0.0
+#         total_salary = 0.0
+
+#         print(f"Project {project_id}: Total unique days worked:", total_days_worked)
+
+#         for work_day in unique_days_worked:
+#             day_timesheets = [t for t in project_timesheet_list if t.date == work_day]
+#             daily_salary = 0.0
+
+#             # Check if the work day overlaps with any approved leave
+#             leave_found = False
+#             for leave_id, leave_data in leave_dates_dict.items():
+#                 if work_day in leave_data['dates']:
+#                     leave_found = True
+#                     # If leave is paid, calculate salary with onsite rate
+#                     if leave_data['is_paid']:
+#                         for timesheet in day_timesheets:
+#                             try:
+#                                 hours, minutes = map(int, timesheet.time_in_hrs.split(':'))
+#                                 total_hours = hours + (minutes / 60.0)
+#                                 daily_salary += total_hours * employee.onsite_salary
+#                                 total_hours_worked += total_hours
+#                             except (ValueError, AttributeError):
+#                                 print(f"Invalid time_in_hrs for timesheet ID {timesheet.id}. Skipping this entry.")
+#                         print(f"Paid leave on {work_day}: Calculating salary using onsite rate.")
+#                     else:
+#                         print(f"Unpaid leave on {work_day}: No salary calculated.")
+#                     break  # Stop further checks for this date
+
+#             # If no leave is found, process timesheet normally
+#             if not leave_found:
+#                 for timesheet in day_timesheets:
+#                     try:
+#                         hours, minutes = map(int, timesheet.time_in_hrs.split(':'))
+#                         total_hours = hours + (minutes / 60.0)
+#                         total_hours_worked += total_hours
+
+#                         if timesheet.location == 'onsite':
+#                             daily_salary += total_hours * employee.onsite_salary
+#                         elif timesheet.location == 'remote':
+#                             daily_salary += total_hours * employee.remote_salary
+#                     except (ValueError, AttributeError):
+#                         print(f"Invalid time_in_hrs for timesheet ID {timesheet.id}. Skipping this entry.")
+            
+#             total_salary += daily_salary
+
+#         print(f"Project {project_id}: Total salary:", total_salary)
+#         print(f"Project {project_id}: Total hours worked:", total_hours_worked)
+
+#         project_salary_data[project_id] = {
+#             'total_days_worked': total_days_worked,
+#             'total_hours_worked': total_hours_worked,
+#             'total_salary': total_salary,
+#         }
+
+#     # Save the salary data
+#     for project_id, salary_data in project_salary_data.items():
+#         salary, created = Salary.objects.get_or_create(
+#             employee=employee,
+#             project_id=project_id,
+#             month=datetime(year, month, 1),
+#             defaults={
+#                 'total_days_worked': 0,
+#                 'total_hours_worked': 0.0,
+#                 'total_salary': 0.0,
+#             }
+#         )
+        
+#         salary.total_days_worked = salary_data['total_days_worked']
+#         salary.total_hours_worked = salary_data['total_hours_worked']
+#         salary.total_salary = salary_data['total_salary']
+        
+#         salary.save()
+#         print(f"Salary record updated for Project {project_id}")
+
+
+def generate_payroll(month_str, employee, date):
+    year, month = map(int, month_str.split('-'))
+    print(f"Generating payroll for employee: {employee}, Year: {year}, Month: {month}")
+
+    # Fetch approved leaves for the employee in the selected month and date range
+    leaves = LeaveApplication.objects.filter(
+        employee=employee,
+        status='approved',
+        start_date__lte=date,
+        end_date__gte=datetime(year, month, 1)
+    )
+
+    # Build a dictionary of leave dates for easier lookup
+    leave_dates_dict = {}
+    for leave in leaves:
+        leave_dates = set(
+            leave.start_date + timedelta(days=i)
+            for i in range((leave.end_date - leave.start_date).days + 1)
+        )
+        leave_dates_dict[leave.id] = {'dates': leave_dates, 'is_paid': leave.leave_type.is_paid}
+
+    timesheets = Timesheet.objects.filter(
+        employee=employee,
+        date__year=year,
+        date__month=month,
+        status='accepted'
+    )
+
+    # Store project-wise timesheets
+    project_timesheets = defaultdict(list)
+    for timesheet in timesheets:
+        project_timesheets[timesheet.project_id].append(timesheet)
+
+    project_salary_data = {}
+
+    for project_id, project_timesheet_list in project_timesheets.items():
+        unique_days_worked = set(timesheet.date for timesheet in project_timesheet_list)
+        total_days_worked = len(unique_days_worked)
+        total_hours_worked = 0.0
+        total_salary = 0.0
+
+        print(f"Project {project_id}: Total unique days worked:", total_days_worked)
+
+        project = Projects.objects.get(id=project_id)
+        client_leaves = ClientLeave.objects.filter(client_id=project.client_name_id)
+
+        client_leave_names = [leave.client_leave_type for leave in client_leaves]
+
+        for work_day in unique_days_worked:
+            day_timesheets = [t for t in project_timesheet_list if t.date == work_day]
+            daily_salary = 0.0
+
+            leave_found = False
+            for leave_id, leave_data in leave_dates_dict.items():
+                if work_day in leave_data['dates']:
+                    leave_found = True
+                    if leave_data['is_paid']:
+                        for timesheet in day_timesheets:
+                            try:
+                                hours, minutes = map(int, timesheet.time_in_hrs.split(':'))
+                                total_hours = hours + (minutes / 60.0)
+                                daily_salary += total_hours * employee.onsite_salary
+                                total_hours_worked += total_hours
+                            except (ValueError, AttributeError):
+                                print(f"Invalid time_in_hrs for timesheet ID {timesheet.id}. Skipping this entry.")
+                        print(f"Paid leave on {work_day}: Calculating salary using onsite rate.")
+                    else:
+                        print(f"Unpaid leave on {work_day}: No salary calculated.")
+                    break  
+
+            if not leave_found:
+                for timesheet in day_timesheets:
+                    if timesheet.location in client_leave_names:
+                        leave_found = True
+                        try:
+                            hours, minutes = map(int, timesheet.time_in_hrs.split(':'))
+                            total_hours = hours + (minutes / 60.0)
+                            daily_salary += total_hours * employee.onsite_salary
+                            total_hours_worked += total_hours
+                        except (ValueError, AttributeError):
+                            print(f"Invalid time_in_hrs for timesheet ID {timesheet.id}. Skipping this entry.")
+                        print(f"Client leave on {work_day}: Calculating salary using onsite rate.")
+                        break
+
+            if not leave_found:
+                for timesheet in day_timesheets:
+                    try:
+                        hours, minutes = map(int, timesheet.time_in_hrs.split(':'))
+                        total_hours = hours + (minutes / 60.0)
+                        total_hours_worked += total_hours
+
+                        if timesheet.location == 'onsite':
+                            daily_salary += total_hours * employee.onsite_salary
+                        elif timesheet.location == 'remote':
+                            daily_salary += total_hours * employee.remote_salary
+                    except (ValueError, AttributeError):
+                        print(f"Invalid time_in_hrs for timesheet ID {timesheet.id}. Skipping this entry.")
+            
+            total_salary += daily_salary
+
+        print(f"Project {project_id}: Total salary:", total_salary)
+        print(f"Project {project_id}: Total hours worked:", total_hours_worked)
+
+        project_salary_data[project_id] = {
+            'total_days_worked': total_days_worked,
+            'total_hours_worked': total_hours_worked,
+            'total_salary': total_salary,
+        }
+
+    for project_id, salary_data in project_salary_data.items():
+        salary, created = Salary.objects.get_or_create(
+            employee=employee,
+            project_id=project_id,
+            month=datetime(year, month, 1),
+            defaults={
+                'total_days_worked': 0,
+                'total_hours_worked': 0.0,
+                'total_salary': 0.0,
+            }
+        )
+        
+        salary.total_days_worked = salary_data['total_days_worked']
+        salary.total_hours_worked = salary_data['total_hours_worked']
+        salary.total_salary = salary_data['total_salary']
+        
+        salary.save()
+        print(f"Salary record updated for Project {project_id}")
+
+
+
+# def generate_payroll(month_str, employee, date):
+#     # Extract year and month from the month_str
+#     year, month = map(int, month_str.split('-'))
+    
+#     end_date = datetime.strptime(date, '%Y-%m-%d')
+    
+#     print("Generating payroll for:", employee, year, month, "up to", end_date)
+    
+#     timesheets = Timesheet.objects.filter(
+#         employee=employee,
+#         date__year=year,
+#         date__month=month,
+#         date__lte=end_date, 
+#         status='accepted'
+#     )
+    
+#     project_timesheets = defaultdict(list)
+    
+#     for timesheet in timesheets:
+#         project_timesheets[timesheet.project_id].append(timesheet)
+    
+#     project_salary_data = {}
+    
+#     for project_id, project_timesheet_list in project_timesheets.items():
+#         unique_days_worked = set(timesheet.date for timesheet in project_timesheet_list)
+#         total_days_worked = len(unique_days_worked)
+        
+#         total_hours_worked = 0.0  
+#         total_salary = 0.0  
+        
+#         print(f"Project {project_id}: Total unique days worked:", total_days_worked)
+        
+#         for work_day in unique_days_worked:
+#             day_timesheets = [t for t in project_timesheet_list if t.date == work_day]
+            
+#             daily_salary = 0.0
+#             for timesheet in day_timesheets:
+#                 total_hours = 0.0
+#                 try:
+#                     hours, minutes = map(int, timesheet.time_in_hrs.split(':'))
+#                     total_hours = hours + (minutes / 60.0)
+#                 except (ValueError, AttributeError):
+#                     print(f"Invalid or missing time_in_hrs for timesheet ID {timesheet.id}. Skipping this entry.")
+                
+#                 total_hours_worked += total_hours
+                
+#                 if timesheet.location == 'onsite':
+#                     daily_salary += total_hours * employee.onsite_salary
+#                 elif timesheet.location == 'remote':
+#                     daily_salary += total_hours * employee.remote_salary
+            
+#             total_salary += daily_salary
+        
+#         print(f"Project {project_id}: Total salary:", total_salary)
+#         print(f"Project {project_id}: Total hours worked:", total_hours_worked)
+        
+#         project_salary_data[project_id] = {
+#             'total_days_worked': total_days_worked,
+#             'total_hours_worked': total_hours_worked,
+#             'total_salary': total_salary,
+#         }
+    
+#     for project_id, salary_data in project_salary_data.items():
+#         salary, created = Salary.objects.get_or_create(
+#             employee=employee,
+#             project_id=project_id,
+#             month=datetime(year, month, 1),
+#             defaults={
+#                 'total_days_worked': 0,
+#                 'total_hours_worked': 0.0,
+#                 'total_salary': 0.0,
+#             }
+#         )
+        
+#         salary.total_days_worked = salary_data['total_days_worked']
+#         salary.total_hours_worked = salary_data['total_hours_worked']
+#         salary.total_salary = salary_data['total_salary']
+        
+#         salary.save()
+#         print(f"Salary record updated for Project {project_id}")
+
+
+@login_required
+@no_cache
+def payroll_uae(request):
+    payroll=Salary.objects.all()
+
+    if request.method == 'POST':
+        month=request.POST.get('payroll_month')
+        date=request.POST.get('payment_date')
+        payroll_cycle=request.POST.get('payroll_cycle')
+        employees=Employee.objects.all()
+        for employee in employees:
+            generate_payroll(month,employee,date)
+    return render(request, 'templates/sub_templates/uae_payroll.html', {
+        'payroll': payroll,
+    })
+
+
+@login_required
+@no_cache
+def payroll(request):
+    return render(request, 'templates/payroll.html', {
+        
+    })

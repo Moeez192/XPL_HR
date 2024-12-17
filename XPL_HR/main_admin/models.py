@@ -510,6 +510,18 @@ class LeaveApplication(models.Model):
     def leave_days(self):
         return (self.end_date - self.start_date).days + 1
     
+    def get_leave_dates(self):
+        """
+        Returns a list of dates from start_date to end_date.
+        """
+        from datetime import timedelta
+        leave_dates = []
+        current_date = self.start_date
+        while current_date <= self.end_date:
+            leave_dates.append(current_date)
+            current_date += timedelta(days=1)
+        return leave_dates
+    
 
 class Timesheet(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
@@ -561,9 +573,12 @@ class Salary(models.Model):
         on_delete=models.CASCADE,
         related_name='salaries'  # Use a different related name
     )
+    project = models.ForeignKey(Projects, on_delete=models.SET_NULL,null=True)  # Reference to the Project model
     month = models.DateField()  # Or any suitable field for the month
     total_days_worked = models.IntegerField(null=False)
     total_salary = models.IntegerField()
+    total_hours_worked = models.FloatField(default=0.0)
+
 
 
 class Hierarchy(models.Model):

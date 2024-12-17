@@ -1,0 +1,73 @@
+{% extends 'templates/payroll.html' %}
+{% load static %}
+{% block title %} Leave Policy {% endblock %}
+{% block payroll_content %}
+{% load widget_tweaks %}
+<link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
+
+<form action="" method="post">
+    <h4 >UAE Payroll</h4>
+    
+        {% csrf_token %}
+
+        <div style="margin-left: 80%;">
+            <button type="submit"  class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1;border-radius: 20px;"><i class="fa fa-plus"></i> Generate Payroll</button>
+        </div>
+        <br>
+        <div class="row">
+            <div class="form-group col">
+                <label for="leave_policy">Payroll Month</label>
+                <input type="month" name="payroll_month" id="payroll_month" class="form-control" required>
+            </div>
+            <div class="form-group col">
+                <label for="leave_policy">Payroll Cycle</label>
+                <input type="text" name="payroll_cycle" id="payroll_cycle" class="form-control" required>
+            </div>
+            <div class="form-group col">
+                <label for="leave_policy">Payment Date</label>
+                <input type="date" name="payment_date" id="payment_date" class="form-control" required>
+            </div>
+            
+        </div>
+       
+        
+        
+    </form>
+<div class="table-container">
+    
+    <table class="table table-hover" id="employeeTable">
+        <thead class="">
+            <tr class="table-header">
+                <tr>
+                    <th>Employee Name</th>
+                    <th>Total Days Worked</th>
+                    <th>Total Hours Worked</th>
+                    <th>Project</th>
+                    <th>Total Salary</th>
+                </tr>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in payroll %}
+                <tr>
+                    <td>{{ p.employee.first_name}} {{ p.employee.last_name}}</td>
+                    <td>{{ p.total_days_worked}}</td>
+                    <td>{{ p.total_hours_worked}}</td>
+                    <td>{{ p.project.project_name}}</td>
+                    <td>{{ p.total_salary}}</td>
+                    
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">No Payrolls Found</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+     
+
+
+{% endblock %}

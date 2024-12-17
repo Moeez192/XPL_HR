@@ -102,6 +102,9 @@ urlpatterns = [
     path('delete_role/<int:id>/', views.delete_employee_role, name='delete_role'),
     path('edit_role/<int:id>/', views.edit_employee_role, name='edit_role'),
     path('calculate-available-leaves/', views.calculate_available_leaves, name='calculate_available_leaves'),
+    path('payroll_uae/', views.payroll_uae, name='payroll_uae'),
+    path('payroll/', lambda request: redirect('payroll_uae'), name='payroll'),
+    path('generate_payroll', views.generate_payroll, name='generate_payroll'),
 
 
 
