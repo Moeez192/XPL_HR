@@ -24,6 +24,9 @@
     .alert-info p {
         margin-bottom: 0; /* Remove bottom margin from the paragraph */
     }
+    .profile a {
+    display: none;
+}
 </style>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -59,9 +62,10 @@
         <div class="tab-content" id="main_form">
             <!-- Basic Information -->
             <div class="tab-pane fade show active" role="tabpanel" id="step1">
-                <div class="row mb-3">
-                    <div class="col-md-6">
+                <div class="row mb-3 ">
+                    <div class="col-md-6 profile">
                         <label for="profilePhoto" class="form-label">Upload Profile Photo</label>
+                        
                         {% render_field form.profile_photo class+="form-control" accept="image/*" id="profilePhoto" %}
                         <div id="imagePreviewContainer" class="mt-3" style="display: none;">
                             <img id="imagePreview" src="#" alt="Selected Profile Photo" style="max-width: 10%; height: auto; border: 1px solid #ddd; padding: 5px;">
@@ -670,7 +674,6 @@
             const latestExitField = document.getElementById('id_latest_exit_from_country');
             const daysField = document.getElementById('id_days_from_latest_entry');
     
-            // Function to calculate the number of days between two dates
             function calculateDaysFromLatestEntry() {
                 const latestEntryDate = new Date(latestEntryField.value);
                 const latestExitDate = new Date(latestExitField.value);
@@ -679,18 +682,14 @@
                 let daysDifference = 0;
     
                 if (latestExitDate > latestEntryDate) {
-                    // If Latest Exit is greater than Latest Entry, calculate difference between Latest Entry and Latest Exit
                     daysDifference = Math.floor((latestExitDate - latestEntryDate) / (1000 * 3600 * 24));
                 } else {
-                    // If Latest Exit is not greater, calculate difference between Current Date and Latest Exit
                     daysDifference = Math.floor((currentDate - latestExitDate) / (1000 * 3600 * 24));
                 }
     
-                // Display the calculated days with "Days" appended in the days field
                 daysField.value = daysDifference + " Days";
             }
     
-            // Event listener to trigger the calculation when either the latest entry or latest exit is selected
             latestEntryField.addEventListener('change', function() {
                 calculateDaysFromLatestEntry();
             });
@@ -699,7 +698,6 @@
                 calculateDaysFromLatestEntry();
             });
     
-            // Call the function once on page load if the dates are already filled
             if (latestEntryField.value && latestExitField.value) {
                 calculateDaysFromLatestEntry();
             }
@@ -707,7 +705,25 @@
     </script>
     
     
-    
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+    const profileDiv = document.querySelector('.profile');
+
+    if (profileDiv) {
+        const textNodes = profileDiv.childNodes;
+
+        textNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                if (node.nodeValue.includes('Currently') || node.nodeValue.includes('Change')) {
+                    node.nodeValue = ''; 
+                }
+            }
+        });
+    }
+});
+
+
+    </script>
     
  
     <script>

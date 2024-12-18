@@ -52,7 +52,7 @@
                 <tr>
                     <td>{{ p.employee.first_name}} {{ p.employee.last_name}}</td>
                     <td>{{ p.total_days_worked}}</td>
-                    <td>{{ p.total_hours_worked}}</td>
+                    <td>{{ p.total_hours_worked|floatformat:2 }}</td>
                     <td>{{ p.project.project_name}}</td>
                     <td>{{ p.total_salary}}</td>
                     

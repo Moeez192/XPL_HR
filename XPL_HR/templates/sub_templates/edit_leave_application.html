@@ -1,0 +1,188 @@
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} Apply Leave {% endblock %}
+{% block content %}
+{% load widget_tweaks %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+    .alert {
+        position: relative;
+    }
+
+    .close {
+        transition: color 0.2s;
+    }
+
+    .close:hover {
+        color: #ff2a00; /* Color on hover */
+    }
+
+    .alert-info {
+        border-color: #b8daff; /* Optional: customize border color */
+    }
+
+    .alert-info p {
+        margin-bottom: 0; /* Remove bottom margin from the paragraph */
+    }
+</style>
+<div class="containe-fluid mt-5" >
+    <!-- Dashboard Cards -->
+    {% if messages %}
+    <!-- <div class="container mt-3"> -->
+        {% for message in messages %}
+            <div class="alert alert-dismissible fade show 
+                {% if message.tags == 'success' %}alert-info{% endif %} 
+                {% if message.tags == 'error' %}alert-danger{% endif %} 
+                mt-2" role="alert">
+                <p>{{ message }}</p>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="border: none; background: none; color: #007bff; font-size: 1.5rem; position: absolute; top: 10px; right: 15px; cursor: pointer;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    <!-- </div> -->
+{% endif %}
+<div class="containe mt-5">
+    <div class="scrollable-container">
+        
+    <h4 class=" text-center mb-4">Edit Leave</h4>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <!-- Employee Selection -->
+        <div class="mb-3">
+            <label for="employeeSelect" class="form-label">Select Leave Type</label>
+            {% render_field form.leave_type class+="form-control" id="id_leave_type" onchange="updateMaxDays()" %}
+        </div>            
+    
+        <!-- Leave Dates -->
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="startDate" class="form-label">Start Date</label>
+                {% render_field form.start_date class+="form-control" id="startDate" onchange="updateAvailableLeaves()" %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="endDate" class="form-label">End Date</label>
+                {% render_field form.end_date class+="form-control" id="endDate" onchange="updateAvailableLeaves()" %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="endDate" class="form-label">Resource Replacement Email Id</label>
+                {% render_field form.resource_replacement_email_id placeholder="Resource Replacement Email Id" class+="form-control"  %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="endDate" class="form-label">Available Leaves</label>
+                {% render_field form.available_leaves id="id_available_leaves" class+="form-control" id="endDate" %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="remaining_leaves" class="form-label">Remaining Leave Balance</label>
+                <input type="text" class="form-control" id="remainingLeaves" readonly="readonly">
+            </div>
+        </div>
+    
+        <!-- Comments -->
+        <div class="mb-3">
+            <label for="comments" class="form-label">Reason</label>
+            {% render_field form.reason class+="form-control" %}
+        </div>
+    
+        <button type="submit"  class="btn btn-primary text-center">Save</button>
+    </form>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        function fetchAvailableLeaves() {
+            const leaveTypeId = $('#id_leave_type').val();
+
+            if (leaveTypeId) {
+                $.ajax({
+                    url: "{% url 'calculate_available_leaves' %}", 
+                    method: "POST",
+                    data: {
+                        leave_type_id: leaveTypeId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        $('#id_available_leaves').val(response.available_leaves);
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            } else {
+                $('#id_available_leaves').val('');
+            }
+        }
+
+        // Call the function on page load
+        fetchAvailableLeaves();
+
+        // Call the function on dropdown change
+        $('#id_leave_type').change(fetchAvailableLeaves);
+    });
+</script>
+
+<script>
+    function updateAvailableLeaves() {
+        var startDateField = document.getElementById("startDate");
+        var endDateField = document.getElementById("endDate");
+        var availableLeavesField = document.getElementById("id_available_leaves");
+        var remainingLeavesField = document.getElementById("remainingLeaves");
+
+        var startDate = startDateField ? startDateField.value : null;
+        var endDate = endDateField ? endDateField.value : null;
+        var availableLeaves = availableLeavesField ? parseInt(availableLeavesField.value) : 0;
+
+        if (startDate && endDate && !isNaN(availableLeaves)) {
+            // Parse dates
+            var start = new Date(startDate);
+            var end = new Date(endDate);
+
+            // Validate parsed dates
+            if (isNaN(start) || isNaN(end)) {
+                console.error("Invalid date format");
+                remainingLeavesField.value = "Invalid Date";
+                return;
+            }
+
+            // Set time to midnight for accurate day calculations
+            start.setHours(0, 0, 0, 0);
+            end.setHours(0, 0, 0, 0);
+
+            // Ensure end date is not before start date
+            if (end < start) {
+                alert("End date cannot be before start date.");
+                remainingLeavesField.value = "Invalid Range";
+                return;
+            }
+
+            // Calculate day difference
+            var timeDiff = end - start;
+            var dayDifference = timeDiff / (1000 * 3600 * 24) + 1;
+
+            // Calculate remaining leaves
+            var remainingLeaves = availableLeaves - dayDifference;
+            remainingLeavesField.value = remainingLeaves >= 0 ? remainingLeaves : "Exceeded";
+        } else {
+            remainingLeavesField.value = availableLeaves;
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Call the function on page load
+        updateAvailableLeaves();
+
+        // Attach the function to changes in startDate, endDate, and availableLeaves
+        document.getElementById("startDate").addEventListener("change", updateAvailableLeaves);
+        document.getElementById("endDate").addEventListener("change", updateAvailableLeaves);
+        document.getElementById("id_available_leaves").addEventListener("change", updateAvailableLeaves);
+    });
+</script>
+
+
+
+{% endblock %}

@@ -69,6 +69,13 @@ class EmployeeForm(forms.ModelForm):
             'latest_exit_from_country': forms.DateInput(attrs={'type': 'date'}),
             'age' : forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
             'days_from_latest_entry' : forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
+             'profile_photo': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*',
+                'id': 'profilePhoto',
+                'clear_checkbox_label': '', 
+                 'currently':'' # Optional: Removes 'Clear' label if present
+            }),
 
         } 
         # docs = forms.ModelChoiceField(queryset=uploadDocType.objects.all(), empty_label="Select Document")
@@ -77,6 +84,9 @@ class EmployeeForm(forms.ModelForm):
     def clean_skills(self):
         skills = self.cleaned_data.get("skills", "")
         return skills
+    def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['profile_photo'].initial = None
 
 
 class DepForm(forms.ModelForm):
@@ -243,7 +253,7 @@ class LeaveApplicationForm(forms.ModelForm):
             approved_leaves = LeaveApplication.objects.filter(
                 employee=self.employee,
                 leave_type=leave_type,
-                status='approved'
+                status__in=['approved', 'pending']
             )
             print(f"Approved Leaves: {approved_leaves}")
 

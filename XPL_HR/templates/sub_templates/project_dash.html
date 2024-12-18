@@ -99,7 +99,6 @@
     <!-- </div> -->
 {% endif %}
     <!-- Search and Table Filter -->
-    {% if request.session.role == 'admin' %}
 <h3 class="text-center">All Running Projects</h3>
 <div style="margin-bottom: 3px;">
     <a href="{% url 'add_project' %}" class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1; border-radius: 20px;"> <i class="fa fa-plus"></i> Project</a>
@@ -160,7 +159,6 @@
             </tbody>
         </table>
     </div>
-    {% endif %}
     <br>
 
     <h3 class="text-center">Projects</h3>

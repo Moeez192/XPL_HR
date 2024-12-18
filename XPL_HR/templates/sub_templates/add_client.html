@@ -300,17 +300,35 @@ document.getElementById('add-leave-form').addEventListener('click', function() {
     }
 });
 
+// document.getElementById('leave-section').addEventListener('click', function(event) {
+//     if (event.target.classList.contains('remove-leave-form')) {
+//         var row = event.target.closest('tr');
+//         if (row) row.remove();
+
+//         var leaveCountField = document.getElementById('leave_count');
+//         if (leaveCountField) {
+//             leaveCountField.value = document.querySelectorAll('.leave-form').length;
+//         }
+//     }
+// });
 document.getElementById('leave-section').addEventListener('click', function(event) {
-    if (event.target.classList.contains('remove-leave-form')) {
-        var row = event.target.closest('tr');
+    // Use event delegation
+    var target = event.target;
+
+    // Check if the clicked element is or contains '.remove-leave-form'
+    if (target.classList.contains('remove-leave-form') || target.closest('.remove-leave-form')) {
+        // Find the closest <tr> and remove it
+        var row = target.closest('tr');
         if (row) row.remove();
 
+        // Update the leave count
         var leaveCountField = document.getElementById('leave_count');
         if (leaveCountField) {
             leaveCountField.value = document.querySelectorAll('.leave-form').length;
         }
     }
 });
+
 
 </script>
 
@@ -350,17 +368,30 @@ document.getElementById('add-contact-form').addEventListener('click', function()
     }
 });
 
-document.getElementById('contact-section').addEventListener('click', function(event) {
-    if (event.target.classList.contains('remove-contact-form')) {
-        var row = event.target.closest('tr');
-        if (row) row.remove();
+// document.getElementById('contact-section').addEventListener('click', function(event) {
+//     if (event.target.classList.contains('remove-contact-form')) {
+//         var row = event.target.closest('tr');
+//         if (row) row.remove();
 
+//         var contactCountField = document.getElementById('contact_count');
+//         if (contactCountField) {
+//             contactCountField.value = document.querySelectorAll('.contact-form').length;
+//         }
+//     }
+// });
+document.getElementById('contact-section').addEventListener('click', function(event) {
+    var target = event.target;
+    if (target.classList.contains('remove-contact-form') || target.closest('.remove-contact-form')) {
+        var row = target.closest('tr'); 
+        if (row) row.remove(); 
+        
         var contactCountField = document.getElementById('contact_count');
         if (contactCountField) {
             contactCountField.value = document.querySelectorAll('.contact-form').length;
         }
     }
 });
+
 
 
 </script>

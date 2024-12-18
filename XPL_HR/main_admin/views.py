@@ -96,7 +96,7 @@ def calculate_available_leaves(request):
         approved_leaves = LeaveApplication.objects.filter(
                 employee=employee,
                 leave_type=leave_type,
-                status='approved'
+                status__in=['approved', 'pending']
             )
         print(f"Approved Leaves: {approved_leaves}")
 
@@ -3453,3 +3453,38 @@ def payroll(request):
     return render(request, 'templates/payroll.html', {
         
     })
+
+
+@login_required
+@no_cache
+def leave_application_edit(request, id):
+    leave_application = get_object_or_404(LeaveApplication, id=id)
+    employee = Employee.objects.get(email=request.user.email)
+    form = LeaveApplicationForm(instance=leave_application)
+    form.fields['leave_type'].queryset = Leaves.objects.filter(id=employee.leave_policy_id)
+    if request.method == 'POST':
+        form = LeaveApplicationForm(request.POST, instance=leave_application)
+        form.fields['leave_type'].queryset = Leaves.objects.filter(id=employee.leave_policy_id)
+
+
+        print(request.POST)
+        print(form.errors)
+        if form.is_valid():
+            print("Form is valid")
+            form.save()
+            messages.success(request, 'Leave application updated successfully!')
+            return redirect('leave')
+        else:
+            errors = form.non_field_errors()
+        for error in errors:
+                    messages.error(request, error)
+    return render(request, 'templates/sub_templates/edit_leave_application.html', {
+        'form': form,
+    })
+
+
+def delete_leave_application(request, id):
+    leave_application = get_object_or_404(LeaveApplication, id=id)
+    leave_application.delete()
+    messages.success(request, "Leave application deleted successfully!")
+    return redirect('leave')
