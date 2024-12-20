@@ -107,6 +107,8 @@ urlpatterns = [
     path('generate_payroll', views.generate_payroll, name='generate_payroll'),
     path('edit_leave_application/<int:id>/', views.leave_application_edit, name='edit_leave_application'),
     path('delete_leave_application/<int:id>/', views.delete_leave_application, name='delete_leave_application'),
+    path('view_approved_timesheet/<str:timesheet_group_id>/', views.view_approved_timesheet, name='view_approved_timesheet'),
+    path('contractor_payroll/', views.contractor_payroll, name='contractor_payroll'),
 
 
 

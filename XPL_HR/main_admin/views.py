@@ -3446,6 +3446,13 @@ def payroll_uae(request):
         'payroll': payroll,
     })
 
+@login_required
+@no_cache
+def contractor_payroll(request):
+    # payroll=Salary.objects.all()
+    return render(request, 'templates/sub_templates/contractor_payroll.html', {
+        'payroll': payroll,
+    })
 
 @login_required
 @no_cache
@@ -3453,6 +3460,26 @@ def payroll(request):
     return render(request, 'templates/payroll.html', {
         
     })
+
+@login_required
+@no_cache
+def view_approved_timesheet(request,timesheet_group_id):
+    timesheets = Timesheet.objects.filter(timesheet_group_id=timesheet_group_id)
+    project_name = timesheets.first().project.project_name
+    employee_name = timesheets.first().employee.first_name
+    
+    if not timesheets.exists():
+        messages.error(request, 'No timesheets found for this group.')
+        return redirect('timesheet')
+
+    context = {
+        'timesheets': timesheets,
+        'timesheet_group_id': timesheet_group_id,
+        'project_name': project_name,
+        'employee_name': employee_name,
+    }
+
+    return render(request, 'templates/sub_templates/view_approved_timesheet.html', context)
 
 
 @login_required
@@ -3482,7 +3509,8 @@ def leave_application_edit(request, id):
         'form': form,
     })
 
-
+@login_required
+@no_cache
 def delete_leave_application(request, id):
     leave_application = get_object_or_404(LeaveApplication, id=id)
     leave_application.delete()

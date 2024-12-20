@@ -107,6 +107,11 @@
 
             var remainingLeaves = availableLeaves - dayDifference;
 
+            if (remainingLeaves < 0) {
+                alert("You cannot select negative values!");
+                remainingLeaves = 0; 
+            }
+
             document.getElementById("remainingLeaves").value = remainingLeaves;
 
         } else {

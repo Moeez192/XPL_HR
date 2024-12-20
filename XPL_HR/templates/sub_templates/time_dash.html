@@ -154,7 +154,8 @@
                                 </button>
                             </form>
                             {% elif group.status == "accepted" %}
-                                Approved
+                            <a href="{% url 'view_approved_timesheet' group.timesheet_group_id %}" class="btn btn-info btn-sm"><i class="fa-regular fa-eye"></i></a>
+
                             {% endif %}
 
                         </td>

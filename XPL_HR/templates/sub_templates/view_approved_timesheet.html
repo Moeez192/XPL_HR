@@ -1,0 +1,65 @@
+{% extends 'templates/navs.html' %}
+{%load static%}
+{% block title %} View Timesheet {% endblock %}
+
+{% block content %}
+
+<div class="header-image"> </div>
+
+<div class="containe-fluid mt-5">
+<div class="scrollable-container">
+    <div class="row">
+        <div class="col-6">
+            <div>
+                <label><strong>Project Name:</strong></label>
+                <input type="text" class="form-control" value="{{ project_name }}" readonly>
+            </div>
+<div>
+    <label><strong>Employee/Consultant Name:</strong></label>
+    <input type="text" class="form-control" value="{{ employee_name }}" readonly>
+</div>
+        </div>
+    </div>
+<table class="table table-container mt-4">
+    <thead class="table-primary">
+        <tr class="table-header">
+            <th>Date</th>
+            <th>Task Description</th>
+            <th>Location</th>
+            <th>Time In Hrs</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for timesheet in timesheets%}
+        <tr>
+            <td>{{ timesheet.date }}</td>
+            <td>{{ timesheet.task_description }}</td>
+            <td>
+                {% if timesheet.location %}
+                    {{ timesheet.location }}
+                {% else %}
+                    Holiday
+                {% endif %}
+            </td>            <td>{{ timesheet.time_in_hrs }}</td>
+            <td>{{ timesheet.notes }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="text-center">
+    <a href="{% url 'timesheet' %}" class="btn btn-secondary">Cancel</a>
+
+</div>
+
+</div>
+</div>
+
+
+
+
+
+    
+    
+
+{%endblock%}

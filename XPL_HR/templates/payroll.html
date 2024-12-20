@@ -41,7 +41,7 @@
 <div class="secondary-nav" style="margin-right: 68%;">
     <ul class="nav-links">
         <li><a href="{% url 'payroll_uae' %}" class="{% if request.path == '/payroll_uae/' %}active{% endif %}">Payroll For UAE</a></li>
-        <li><a href="#" class="">Payroll for Contractors</a></li>
+        <li><a href="{% url 'contractor_payroll' %}" class="{% if request.path == '/contractor_payroll/' %}active{% endif %}">Payroll for Contractors</a></li>
     </ul>
 </div>
 <br>

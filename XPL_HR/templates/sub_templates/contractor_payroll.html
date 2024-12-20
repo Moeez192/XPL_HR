@@ -5,7 +5,7 @@
 <link href="{% static 'css/emp_dash.css' %}" rel="stylesheet">
 
 <form action="" method="post">
-    <h4 >UAE Payroll</h4>
+    <h4 >Contractor Payroll</h4>
     
         {% csrf_token %}
 
@@ -58,7 +58,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="5">No Payrolls Found</td>
+                    <td colspan="5" >No Payrolls Found For Contractors!</td>
                 </tr>
             {% endfor %}
         </tbody>

@@ -68,7 +68,6 @@
     <!-- </div> -->
 {% endif %}
     <!-- Search and Table Filter -->
-    {% if request.session.role == 'admin' %}
 <div>
     <a href="{% url 'leave_configuration' %}" class="btn btn-sm btn-primary " style="background-color: #0091b1 !important; border: #0091b1;border-radius: 20px;"> <i class="fa fa-plus"></i> Leave Policy</a>
 </div>
@@ -118,7 +117,6 @@
             </tbody>
         </table>
     </div>
-    {% endif %}
 
     {% endblock %}
     
