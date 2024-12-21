@@ -277,7 +277,6 @@ def login_view(request):
             print("User authenticated successfully")
             login(request, user)  
             
-            #  role from  Employee model 
             try:
                 employee = Employee.objects.get(email=email)
                 request.session['role'] = employee.employee_role.id
@@ -292,7 +291,6 @@ def login_view(request):
             print("Authentication failed")
             messages.error(request, "Invalid email or password.")
             return render(request, "templates/login.html", {"form": form})
-
     return render(request, "templates/login.html", {"form": form})
 
 @login_required
@@ -429,7 +427,7 @@ def edit_employee_self(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Edited Successfully')
-            return redirect('edit_employee_self')  # Redirect to the employee list or details page after saving
+            return redirect('dashboard')  
     else:
         form = EmployeeUpdateForm(instance=employee)
     

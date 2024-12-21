@@ -7,15 +7,13 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-        <meta name="description" content="Kleon Admin Template">
-        <meta name="author" content="">
 
         <!-- Favicon and touch Icons -->
-        <link href="{% static 'images/favicon.png' %}" rel="shortcut icon" type="image/png">
-        <link href="{% static 'images/apple-touch-icon.png' %}" rel="apple-touch-icon">
-        <link href="{% static 'images/apple-touch-icon-72x72.png' %}" rel="apple-touch-icon" sizes="72x72">
-        <link href="{% static 'images/apple-touch-icon-114x114.png' %}" rel="apple-touch-icon" sizes="114x114">
-        <link href="{% static 'images/apple-touch-icon-144x144.png' %}" rel="apple-touch-icon" sizes="144x144">
+        <!-- <link href="{% static 'images/favicon.png' %}" rel="shortcut icon" type="image/png"> -->
+        <!-- <link href="{% static 'images/apple-touch-icon.png' %}" rel="apple-touch-icon"> -->
+        <!-- <link href="{% static 'images/apple-touch-icon-72x72.png' %}" rel="apple-touch-icon" sizes="72x72"> -->
+        <!-- <link href="{% static 'images/apple-touch-icon-114x114.png' %}" rel="apple-touch-icon" sizes="114x114"> -->
+        <!-- <link href="{% static 'images/apple-touch-icon-144x144.png' %}" rel="apple-touch-icon" sizes="144x144"> -->
 
         <!-- Page Title -->
         <title>Dashboard</title>
@@ -99,13 +97,13 @@
                                             <div class="card-body p-3">
                                                 <ul class="list-unstyled p-0 m-0">
                                                     <li>
-                                                        <a href="#" class="fs-14 fw-normal text-dark d-block p-1"><i class="bi bi-person me-2"></i> Profile</a>
+                                                        <a href="{% url 'dashboard' %}" class="fs-14 fw-normal text-dark d-block p-1"><i class="bi bi-person me-2"></i> Profile</a>
                                                     </li>
                                                     <li >
                                                         <a href="#" class="fs-14 fw-normal text-dark d-block p-1"><i class="bi bi-envelope me-2 "></i> Inbox</a>
                                                     </li>
                                                     <li>
-                                                        <a href="#" class="fs-14 fw-normal text-dark d-block p-1"><i class="bi bi-gear me-2"></i> Setting & Privacy</a>
+                                                        <a href="{% url 'edit_employee_self' %}" class="fs-14 fw-normal text-dark d-block p-1"><i class="bi bi-gear me-2"></i> Edit Profile</a>
                                                     </li>
                                                 </ul>
 
@@ -235,52 +233,51 @@
 
         
 
-        <!-- Core JS -->
         <script src=" {% static 'js/jquery-3.6.0.min.js' %}"></script>
         <script src=" {% static 'js/bootstrap.bundle.min.js' %}"></script>
 
         <!-- jQuery UI Kit -->
-        <script src=" {% static 'plugins/jquery_ui/jquery-ui.1.12.1.min.js' %}"></script>
+        <!-- <script src=" {% static 'plugins/jquery_ui/jquery-ui.1.12.1.min.js' %}"></script> -->
         
         <!-- ApexChart -->
-        <script src="{% static 'plugins/apexchart/apexcharts.min.js' %}"></script>
-        <script src="{% static 'plugins/apexchart/apexchart-inits/apexcharts-profile.js' %}"></script>
+        <!-- <script src="{% static 'plugins/apexchart/apexcharts.min.js' %}"></script> -->
+        <!-- <script src="{% static 'plugins/apexchart/apexchart-inits/apexcharts-profile.js' %}"></script> -->
         
         <!-- Peity  -->
-        <script src="{% static 'plugins/peity/jquery.peity.min.js' %}"></script>
-        <script src="{% static 'plugins/peity/piety-init.js' %}"></script>
+        <!-- <script src="{% static 'plugins/peity/jquery.peity.min.js' %}"></script> -->
+        <!-- <script src="{% static 'plugins/peity/piety-init.js' %}"></script> -->
 
         <!-- Select 2 -->
-        <script src="{% static 'plugins/select2/js/select2.min.js' %}"></script>
+        <!-- <script src="{% static 'plugins/select2/js/select2.min.js' %}"></script> -->
 
         <!-- Datatables -->
-        <script src="{% static 'plugins/datatables/js/jquery.dataTables.min.js' %}"></script>
-        <script src="{% static 'plugins/datatables/js/datatables.init.js' %}"></script>
+        <!-- <script src="{% static 'plugins/datatables/js/jquery.dataTables.min.js' %}"></script> -->
+        <!-- <script src="{% static 'plugins/datatables/js/datatables.init.js' %}"></script> -->
         
         
 
         <!-- Date Picker -->
-        <script src="{% static 'plugins/flatpickr/flatpickr.min.js' %}"></script>
+        <!-- <script src="{% static 'plugins/flatpickr/flatpickr.min.js' %}"></script> -->
 
         <!-- Dropzone -->
-        <script src="{% static 'plugins/dropzone/dropzone.min.js' %}"></script>
-        <script src="{% static 'plugins/dropzone/dropzone_custom.js' %}"></script>
+        <!-- <script src="{% static 'plugins/dropzone/dropzone.min.js' %}"></script>
+        <script src="{% static 'plugins/dropzone/dropzone_custom.js' %}"></script> -->
         
         <!-- TinyMCE -->
-        <script src="{% static 'plugins/tinymce/tinymce.min.js' %}"></script>
-        <script src="{% static 'plugins/prism/prism.js' %}"></script>
-        <script src="{% static 'plugins/jquery-repeater/jquery.repeater.js' %}"></script>
+        <!-- <script src="{% static 'plugins/tinymce/tinymce.min.js' %}"></script> -->
+        <!-- <script src="{% static 'plugins/prism/prism.js' %}"></script> -->
+        <!-- <script src="{% static 'plugins/jquery-repeater/jquery.repeater.js' %}"></script> -->
 
         
 
         
 
         <!-- Sweet Alert -->
-        <script src="{% static 'plugins/sweetalert/sweetalert2.min.js' %}"></script>
-        <script src="{% static 'plugins/sweetalert/sweetalert2-init.js' %}"></script>
+        <!-- <script src="{% static 'plugins/sweetalert/sweetalert2.min.js' %}"></script> -->
+        <!-- <script src="{% static 'plugins/sweetalert/sweetalert2-init.js' %}"></script> -->
 
         <!-- Snippets JS -->
-        <script src="{% static 'js/snippets.js' %}"></script>
+        <!-- <script src="{% static 'js/snippets.js' %}"></script> -->
 
         <!-- Theme Custom JS -->
         <script src=" {% static 'js/theme.js' %}"></script>
